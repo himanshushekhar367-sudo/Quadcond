@@ -455,6 +455,12 @@ def cmd_assets(a) -> None:
                  f"into {assets.cache_dir()} or pass --model/--db explicitly.")
 
 
+def cmd_serve(a) -> None:
+    from . import service
+    service.ALLOW_SYNTHETIC_MODEL = a.allow_synthetic_model
+    service.serve(a.host, a.port)
+
+
 def cmd_info(a) -> None:
     from . import __version__, assets, claims
     from .models.base import MultiTaskModel
@@ -632,6 +638,18 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("--out", default="artifacts/quadcond_report.html")
     q.add_argument("--ablation", default="artifacts/quadcond_model_seqonly.joblib")
     q.set_defaults(func=cmd_report)
+
+    q = sub.add_parser(
+        "serve",
+        help="run the HTTP service, and the browser workbench if one is built")
+    q.add_argument("--host", default="127.0.0.1",
+                   help="0.0.0.0 to accept connections from other machines")
+    q.add_argument("--port", type=int, default=8765)
+    q.add_argument(
+        "--allow-synthetic-model", action="store_true",
+        help="serve a model trained on generated data (software fixture). "
+             "Every response is flagged. Refused without this flag.")
+    q.set_defaults(func=cmd_serve)
 
     q = sub.add_parser("info", help="version, assets, heads and what each may claim")
     q.add_argument("--json", action="store_true")

@@ -874,11 +874,24 @@ class Handler(BaseHTTPRequestHandler):
 
 def serve(host: str = "127.0.0.1", port: int = 8765) -> None:
     srv = ThreadingHTTPServer((host, port), Handler)
-    print(f"quadcond {__version__} serving on http://{host}:{port}")
-    print("  GET  /health   GET /info   GET /schema/prediction")
-    print("  POST /predict  POST /evidence")
+    shown = "localhost" if host in ("127.0.0.1", "0.0.0.0") else host
+    print(f"quadcond {__version__} serving on http://{shown}:{port}")
+    from . import web as _web
+    root = _web.root()
+    if root is not None:
+        print(f"  workbench  http://{shown}:{port}/   (from {root})")
+    else:
+        print("  workbench  not built -- API only.")
+        print("             run: npm --prefix web install && npm --prefix web run build")
+    print(f"  health     http://{shown}:{port}/health")
+    print(f"  readiness  http://{shown}:{port}/ready    (503 until the assets verify)")
+    print(f"  info       http://{shown}:{port}/info")
+    print("  POST /predict  /scan/mutations  /scan/conditions  /scan/variant  /batch")
     print("  no accounts, no sessions, no stored requests")
-    srv.serve_forever()
+    try:
+        srv.serve_forever()
+    except KeyboardInterrupt:
+        print("\nstopped")
 
 
 def main() -> None:

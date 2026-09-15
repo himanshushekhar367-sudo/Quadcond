@@ -51,10 +51,15 @@ implicitly and no asset is installed unverified.
 ```bash
 npm --prefix web install
 npm --prefix web run build      # writes web/dist
-quadcond serve --port 8765
+quadcond serve --port 8765      # or, without installing: python -m quadcond.service --port 8765
 ```
 
-Then open `http://127.0.0.1:8765/`.
+Then open `http://localhost:8765/`. The startup banner says whether it found a
+built workbench, so you know before opening the browser whether `/` will be the
+application or the health document.
+
+`--host 0.0.0.0` accepts connections from other machines. There are no
+accounts and no sessions, so do that only on a network you trust.
 
 The server resolves the built workbench in this order: `QUADCOND_WEB_ROOT`,
 then `quadcond/_web`, then `web/dist` beside the repository root. When no build
