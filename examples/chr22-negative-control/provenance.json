@@ -1,0 +1,20 @@
+{
+  "assembly": "GRCh38",
+  "chromosome": "chr22",
+  "start_1based": 36201668,
+  "sequence": "AGGAGGGCAGAGAGCTGGGGCCTCGGACTCACCCGACGCTTGTGATGAGCTGCACCCAGGA",
+  "interval_0based": [
+    36201667,
+    36201728
+  ],
+  "scorer": "AVI_SCORE",
+  "ontology_terms": null,
+  "source": "AlphaGenome Atlas API",
+  "sdk_version": "0.9.0",
+  "retrieved_utc": "2026-09-15T05:29:38.414746+00:00",
+  "aggregation": "maximum absolute raw score over returned tracks/genes, within this scorer only",
+  "expected_snv_count": 183,
+  "returned_scored_snv_count": 183,
+  "missing_scores": "absent, never zero-filled",
+  "model_release": "not supplied by this adapter"
+}

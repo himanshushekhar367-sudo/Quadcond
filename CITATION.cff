@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "QuadCond / AENNA-3D: condition-aware G-quadruplex and i-motif prediction with an AlphaGenome join"
+abstract: >-
+  QuadCond predicts G-quadruplex and i-motif propensity from sequence and
+  solution conditions with calibrated, per-head claim limits and explicit
+  refusal outside the applicability domain. AENNA-3D is its browser workbench.
+  Both are served by one process, and variant scans can be joined exactly to
+  AlphaGenome regulatory scores.
+type: software
+license: MIT
+repository-code: "https://github.com/himanshushekhar367-sudo/Quadcond"
+keywords:
+  - g-quadruplex
+  - i-motif
+  - nucleic acid structure
+  - genomics
+  - alphagenome
+authors:
+  - family-names: Deep
+    given-names: Auroni
+  - family-names: Shekhar
+    given-names: Himanshu
+  - family-names: Minocha
+    given-names: Shilpi
+  - family-names: Perumal
+    given-names: Vivekanandan
+  - family-names: Kumar
+    given-names: Saran

@@ -1,0 +1,61 @@
+{
+  "release": "0.4.8",
+  "note": "SHA-256 of each asset this build expects, verified before the file is opened; a mismatch is an error, not a warning. Models are identified by file bytes. Atlases are identified by an ordered hash of their rows, because SQLite rewrites page metadata on open and the file hash changes after a mere read. 'url' is null until the assets are published alongside the tagged release. A download is verified against sha256 where the manifest records one and against content_fingerprint where it does not (atlases); an asset with neither is refused rather than installed unverified.",
+  "assets": [
+    {
+      "name": "model",
+      "filename": "quadcond_model.joblib",
+      "sha256": "204b4608c964793107ec5a384581b316c4bd0aacb20791aeb5561df9187a57db",
+      "bytes": 27280002,
+      "kind": "model",
+      "description": "The trained heads (sequence + conditions): 12 heads.",
+      "url": null,
+      "required": true,
+      "checksum_stable": true,
+      "content_fingerprint": null
+    },
+    {
+      "name": "model_seqonly",
+      "filename": "quadcond_model_seqonly.joblib",
+      "sha256": "b4fca5d39e5f05be4053f4e83282f90b6375b385e3c979e22b0d61d6090233b4",
+      "bytes": 25729065,
+      "kind": "model",
+      "description": "The sequence-only ablation counterpart: 12 heads. Needed only to reproduce the ablation table.",
+      "url": null,
+      "required": false,
+      "checksum_stable": true,
+      "content_fingerprint": null
+    },
+    {
+      "name": "atlas_core",
+      "filename": "atlas_core.db",
+      "sha256": null,
+      "bytes": 5394432,
+      "kind": "atlas",
+      "description": "Experimental + derived atlas: every measured row, no predicted tier.",
+      "url": null,
+      "required": true,
+      "checksum_stable": false,
+      "content_fingerprint": "145711cd33002ecf6436c52318af55c5feb9e46814239bfb9e4b6f548f7302f6"
+    },
+    {
+      "name": "atlas",
+      "filename": "atlas.db",
+      "sha256": null,
+      "bytes": 354144256,
+      "kind": "atlas",
+      "description": "The full atlas including the predicted tier (G4STAB distillation). Large; needed only to retrain.",
+      "url": null,
+      "required": false,
+      "checksum_stable": false,
+      "content_fingerprint": "26b4a9f85cd2c14e2f57c17b317566e9c419f704d160f6f03324ff7f4dee7ac4"
+    }
+  ],
+  "built_with": {
+    "scikit-learn": "1.8.0",
+    "xgboost": "3.2.0",
+    "numpy": "2.4.4",
+    "scipy": "1.17.1",
+    "joblib": "1.5.3"
+  }
+}

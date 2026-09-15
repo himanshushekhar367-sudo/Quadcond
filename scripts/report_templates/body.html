@@ -1,0 +1,394 @@
+<div class="wrap">
+
+<header class="mast">
+  <div class="kicker">Frozen release · {today}</div>
+  <h1>QuadCond <span class="v">v{version}</span><br>condition-aware G4 and i-motif prediction</h1>
+  <p class="standfirst">Every figure below is read from the frozen artifacts at generation time.
+  That claim used to be false in the places it mattered most: the head count, the buffer count and
+  the test count were literals in this template, and when a twelfth head was trained the page went
+  on saying eleven — while listing that head's own data sources in the table below it. Every number
+  on this page now comes from the model metadata, the atlas, the ablation record or a test run.</p>
+
+  <div class="strip">
+    <div><span class="n">{n_heads_total}</span><span class="l">prediction heads</span></div>
+    <div><span class="n">{n_biophysical}</span><span class="l">biophysically anchored</span></div>
+    <div><span class="n">{n_records}</span><span class="l">atlas records</span></div>
+    <div><span class="n">{n_buffers}</span><span class="l">distinct G4 buffers</span></div>
+    <div><span class="n">{tests}</span><span class="l">tests</span></div>
+  </div>
+  <p class="note">{tests_detail} &middot; commit <span class="mono">{commit}</span> &middot;
+  model <span class="mono">{version}</span>. The test line is read from a JUnit report produced by
+  an actual run, not from counting <code>def test_</code> in the tree — a count of test functions
+  says they exist, not that they pass.</p>
+  <div class="key">
+    <span><i class="swatch g4"></i> G-quadruplex heads and data</span>
+    <span><i class="swatch im"></i> i-motif heads and data</span>
+  </div>
+</header>
+
+<section>
+  <div class="eyebrow">artifacts/quadcond_model.json</div>
+  <h2>What each head is, and what it is allowed to claim</h2>
+  <p class="col lede">Three fields decide this, and the reason there are three is that v0.4.0
+  shipped one. <code>has_experimental_observation</code> asks whether anything was measured.
+  <code>target_semantics</code> asks what the label <em>is</em>.
+  <code>biophysically_grounded</code> asks whether the label is a physical measurement of the
+  structure the head predicts — and only that field licenses a folding or stability claim.</p>
+
+  <p class="col">Collapsing the first and third is what let a CUT&amp;Tag proxy head be described
+  as "measurement-grounded: yes" in the model card on the same day this report called it a proxy.
+  An antibody peak <em>is</em> an experimental observation. It is an observation of occupancy at a
+  locus, which is a different quantity from a melting transition in a defined buffer — and one
+  whose interpretation is contested, since iMab specificity and the accessible-chromatin
+  contribution to targeted CUT&amp;Tag signal are both open questions.</p>
+
+  <div class="scroll">
+  <table>
+    <thead><tr>
+      <th scope="col">head</th><th scope="col">claim basis</th><th scope="col" class="num">metric</th>
+      <th scope="col" class="num">ECE</th><th scope="col" class="num">rows</th>
+      <th scope="col" class="num">groups</th><th scope="col">grouped by</th>
+    </tr></thead>
+    <tbody>
+{heads_table}
+    </tbody>
+  </table>
+  </div>
+  <p class="note">Grouped cross-validation throughout: folds hold out whole similarity clusters,
+  or whole buffers for the two condition-response heads. The gap between rows and groups is the
+  reason — 6,744 G4 folding rows collapse into 1,619 clusters, and a random split would report a
+  number the model cannot reproduce on a new sequence.</p>
+
+  <h3>The claim each head is licensed to make</h3>
+  <div class="claims">
+{claims}
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">artifacts/ablation.json</div>
+  <h2>The condition ablation</h2>
+  <p class="col lede">Remove the condition and interaction features, change nothing else. This is
+  the experiment the whole tool exists to run, and it is the one figure that has to survive
+  scrutiny: if buffer composition did not carry predictive weight on real measurements, a
+  condition-aware predictor would be a solution without a problem.</p>
+
+  <figure>
+    {fig_abl_reg}
+    <div class="key">
+      <span><i class="swatch g4"></i> G4 head</span>
+      <span><i class="swatch im"></i> i-motif head</span>
+      <span><i class="swatch open"></i> sequence only</span>
+      <span>filled dot = sequence + conditions</span>
+    </div>
+    <figcaption>Coefficient of determination, grouped cross-validation. The number at the right
+    is the gain from conditioning. <code>im_tm_condition</code> is the starkest case available:
+    strip the buffer from a two-sequence panel and there is nothing left to predict from, so R²
+    falls to 0.063.</figcaption>
+  </figure>
+
+  <figure>
+    {fig_abl_cls}
+    <figcaption>The same ablation on the classification heads, on a 0.5–1.0 axis.
+    <code>g4_topology</code> is a K⁺-only dataset and <code>im_fold</code>'s positives were all
+    measured in one buffer; neither has a condition response to learn, and neither claims one.
+    Flat rows here are statements about the data, not about the method.</figcaption>
+  </figure>
+</section>
+
+<section>
+  <div class="eyebrow">scripts/07_validate_external.py</div>
+  <h2>Transfer to a cross-assay panel</h2>
+  <p class="col lede">Cross-validated numbers describe behaviour inside this atlas. They are not
+  evidence that the model works on somebody else's sequences. The check available here is the
+  sixteen oligonucleotides Zanin et al. characterised by circular dichroism alongside their
+  CUT&amp;Tag mapping — a different assay on sequences taken from genomic peaks rather than
+  designed C-tract series. They are never ingested.</p>
+
+  <p class="col">It is a <strong>held-out cross-assay panel, not a fully independent external
+  set</strong>, and the difference is worth stating rather than burying. The oligos come from the
+  same study as the peaks that train the proxy head; there are only two negative controls; one of
+  the sixteen overlaps the training set; and the source publishes CD spectra as figures, so the
+  only label is the class the authors assigned. It is good for catching a head that cannot tell an
+  i-motif from a G4 anywhere outside its own panel — which is exactly what it caught. It cannot
+  establish generalisation. That needs a panel from a laboratory with no connection to the
+  training data, which this release does not have.</p>
+
+  <figure>
+    {fig_transfer}
+    <div class="key">
+      <span>filled mark = the authors' i-motif set</span>
+      <span><i class="swatch open"></i> open = their G4 controls</span>
+      <span>dashed outline = their negative controls</span>
+      <span>row colour = the head's structure class</span>
+    </div>
+    <figcaption>Mean predicted probability by the class the authors assigned, scored at
+    100 mM K⁺ / 10 mM Na⁺, pH 5.8, 25 °C. The number at the right is the i-motif-minus-negatives
+    separation.</figcaption>
+  </figure>
+
+  <div class="callout">
+    <h3>The head trained on designed oligos does not transfer; the one trained on genomic loci does</h3>
+    <p><code class="im">im_fold</code> separates the authors' i-motifs from their negative controls
+    by <strong>{im_sep}</strong> — one of those negatives is <span class="mono">CAATCT</span>
+    repeated four times and contains no C-tract at all — and cannot tell an i-motif from a G4
+    either. <code class="im">im_fold_genomic</code> separates them by <strong>{im_gen_sep}</strong>
+    and scores the G4 controls at 0.304, which is the discrimination that matters. Same features,
+    same estimator, same protocol. What changed is 8,482 independent genomic loci in place of
+    variants of a handful of parent constructs.</p>
+    <p><code class="g4">g4_fold</code> transfers on its own side at <strong>{g4_sep}</strong>.</p>
+  </div>
+
+  <p class="note">Held-out status is checked against the atlas rather than asserted: the CD oligos
+  and the CUT&amp;Tag peaks come from the same paper. {overlap_n} of 16 overlaps — the G4 control
+  <span class="mono">{overlap_name}</span>, which contains a motif also present in the peak-derived
+  training set, and which affects only the G4 side. The remaining limit is in the data: a canonical
+  four-C-tract motif is present in only {canon} of the sequences the authors call i-motifs, so half
+  the set sits outside either head's applicability domain — which the predictor flags per sequence.</p>
+
+  <div class="scroll">
+  <table>
+    <thead><tr>
+      <th scope="col">oligo</th><th scope="col">authors say</th>
+      <th scope="col" class="num">P(iM)</th><th scope="col" class="num">P(iM) genomic</th>
+      <th scope="col" class="num">P(G4)</th><th scope="col" class="num">pH<sub>T</sub></th>
+      <th scope="col">motif</th><th scope="col">sequence</th>
+    </tr></thead>
+    <tbody>
+{cd_rows}
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">scripts/06_gse220882_peaks.py</div>
+  <h2>Where the genomic sequences came from</h2>
+  <p class="col lede">GSE220882 deposits seventeen bigWig tracks and no alignments, so
+  <code>MACS2 -f BAMPE</code> cannot run on it at all. SEACR is the right caller and could not be
+  run either — bash, R and bedtools, none available where the data lives. What runs is a Python
+  reimplementation of SEACR's no-control logic: contiguous non-zero coverage blocks ranked by area
+  under the curve.</p>
+
+  <p class="col">The free parameter in that method is where to cut, and it did not have to be
+  guessed. Table S1 of the paper reports the peak count the authors obtained for each of the twelve
+  samples, so the cut is made at their number and the implied top-fraction comes out as a
+  <em>check</em> rather than an input. It lands between 0.94% and 1.04% on all twelve — one
+  threshold explains the whole series.</p>
+
+  <div class="scroll">
+  <table>
+    <thead><tr>
+      <th scope="col">GSM</th><th scope="col">cell line</th><th scope="col">antibody</th>
+      <th scope="col" class="num">rep</th><th scope="col" class="num">coverage blocks</th>
+      <th scope="col" class="num">authors' SEACR peaks</th>
+      <th scope="col" class="num">implied top fraction</th>
+    </tr></thead>
+    <tbody>
+{sample_rows}
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Nine-fold enrichment, and what survives a composition-matched control</h3>
+  <figure>
+    {fig_enrich}
+    <figcaption>Fraction of 201 nt windows containing a canonical four-tract motif, searched on
+    both strands. "Random hg38" is 40,000 N-free windows of the same length. The peaks are
+    strongly enriched against the genome and only modestly enriched against a dinucleotide shuffle
+    of themselves.</figcaption>
+  </figure>
+
+  <div class="callout">
+    <h3>Most of the enrichment is composition, so the negatives are matched on composition</h3>
+    <p>A canonical i-motif appears in 3.9% of random hg38 windows and 37.3% of the strongest iMab
+    peaks — 9.6×. Against a dinucleotide shuffle of the same windows it is 1.36×. A classifier
+    trained on peaks versus random genome would have learned GC content and reported an excellent
+    AUROC for doing so. Each negative here is instead the best canonical motif found inside a
+    shuffled copy of a peak window: positives and negatives match on composition, both carry a
+    four-tract motif, and only the architecture separates them.</p>
+  </div>
+
+  <p class="note">Reference sequence was read out of a STAR index rather than a genome download,
+  and the byte decoding was verified before any sequence was written — {junc}% of {n_junc} annotated
+  introns decode to canonical GT–AG (or CT–AC on the minus strand), with the residue falling into
+  the genuine GC–AG and AT–AC minor-spliceosome classes. Random bytes would score about 0.4%. No
+  lift-over was needed: the deposited tracks are already hg38.</p>
+</section>
+
+<section>
+  <div class="eyebrow">cross-fitted calibration</div>
+  <h2>Are the probabilities honest?</h2>
+  <p class="col lede">A calibrator fitted on out-of-fold predictions and then scored on those same
+  predictions reports an expected calibration error near zero and means nothing. These curves are
+  cross-fitted: the calibrator is fitted on some groups and evaluated on the held-out ones, so the
+  ECE below is the error a new sequence would actually see.</p>
+
+  <div class="grid2">
+    <div class="relcard"><h4 class="g4">g4_fold</h4>{rel_g4_fold}<div class="ece">ECE {ece_g4_fold}</div></div>
+    <div class="relcard"><h4 class="im">im_fold</h4>{rel_im_fold}<div class="ece">ECE {ece_im_fold}</div></div>
+    <div class="relcard"><h4 class="im">im_fold_genomic</h4>{rel_im_gen}<div class="ece">ECE {ece_im_gen}</div></div>
+    <div class="relcard"><h4 class="g4">g4_fold_genomic</h4>{rel_g4_gen}<div class="ece">ECE {ece_g4_gen}</div></div>
+  </div>
+  <p class="note">Predicted probability on the horizontal axis, observed frequency on the vertical,
+  ten equal-count bins; the dashed diagonal is perfect calibration. <code>im_fold</code>'s wider
+  excursion is the honest consequence of 320 rows in 175 groups.</p>
+
+  <div class="callout g4b">
+    <h3>What these ECEs do and do not cover</h3>
+    <p>Every folding head was trained on a <em>constructed</em>, approximately balanced task:
+    measured positives against dinucleotide-preserving shuffles of themselves. The negatives are
+    generated, not experimentally tested non-folders, and no candidate set a user will query is
+    balanced. So an ECE of 0.008 means the probabilities are well calibrated <em>on that task</em>
+    — it does not make them absolute probabilities for a genomic, transcriptomic or aptamer
+    population. Recalibrate against your own prevalence before reading a number as a probability.</p>
+    <p>The regression heads carry an <strong>OOF-residual interval, not a conformal one</strong>.
+    The half-width is a percentile of the out-of-fold residual pool and the coverage reported
+    beside it was measured on those same residuals, so that coverage is in-sample to the pool and
+    guarantees nothing. Read the width as a typical error scale. That in-sample number is kept
+    under the name <code>in_sample_coverage_of_residual_pool</code> rather than deleted, because
+    the honest thing to do with a near-tautological statistic is label it, not hide it.</p>
+    <p>The estimate that <em>is</em> evidence sits beside it: the half-width fitted on half the
+    sequence groups and its coverage measured on the other half, averaged over 20 random group
+    partitions. These artifacts carry it — {conformal_rows} — and it runs a little under the
+    0.90 nominal level, which is what a real held-out coverage estimate looks like.</p>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">cation identity</div>
+  <h2>Does <span class="mono">g4_tm</span> know potassium from sodium?</h2>
+  <p class="col lede">An R&sup2; of 0.670 would look identical whether the head reads
+  <em>which</em> cation is present or only how much monovalent salt there is. Those are very
+  different models and only one of them is doing chemistry, so the aggregate metric cannot settle
+  it. The atlas was searched for sequences measured both K&#8314;-only and Na&#8314;-only at
+  comparable concentration and pH, and the head was asked to reproduce the difference.</p>
+
+  {cation_block}
+
+  <p class="note">v0.4.1 reported the in-sample column alone. It is a mechanistic consistency
+  check &mdash; does the fitted function respond to cation identity at all? &mdash; and it is not
+  validation, because the model was trained on the records being compared. The out-of-fold column
+  is the one to quote.</p>
+
+  <p class="col">What this check cannot establish: accuracy on any individual construct. Eight of
+  the 151 sequences carry published values disagreeing with <em>each other</em> by more than
+  10&nbsp;&deg;C at the same nominal buffer &mdash; hTelo 22AG spans &minus;4.7 to +32.1&nbsp;&deg;C
+  across its own matched pairs. No single prediction can agree with all of them, and counting that
+  as model error would understate the head in the flattering direction, which is its own kind of
+  misreporting.</p>
+</section>
+
+<section>
+  <div class="eyebrow">applicability domain</div>
+  <h2>Where the training data actually lives</h2>
+  <p class="col lede">A model's input range is not its applicability domain. The full span of
+  potassium in the melting data reaches 1,015 mM, but the middle 90% of it stops at 120 mM, and
+  almost every measurement was taken near physiological pH. The predictor flags a query outside the
+  observed range; it cannot flag thinness inside it, which is what this table is for.</p>
+
+  <div class="scroll">
+  <table>
+    <thead><tr>
+      <th scope="col">head</th><th scope="col">variable</th>
+      <th scope="col" class="num">full range</th>
+      <th scope="col" class="num">5th–95th percentile</th>
+      <th scope="col" class="num">distinct values</th>
+    </tr></thead>
+    <tbody>
+{applicability_rows}
+    </tbody>
+  </table>
+  </div>
+  <p class="note">Amber marks a variable whose central mass covers less than a quarter of its
+  nominal span, or which takes fewer than six distinct values. A prediction at pH 5 from
+  <code>g4_tm</code> is an extrapolation dressed as an interpolation.</p>
+</section>
+
+<section>
+  <div class="eyebrow">reproducibility</div>
+  <h2>Two failures found while freezing this release</h2>
+  <p class="col lede">Both were found by checks rather than by reading code, and both are the kind
+  that produce better-looking numbers rather than obvious errors. They are recorded here because a
+  frozen release should say what it survived.</p>
+
+  <div class="callout g4b">
+    <h3>A label-class filter is not a source filter</h3>
+    <p><code class="g4">g4_fold</code> was restricted to biophysical and catalogue rows on the
+    reasoning that the peak-derived positives are <span class="mono">genomic_proxy</span>. But their
+    <em>negatives</em> are <span class="mono">catalog</span>, like every other dinucleotide shuffle
+    in the atlas — so 5,135 unpaired negatives passed the filter while their positives did not, and
+    the head's reported AUROC rose from 0.970 to 0.988. Provenance metadata prevents the mistakes
+    you thought of. This one needed the four sources named explicitly, and a regression test that
+    now fails if anybody removes them.</p>
+  </div>
+
+  <div class="callout">
+    <h3>The atlas was not reproducible, and a 16-sequence check is what showed it</h3>
+    <p>Two builds of nominally the same atlas gave <code class="im">im_fold</code> external
+    separations of +0.024 and +0.155. The shuffled-negative seed was
+    <span class="mono">abs(hash(source_name))</span>, and Python randomises string hashing per
+    interpreter — so every rebuild produced different negatives and every metric measured against
+    them moved with them. The seed is now a SHA-1 of the source name.</p>
+    <p>Verified by building the atlas twice in separate processes and hashing the ordered contents
+    of all {n_records} rows:</p>
+    <p class="hash">build 1 &nbsp;{atlas_fp}<br>build 2 &nbsp;{atlas_fp}</p>
+  </div>
+
+  <p class="note">The <em>file</em> hash of <span class="mono">atlas.db</span> is not stable and
+  should not be used as an identity — SQLite rewrites page metadata whenever the database is
+  opened. The content fingerprint above is the one to quote.</p>
+</section>
+
+<section>
+  <div class="eyebrow">atlas composition</div>
+  <h2>Every source behind the numbers</h2>
+  <div class="scroll">
+  <table>
+    <thead><tr>
+      <th scope="col">source</th><th scope="col">kind</th><th scope="col">evidence tier</th>
+      <th scope="col">label class</th><th scope="col" class="num">rows</th>
+      <th scope="col" class="num">unique sequences</th><th scope="col" class="num">buffers</th>
+    </tr></thead>
+    <tbody>
+{atlas_rows}
+    </tbody>
+  </table>
+  </div>
+  <p class="note">A <em>buffer</em> here is one distinct (K⁺, Na⁺, Li⁺/NH₄⁺, Mg²⁺, pH) combination, the same key everywhere on this page. It is the column that matters for a condition-aware
+  model. <span class="mono">g4stab_experimental_tm</span> carries {n_buffers} buffers over {n_g4_seqs} sequences,
+  and 446 of those sequences were measured under two or more — that within-sequence contrast is what
+  makes a salt response learnable rather than confounded with sequence identity.</p>
+</section>
+
+<section>
+  <div class="eyebrow">checksums</div>
+  <h2>What "frozen" refers to</h2>
+  <div class="scroll">
+  <table>
+    <thead><tr><th scope="col">object</th><th scope="col">SHA-256</th></tr></thead>
+    <tbody>
+      <tr><th scope="row" class="mono">quadcond_model.joblib</th><td class="hash">{artifact_sha}</td></tr>
+      <tr><th scope="row" class="mono">quadcond_model_seqonly.joblib</th><td class="hash">{seqonly_sha}</td></tr>
+      <tr><th scope="row" class="mono">training-row fingerprint</th><td class="hash">{dataset_fp}</td></tr>
+      <tr><th scope="row" class="mono">atlas content fingerprint</th><td class="hash">{atlas_fp}</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="note">The artifact checksum is recorded beside the model and verified <em>before</em>
+  deserialisation, not after — a corrupted joblib archive does not fail politely, it can hand the
+  allocator a garbage length prefix and take the process out.</p>
+</section>
+
+<footer>
+  <p><strong>Sources.</strong> G4STAB Supplementary Table 1 (doi:10.1093/bioinformatics/btaf545) ·
+  G4ShapePredictor topology set · iM-Seeker Supplementary Data Set 1 (doi:10.1093/nar/gkae092) ·
+  5DUVMA (doi:10.1093/nar/gkag110) · iMab and BG4 CUT&amp;Tag, GSE220882 (doi:10.1093/nar/gkad626) ·
+  ENCODE hg38 blacklist v2. QuadCond is a framework; the science is in these datasets, and work
+  built on it should cite them.</p>
+  <p>Generated from the frozen v{version} artifacts on {today}. Regenerate with
+  <span class="mono">scripts/02_train.py</span>, <span class="mono">scripts/03_model_card.py</span>
+  and <span class="mono">scripts/07_validate_external.py</span>.</p>
+</footer>
+
+</div>

@@ -1,0 +1,365 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/quadcond/quadcond/schema/prediction-v1.json",
+  "title": "QuadCond prediction record, version 1",
+  "description": "One record per queried sequence. Frozen at v0.4.2, extended compatibly at v0.4.3 (added `refused` / `refusal_reason`, no field removed): fields may be ADDED in a v1.x release, and a field may never be removed, renamed, or have its meaning changed without incrementing the major version in schema_version. A consumer that reads this document may rely on every required field below existing with the stated meaning for the life of schema 1.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "sequence",
+    "length",
+    "condition",
+    "condition_detail",
+    "condition_imputed_fields",
+    "motifs",
+    "predictions"
+  ],
+  "properties": {
+    "schema_version": {
+      "description": "Semantic version of THIS document's shape, not of the model or the atlas. Model identity lives in model_version; atlas identity in atlas_fingerprint.",
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$"
+    },
+    "model_version": {
+      "type": "string"
+    },
+    "atlas_fingerprint": {
+      "description": "Content fingerprint of the atlas the heads were trained on. Two predictions with the same model_version and the same atlas_fingerprint are reproducible against each other.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "sequence": {
+      "type": "string",
+      "pattern": "^[ACGTN]*$"
+    },
+    "length": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "condition": {
+      "description": "Human-readable buffer label. Display only -- parse condition_detail instead.",
+      "type": "string"
+    },
+    "condition_detail": {
+      "type": "object",
+      "required": [
+        "k",
+        "na",
+        "li_nh4",
+        "mg",
+        "ph",
+        "temperature",
+        "crowder_pct",
+        "strand_conc"
+      ],
+      "properties": {
+        "k": {
+          "type": "number",
+          "description": "K+, mM"
+        },
+        "na": {
+          "type": "number",
+          "description": "Na+, mM"
+        },
+        "li_nh4": {
+          "type": "number",
+          "description": "Li+ / NH4+, mM"
+        },
+        "mg": {
+          "type": "number",
+          "description": "Mg2+, mM"
+        },
+        "ph": {
+          "type": "number"
+        },
+        "temperature": {
+          "type": "number",
+          "description": "degrees C"
+        },
+        "crowder_pct": {
+          "type": "number",
+          "description": "% w/v PEG or equivalent"
+        },
+        "strand_conc": {
+          "type": "number",
+          "description": "uM"
+        }
+      },
+      "additionalProperties": false
+    },
+    "condition_imputed_fields": {
+      "description": "Every condition field the caller did not supply, which therefore fell back to a reference default. A number computed under an imputed buffer is not a prediction under a measured one. NEVER omit this when reproducing a record.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "motifs": {
+      "type": "object",
+      "required": [
+        "g4_canonical",
+        "im_canonical",
+        "g4hunter_mean"
+      ],
+      "properties": {
+        "g4_canonical": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/motif"
+          }
+        },
+        "im_canonical": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/motif"
+          }
+        },
+        "g4hunter_mean": {
+          "type": "number"
+        }
+      }
+    },
+    "predictions": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/head_output"
+      }
+    },
+    "evidence": {
+      "description": "Nearest measured atlas records, when an atlas was attached.",
+      "type": "array"
+    }
+  },
+  "$defs": {
+    "motif": {
+      "type": "object",
+      "required": [
+        "kind",
+        "sequence",
+        "start",
+        "end",
+        "strand",
+        "length",
+        "score"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "G4",
+            "iM"
+          ]
+        },
+        "sequence": {
+          "type": "string"
+        },
+        "start": {
+          "type": "integer"
+        },
+        "end": {
+          "type": "integer"
+        },
+        "strand": {
+          "enum": [
+            "+",
+            "-"
+          ]
+        },
+        "length": {
+          "type": "integer"
+        },
+        "tract_len": {
+          "type": "integer"
+        },
+        "loops": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "score": {
+          "type": "number"
+        },
+        "source_id": {
+          "type": "string"
+        }
+      }
+    },
+    "head_output": {
+      "type": "object",
+      "required": [
+        "head",
+        "kind",
+        "task",
+        "claim",
+        "has_experimental_observation",
+        "target_semantics",
+        "biophysically_grounded",
+        "calibration_scope",
+        "trained_on",
+        "label_classes",
+        "n_training_rows",
+        "applicability"
+      ],
+      "properties": {
+        "head": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "G4",
+            "iM",
+            "locus"
+          ]
+        },
+        "task": {
+          "enum": [
+            "binary",
+            "multiclass",
+            "regression"
+          ]
+        },
+        "claim": {
+          "type": "string",
+          "description": "What this head is allowed to claim, in prose. See docs/CLAIMS.md."
+        },
+        "has_experimental_observation": {
+          "type": "boolean",
+          "description": "Was ANYTHING measured upstream of this label? True for a CUT&Tag proxy as well as for a melting curve. Does not license a folding claim on its own."
+        },
+        "target_semantics": {
+          "enum": [
+            "biophysical",
+            "genomic_proxy",
+            "derived",
+            "predicted"
+          ],
+          "description": "What the label IS. biophysical = a physical measurement of the structure this head predicts. genomic_proxy = antibody occupancy at a locus, never P(folds). derived = computed from sequence. predicted = another model's output."
+        },
+        "biophysically_grounded": {
+          "type": "boolean",
+          "description": "The ONLY field that licenses a folding or stability claim. Equivalent to target_semantics == 'biophysical'. v0.4.0 shipped a single collapsed field here and it described a proxy head as measurement-grounded; that is why there are three."
+        },
+        "calibration_scope": {
+          "type": "string",
+          "description": "The task the reported ECE/Brier/interval was measured on. A calibrated number is calibrated for THIS task and no other."
+        },
+        "trained_on": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "experimental",
+              "derived",
+              "predicted",
+              "catalog"
+            ]
+          }
+        },
+        "label_classes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "n_training_rows": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "applicability": {
+          "type": "object",
+          "required": [
+            "in_domain",
+            "warnings",
+            "biophysically_grounded"
+          ],
+          "properties": {
+            "in_domain": {
+              "type": "boolean",
+              "description": "False means the query falls outside what this head was trained on. A value may still be present; it is an extrapolation and must not be displayed as a prediction without the warnings beside it. For the stronger case where there is no value at all, see `refused`."
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "biophysically_grounded": {
+              "type": "boolean"
+            },
+            "refused": {
+              "type": "boolean",
+              "description": "This head declined to answer; no value was emitted."
+            },
+            "refusal_reason": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        },
+        "probability": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "binary heads only, calibrated"
+        },
+        "uncalibrated_probability": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "posterior": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          },
+          "description": "multiclass heads only"
+        },
+        "argmax": {
+          "type": "string"
+        },
+        "confidence": {
+          "type": "number"
+        },
+        "value": {
+          "type": "number",
+          "description": "regression heads only, in the head's own units (degrees C for tm, pH units for ph_t). ABSENT when `refused` is true \u2014 do not default it."
+        },
+        "interval": {
+          "description": "[low, high] in the head's own units. An OOF-residual interval, NOT a conformal guarantee: the half-width is an out-of-fold residual quantile. The coverage that survives a group split is reported separately in the model card, and is lower than the nominal level.",
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "interval_kind": {
+          "enum": [
+            "oof_residual"
+          ]
+        },
+        "interval_nominal_level": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "The level the half-width was fitted at. Nominal -- see interval_note for what it actually covers."
+        },
+        "interval_note": {
+          "type": "string"
+        },
+        "refused": {
+          "type": "boolean",
+          "description": "True when this head declined to answer. A refused head emits NO value, interval or folded fraction \u2014 the keys are absent, not null. Distinct from applicability.in_domain=false, which means a value exists and is an extrapolation."
+        },
+        "refusal_reason": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

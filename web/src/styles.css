@@ -1,0 +1,135 @@
+/*
+ * Self-hosted IBM Plex, not a Google Fonts <link>.
+ *
+ * The remote stylesheet failed on every restricted network — sandbox, air-gapped
+ * lab machine, institutional proxy — and the browser-smoke run recorded it as a
+ * console error on a page that was otherwise fine. The old comment called that
+ * "cosmetic", which is true of the typography and false of the check: a tool
+ * that reports an error on every offline load has no signal left for a real one.
+ *
+ * Latin subset only, and only the weights the interface uses (sans 400/500/600,
+ * mono 400/500), so the shipped bundle carries five woff2 files rather than the
+ * whole family. Vite inlines these @imports into the single emitted stylesheet
+ * and rewrites the font URLs, so there is one request for CSS and no
+ * third-party origin in the document at all.
+ */
+@import "@fontsource/ibm-plex-sans/latin-400.css";
+@import "@fontsource/ibm-plex-sans/latin-500.css";
+@import "@fontsource/ibm-plex-sans/latin-600.css";
+@import "@fontsource/ibm-plex-mono/latin-400.css";
+@import "@fontsource/ibm-plex-mono/latin-500.css";
+
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #0a0a0c;
+  --color-bg-gradient-start: #0a0a0c;
+  --color-bg-gradient-end: #13141a;
+  
+  --color-surface: rgba(18, 22, 26, 0.4);
+  --color-surface-2: rgba(24, 29, 34, 0.5);
+  --color-surface-3: rgba(32, 38, 44, 0.6);
+  --color-surface-solid: #12161a;
+  
+  --color-fg: #f8f9fa;
+  --color-fg-muted: #a1aab3;
+  --color-fg-subtle: #a0aab5;
+  
+  --color-accent: #3b82f6;
+  --color-accent-foreground: #ffffff;
+  --color-accent-glow: rgba(59, 130, 246, 0.5);
+  
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-strong: rgba(255, 255, 255, 0.16);
+  --color-ring: rgba(59, 130, 246, 0.5);
+  
+  --color-base-a: #60a5fa;
+  --color-base-t: #fcd34d;
+  --color-base-g: #34d399;
+  --color-base-c: #f87171;
+
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+
+  /* "Inter" and "Outfit" led these stacks but were never loaded by anything,
+     so both already resolved to IBM Plex Sans. Naming a font you do not ship
+     makes the rendered result depend on what the reader happens to have
+     installed, which is not a thing to leave to chance in a figure. */
+  --font-sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-display: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-quick: 150ms;
+  --motion-fast: 250ms;
+  --motion-smooth: 400ms;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  body {
+    background: linear-gradient(135deg, var(--color-bg-gradient-start), var(--color-bg-gradient-end));
+    background-attachment: fixed;
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    min-height: 100vh;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-surface backdrop-blur-xl border border-border shadow-[0_4px_30px_rgba(0,0,0,0.1)];
+  }
+  .glass-panel {
+    @apply bg-surface-2 backdrop-blur-md border border-border rounded-xl;
+  }
+  .glass-card {
+    @apply bg-surface-3 backdrop-blur-lg border border-border-strong rounded-2xl shadow-xl transition-all duration-300;
+  }
+  .glass-card:hover {
+    @apply shadow-2xl border-accent/30;
+    box-shadow: 0 0 20px var(--color-accent-glow);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Readable scientific labels and keyboard navigation at either viewport. */
+@layer base {
+  :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+  button:disabled { cursor: not-allowed; }
+  [role="tab"] { min-height: 44px; }
+  summary { min-height: 44px; }
+}
+.workbench-guide {
+  width: min(44rem, calc(100vw - 2rem)); max-height: calc(100dvh - 2rem);
+  margin: auto; padding: 1.5rem; border-radius: var(--radius-md);
+  background: var(--color-surface-solid); color: var(--color-fg);
+  border: 1px solid var(--color-border-strong); overflow-y: auto;
+}
+.workbench-guide::backdrop { background: rgb(0 0 0 / 0.7); }
+[data-testid="evidence-card"] p, [data-testid="genomic-readout"] p { font-size: 0.75rem; line-height: 1.5; }
+@media (max-width: 1023px) {
+  button:not([role="checkbox"]), [role="tab"] { min-height: 44px; }
+  .glass-panel { min-width: 0; }
+}

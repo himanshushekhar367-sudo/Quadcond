@@ -1,0 +1,47 @@
+{
+  "reference_temperature_c": 37.0,
+  "van_t_hoff_dh_kcal": 45.0,
+  "RT_at_reference_kcal": 0.6163,
+  "method": "dG(37 C) implied by each measured Tm under a two-state van 't Hoff model, regressed on the heuristic's raw output. The fitted scale is how much the heuristic must be compressed to speak in kcal/mol.",
+  "classes": {
+    "g-quadruplex": {
+      "n": 2274,
+      "scale": 0.0518,
+      "offset_kcal": -1.38,
+      "r2": 0.074,
+      "residual_sd_kcal": 1.68,
+      "raw_span_kcal": 48.3,
+      "raw_span_in_RT": 78.3,
+      "calibrated_span_kcal": 2.5,
+      "calibrated_span_in_RT": 4.1,
+      "measured_dg_range_kcal": [
+        -6.99,
+        4.69
+      ]
+    },
+    "i-motif": {
+      "n": 379,
+      "scale": 0.0368,
+      "offset_kcal": -0.053,
+      "r2": 0.091,
+      "residual_sd_kcal": 2.22,
+      "raw_span_kcal": 42.3,
+      "raw_span_in_RT": 68.6,
+      "calibrated_span_kcal": 1.6,
+      "calibrated_span_in_RT": 2.5,
+      "measured_dg_range_kcal": [
+        -5.52,
+        4.63
+      ]
+    }
+  },
+  "model_derived_dg": {
+    "route": "g4_tm predicted Tm -> dG(37 C) by the same van 't Hoff relation",
+    "n": 2274,
+    "r2_vs_measured_dg_IN_SAMPLE": 0.9659,
+    "rmse_kcal_IN_SAMPLE": 0.32,
+    "in_sample_warning": "g4_tm was TRAINED on these 2,274 rows, so this figure is in-sample and is not the accuracy to quote. It is reported only to show that the head carries the free-energy variation the heuristic does not. The head's honest number is its grouped cross-validated Tm R^2 of 0.670; the out-of-fold dG figure is materially lower than the in-sample one above.",
+    "head_grouped_cv_r2_on_tm": 0.6701,
+    "verdict": "Where a trained head exists, dG must come from it. The calibrated heuristic fixes the ensemble's dynamic range but explains little of the free-energy variation; the head explains most of it. The heuristic's remaining job is the folds no head covers -- cruciform, triplex, AC-motif, hairpin, duplex -- where it is the only estimate available and is labelled as such."
+  }
+}

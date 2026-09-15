@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Node / frontend
+node_modules/
+web/dist/
+web/.vite/
+*.tsbuildinfo
+
+# Model and atlas binaries -- fetched and verified, never committed.
+# See quadcond/assets_manifest.json and docs/GET_THE_DATA.md.
+*.joblib
+*.joblib.part
+*.db
+*.db-journal
+*.db-wal
+quadcond/_web/
+
+# AlphaGenome bundles and other large third-party data
+*.tsv.gz
+*.tsv.gz.tbi
+*.bed.gz
+*.bed.gz.tbi
+*.fa
+*.fa.fai
+*.fasta.fai
+!examples/**/*.fasta
+
+# Local configuration and secrets
+.env
+.env.*
+*.key
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

@@ -1,0 +1,73 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "quadcond"
+dynamic = ["version"]
+description = "Condition-aware G-quadruplex and i-motif prediction with an AlphaGenome join and a browser workbench"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Auroni Deep" },
+    { name = "Himanshu Shekhar" },
+    { name = "Shilpi Minocha" },
+    { name = "Vivekanandan Perumal" },
+    { name = "Saran Kumar" },
+]
+keywords = [
+    "g-quadruplex",
+    "i-motif",
+    "nucleic acid structure",
+    "genomics",
+    "alphagenome",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+dependencies = [
+    "numpy>=1.26",
+    "scipy>=1.11",
+    "pandas>=2.1",
+    "scikit-learn==1.8.0",
+    "xgboost==3.2.0",
+    "joblib>=1.3",
+]
+
+[project.optional-dependencies]
+# Reading the published AlphaGenome AVI Tabix bundle without the `tabix` CLI.
+tabix = ["pysam>=0.22"]
+# Querying the live AlphaGenome service.
+live = ["alphagenome"]
+dev = ["pytest>=8.0", "ruff>=0.6"]
+
+[project.scripts]
+quadcond = "quadcond.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/himanshushekhar367-sudo/Quadcond"
+Source = "https://github.com/himanshushekhar367-sudo/Quadcond"
+Issues = "https://github.com/himanshushekhar367-sudo/Quadcond/issues"
+
+[tool.setuptools.dynamic]
+version = { attr = "quadcond.__version__" }
+
+[tool.setuptools.packages.find]
+include = ["quadcond*"]
+
+[tool.setuptools.package-data]
+quadcond = ["assets_manifest.json", "schema/*.json", "structure/*.json", "_web/**/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

@@ -1,0 +1,196 @@
+{
+  "run_record": {
+    "quadcond_model_version": "0.4.6",
+    "model_artifact_sha256": "493640193ad70974d35582c55b4a721095bfcba50edc6827d9636d2f7b7be0c7",
+    "atlas_fingerprint": "4c5cca5a98e1259452824cc3f5aaad151a11671a4391b99f5abaa67e716d061b",
+    "prediction_schema_version": "1.1.0",
+    "provenance": {
+      "model": {
+        "model_version_reported_by_artifact": "0.4.6",
+        "model_file": "/mnt/user-data/uploads/Quadcond/sandbox/quadcond_model.reassembled-v0.4.6.joblib",
+        "model_file_sha256": "493640193ad70974d35582c55b4a721095bfcba50edc6827d9636d2f7b7be0c7",
+        "dataset_fingerprint": "4c5cca5a98e1259452824cc3f5aaad151a11671a4391b99f5abaa67e716d061b",
+        "manifest_release": "0.4.8",
+        "manifest_expected_model_sha256": "204b4608c964793107ec5a384581b316c4bd0aacb20791aeb5561df9187a57db",
+        "matches_manifest": false,
+        "note": "A path names a location, not a set of bytes; the hash above is of the file that was actually opened. `matches_manifest: false` means this run used an artifact the release does not describe -- the numbers may still be the ones intended, but that has not been established here and metadata agreement is not estimator identity."
+      },
+      "environment": {
+        "python": "3.11.15",
+        "platform": "Linux-6.18.44-fc-v33-x86_64-with-glibc2.39",
+        "packages": {
+          "scikit-learn": "1.8.0",
+          "xgboost": "3.2.0",
+          "joblib": "1.5.3",
+          "numpy": "2.4.4",
+          "scipy": "1.17.1"
+        }
+      },
+      "environment_vs_build": {
+        "scikit-learn": {
+          "built_with": "1.8.0",
+          "running": "1.8.0",
+          "same": true
+        },
+        "xgboost": {
+          "built_with": "3.2.0",
+          "running": "3.2.0",
+          "same": true
+        },
+        "numpy": {
+          "built_with": "2.4.4",
+          "running": "2.4.4",
+          "same": true
+        },
+        "scipy": {
+          "built_with": "1.17.1",
+          "running": "1.17.1",
+          "same": true
+        },
+        "joblib": {
+          "built_with": "1.5.3",
+          "running": "1.5.3",
+          "same": true
+        }
+      },
+      "caveat": "Recorded, not verified. Matching library versions make a run reproducible; they do not by themselves establish that a model loaded under them computes what it computed when it was fitted."
+    },
+    "workflow": "variant_scan",
+    "heads_requested": [
+      "g4_tm",
+      "im_pht"
+    ],
+    "n_substitutions": 183,
+    "condition": {
+      "k": 140.0,
+      "na": 12.0,
+      "li_nh4": 0.0,
+      "mg": 1.0,
+      "ph": 7.4,
+      "temperature": 37.0,
+      "crowder_pct": 0.0,
+      "strand_conc": 5.0
+    },
+    "condition_imputed_fields": [],
+    "strand_by_head": {
+      "g4_tm": "+",
+      "im_pht": "-"
+    },
+    "delta_semantics": "Spread of the paired per-estimator differences, not a validated interval on the difference. Mutation-effect prediction is a different task from absolute prediction and has not been validated here against measured wild-type/mutant panels; this head's error on absolute values does not transfer to its error on differences.",
+    "locus": {
+      "chromosome": "chr22",
+      "start": 36201668,
+      "end": 36201728,
+      "coordinate_convention": "1-based inclusive, as in VCF",
+      "strand_of_window_sequence": "+ (forward / reference strand)",
+      "assembly": "GRCh38",
+      "assembly_stated_by_caller": true
+    },
+    "regulatory_source": {
+      "source": "table",
+      "path": "/mnt/user-data/uploads/Quadcond/alphagenome_bridge/results/chr22_example_20260915_105922_ce722e/quadcond_scores.csv",
+      "n_variants": 183,
+      "scorers": [
+        "AVI_SCORE"
+      ],
+      "file": {
+        "path": "/mnt/user-data/uploads/Quadcond/alphagenome_bridge/results/chr22_example_20260915_105922_ce722e/quadcond_scores.csv",
+        "sha256": "bf0247bdac14b9249dd1389423d1f528ae71523d5855ee44fc91501fc7fcbdba",
+        "bytes": 9167,
+        "mtime_utc": "2026-09-15T05:36:06.733282Z",
+        "role": "regulatory_scores",
+        "exporter_provenance": {
+          "assembly": "GRCh38",
+          "chromosome": "chr22",
+          "start_1based": 36201668,
+          "sequence": "AGGAGGGCAGAGAGCTGGGGCCTCGGACTCACCCGACGCTTGTGATGAGCTGCACCCAGGA",
+          "interval_0based": [
+            36201667,
+            36201728
+          ],
+          "scorer": "AVI_SCORE",
+          "ontology_terms": null,
+          "source": "AlphaGenome Atlas API",
+          "sdk_version": "0.9.0",
+          "retrieved_utc": "2026-09-15T05:29:38.414746+00:00",
+          "aggregation": "maximum absolute raw score over returned tracks/genes, within this scorer only",
+          "expected_snv_count": 183,
+          "returned_scored_snv_count": 183,
+          "missing_scores": "absent, never zero-filled",
+          "model_release": "not supplied by this adapter"
+        },
+        "exporter_provenance_sha256": "52e92e29efb919f35dcf54810e7a1a9f7e46e9453fdcc13f456e682be065e3bf"
+      },
+      "note": "Regulatory scores read from a user-supplied export. QuadCond did not fetch them and cannot vouch for which model version or scorer settings produced them; the file, identified above by its checksum, is the provenance."
+    },
+    "regulatory_error": null,
+    "structural_axis_head": "g4_tm",
+    "regulatory_axis_scorer": "AVI_SCORE",
+    "structural_threshold": null,
+    "regulatory_threshold": null,
+    "threshold_basis": "75th percentile within this request",
+    "condition_responsiveness": {
+      "g4_tm": {
+        "k": "varied",
+        "na": "varied",
+        "li_nh4": "varied",
+        "mg": "varied",
+        "ph": "varied",
+        "temperature": "predicts",
+        "crowder_pct": "fixed",
+        "strand_conc": "varied"
+      },
+      "im_pht": {
+        "k": "fixed",
+        "na": "fixed",
+        "li_nh4": "fixed",
+        "mg": "fixed",
+        "ph": "fixed",
+        "temperature": "fixed",
+        "crowder_pct": "fixed",
+        "strand_conc": "fixed"
+      }
+    },
+    "condition_note": "Per-head, from each head's own training ranges. 'fixed' means every training record used one value, so the head has no response to apply to a different one -- an absence, not an extrapolation. 'predicts' marks an axis a head outputs rather than consumes. The requested buffer is applied where a head varied in it and is otherwise inert."
+  },
+  "quadrant_counts": {
+    "structural_only": 0,
+    "regulatory_only": 0,
+    "both": 0,
+    "neither": 0,
+    "unclassified": 183
+  },
+  "structural_candidate_counts": {
+    "motif_lost": 0,
+    "motif_gained": 0,
+    "motif_count_changed": 0
+  },
+  "notes": {
+    "quadrant_note": "Two axes, four cells, thresholds supplied by the caller. This is a triage device for choosing what to measure, not a classifier: neither threshold was fitted, the axes are model output on different scales, and no benchmark against measured regulatory variants has been run.",
+    "rank_note": "Within this request only. The combined rank is the smaller of the two percentile ranks, so a variant ranks high only when it ranks high on both axes. It is not a probability, not calibrated, and not comparable across requests -- a percentile is a statement about the other rows in the same table.",
+    "delta_note": "Spread of the paired per-estimator differences, not a validated interval on the difference. Mutation-effect prediction is a different task from absolute prediction and has not been validated here against measured wild-type/mutant panels; this head's error on absolute values does not transfer to its error on differences.",
+    "ranking_note": "Ranked by magnitude of predicted change. No significance test is applied and no threshold separates 'significant' from 'not': there is no null distribution here to test against. Use the paired spread and the applicability state to judge which rows are worth measuring.",
+    "interpretation_note": "A variant in the 'both' cell is a candidate for a structure-mediated regulatory mechanism: the regulatory model expects an effect and this head expects the local G-quadruplex or i-motif to change. That is a hypothesis to test, not a finding. Neither axis observes the other, no joint model was fitted, and the structural axis carries the same limitation as every other QuadCond delta -- mutation-effect prediction has not been validated here as its own task.",
+    "candidate_note": "Motif loss, gain and count change have no melting-temperature or transitional-pH delta by construction -- one side of the comparison has no motif for the head to be about. They are listed here so that a ranked table built on deltas cannot hide them. Read them as categorical structural findings, not as effects of a measured size."
+  },
+  "csv_columns": [
+    "variant",
+    "chromosome",
+    "position",
+    "reference",
+    "alternate",
+    "mutation",
+    "structural_head",
+    "strand",
+    "motif_state",
+    "structural_applicability",
+    "delta",
+    "delta_paired_sd",
+    "regulatory_scorer",
+    "regulatory_score",
+    "regulatory_rank",
+    "combined_rank",
+    "quadrant",
+    "quadrant_reason"
+  ]
+}
