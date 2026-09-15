@@ -311,8 +311,8 @@ def find_im_graph(
         cands: list[tuple[int, int, int, int]] = []
         for j in adj[i]:
             for k in adj[j]:
-                for l in adj[k]:
-                    cands.append((i, j, k, l))
+                for m in adj[k]:
+                    cands.append((i, j, k, m))
                     if len(cands) >= max_candidates_per_start:
                         break
                 if len(cands) >= max_candidates_per_start:

@@ -221,7 +221,7 @@ def status() -> list[dict]:
             try:
                 verify(found, a)
                 state = "ok"
-            except (AssetError, OSError, ValueError) as exc:
+            except (AssetError, OSError, ValueError):
                 state = "verification failed"
         rows.append({
             "name": a.name, "kind": a.kind, "filename": a.filename,

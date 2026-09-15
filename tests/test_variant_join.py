@@ -21,7 +21,6 @@ import pytest
 
 from quadcond import alphagenome as ag
 from quadcond import variants as var
-from quadcond.conditions import Condition
 
 from test_comparison_contracts import TEL22, _predictor
 

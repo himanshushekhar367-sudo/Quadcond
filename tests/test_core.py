@@ -99,7 +99,8 @@ def test_dinucleotide_shuffle_preserves_dinucleotide_counts():
     for seq in (HTELO, MYC, CTELO):
         sh = dinucleotide_shuffle(seq, rng)
         assert Counter(seq) == Counter(sh)
-        di = lambda s: Counter(a + b for a, b in zip(s, s[1:]))
+        def di(s):
+            return Counter(a + b for a, b in zip(s, s[1:]))
         assert di(seq) == di(sh)
 
 

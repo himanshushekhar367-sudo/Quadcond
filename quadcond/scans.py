@@ -41,7 +41,6 @@ nothing about it. Every delta this module emits carries that sentence.
 """
 from __future__ import annotations
 
-import math
 from typing import Any, Iterable, Sequence
 
 import numpy as np

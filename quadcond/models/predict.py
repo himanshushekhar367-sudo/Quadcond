@@ -15,9 +15,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, Sequence
-
-import numpy as np
+from typing import Sequence
 
 from .. import claims
 from ..schema import PREDICTION_SCHEMA_VERSION

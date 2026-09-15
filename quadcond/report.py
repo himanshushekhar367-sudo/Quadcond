@@ -579,7 +579,7 @@ def build_report(model_path, db_path, out_path, *, ablation: str | None = None,
         _sem = claims.target_semantics(name, tm_)
         is_grounded = _sem == claims.BIOPHYSICAL
         nav_heads.append(f'<a class="sub" href="#h-{_e(name)}">{_e(name)}</a>')
-        badge = (f'<span class="pill good">biophysically anchored</span>' if is_grounded
+        badge = ('<span class="pill good">biophysically anchored</span>' if is_grounded
                  else f'<span class="pill warn">{_e(claims.SEMANTICS_LABEL[_sem])}</span>')
 
         if h.task == "binary":

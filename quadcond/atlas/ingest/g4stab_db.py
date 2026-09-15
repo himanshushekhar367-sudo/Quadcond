@@ -19,7 +19,6 @@ benchmark to compare a new model against, (b) a condition-response prior, and
 """
 from __future__ import annotations
 
-import json
 from pathlib import Path
 from typing import Iterator
 

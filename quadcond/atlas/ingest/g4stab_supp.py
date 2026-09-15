@@ -38,7 +38,6 @@ from pathlib import Path
 
 from ...buffers import coverage_report, parse_buffer
 from ...conditions import Condition
-from ...motifs import clean
 from ..db import Record
 from ._columns import read_table, resolve
 

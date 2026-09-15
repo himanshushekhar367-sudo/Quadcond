@@ -29,7 +29,7 @@ other by weighting them, since no weighting has been calibrated.
 """
 from __future__ import annotations
 
-from typing import Any, Sequence
+from typing import Sequence
 
 from . import alphagenome as ag
 from . import scans

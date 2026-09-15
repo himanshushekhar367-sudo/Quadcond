@@ -5,7 +5,7 @@ import numpy as np
 
 from . import readout
 from .conditions import Condition
-from .models.calibration import expected_calibration_error, reliability_curve
+from .models.calibration import expected_calibration_error
 from .motifs import find_g4, find_im, g4hunter_mean, g4hunter_window_max
 
 

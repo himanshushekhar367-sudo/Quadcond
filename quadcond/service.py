@@ -34,8 +34,6 @@ import json
 import math
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from pathlib import Path
-from typing import Any
 
 from . import __version__, assets, capabilities, claims, readout, scans
 from .conditions import CONDITION_FIELDS, PRESETS, Condition
