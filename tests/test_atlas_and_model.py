@@ -549,3 +549,50 @@ def test_claim_basis_travels_with_every_head(trained_predictor):
             assert field in out, f"{name} is missing {field}"
         # The licensing field must agree with the semantics it is derived from.
         assert out["biophysically_grounded"] == (out["target_semantics"] == "biophysical")
+
+
+# --------------------------------------------------------- concurrent access
+def test_the_atlas_is_usable_from_more_than_one_thread(tmp_path):
+    """One connection shared across request threads is a 500 on every query.
+
+    `ThreadingHTTPServer` hands each request to a new thread, and SQLite
+    refuses a connection used off the thread that created it. Nothing caught
+    this: with a sentinel model and no atlas file, no connection is ever
+    opened, so the suite and the browser fixture both passed while every real
+    `/predict` after the first request returned
+
+        ProgrammingError: SQLite objects created in a thread can only be used
+        in that same thread.
+
+    The defect needed a real atlas to appear, which is exactly the
+    configuration CI cannot reach -- so the regression is pinned here with a
+    two-row database that needs no release asset.
+    """
+    import threading
+
+    a = Atlas(tmp_path / "threaded.db")
+    a.register_source("src", evidence_tier="experimental")
+    a.add([Record(sequence=HTELO, kind="G4", source="src",
+                  evidence_tier="experimental", folded=1,
+                  condition=Condition(k=100.0))])
+
+    results, errors = [], []
+
+    def read():
+        try:
+            rows = a.conn.execute("SELECT COUNT(*) AS n FROM records").fetchone()
+            results.append(rows["n"])
+        except Exception as exc:                            # noqa: BLE001
+            errors.append(exc)
+
+    threads = [threading.Thread(target=read) for _ in range(4)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+
+    assert not errors, f"atlas unusable off the creating thread: {errors[0]}"
+    assert results == [1, 1, 1, 1]
+    # The creating thread still works afterwards.
+    assert a.conn.execute("SELECT COUNT(*) AS n FROM records").fetchone()["n"] == 1
+    a.close()

@@ -694,10 +694,12 @@ describe("the comparison panels", () => {
     const src = await read("../../components/panels/VariantPanel.tsx");
     assert.ok(/variant-condition-responsiveness/.test(src));
     assert.ok(
-      /no learned response to any condition axis/.test(src),
-      "a wholly inert head must say so in those terms",
+      /no condition variation supported by this record/.test(src),
+      "fixed training conditions must not imply an experimentally established non-effect",
     );
-    assert.ok(/reference-condition prediction/.test(src));
+    assert.ok(/recorded reference conditions/.test(src));
+    assert.ok(/training conditions varied for/.test(src));
+    assert.ok(/unknown:/.test(src));
   });
 
   it("keeps motif-gain and motif-loss candidates visible without a delta", async () => {

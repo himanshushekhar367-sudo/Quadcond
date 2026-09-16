@@ -295,18 +295,20 @@ export function VariantPanel() {
                     <span className="font-mono text-fg">{head}</span>{" "}
                     {inert.length === Object.keys(axesOf).length ? (
                       <span className="text-amber-300">
-                        has no learned response to any condition axis — the buffer
-                        set above is inert for it, and its value is a
-                        reference-condition prediction
+                        has no condition variation supported by this record;
+                        interpret its output within the recorded reference conditions
                       </span>
                     ) : (
                       <>
-                        responds to{" "}
+                        training conditions varied for{" "}
                         {Object.entries(axesOf)
                           .filter(([, st]) => st === "varied")
                           .map(([ax]) => ax)
                           .join(", ") || "no axis"}
-                        {inert.length ? `; inert for ${inert.join(", ")}` : ""}
+                        {inert.length ? `; fixed or unused: ${inert.join(", ")}` : ""}
+                        {Object.entries(axesOf).some(([, st]) => st === "unknown")
+                          ? `; unknown: ${Object.entries(axesOf).filter(([, st]) => st === "unknown").map(([ax]) => ax).join(", ")}`
+                          : ""}
                         {predicts.length ? `; predicts ${predicts.join(", ")}` : ""}
                       </>
                     )}
@@ -321,10 +323,7 @@ export function VariantPanel() {
 
           <Quadrants counts={scan.quadrant_counts} />
 
-          {/* Findings with no number, kept where they can be seen. A ranked
-              table built on deltas would sort these to the bottom and off the
-              end of a shortlist, which is a retrieval failure and not a
-              formatting one. */}
+          {/* Preserve motif events, including those without numerical deltas. */}
           {candidateTotal ? (
             <details
               className="mt-3 rounded-[var(--radius-md)] border border-accent/30 bg-accent/5 p-2"
@@ -333,7 +332,7 @@ export function VariantPanel() {
             >
               <summary className="cursor-pointer text-xs font-medium text-fg">
                 {candidateTotal} structural candidate
-                {candidateTotal === 1 ? "" : "s"} with no comparable number
+                {candidateTotal === 1 ? "" : "s"} for the selected structural head
               </summary>
               <p className="mt-1 text-[0.65rem] leading-relaxed text-fg-subtle">
                 {scan.candidate_note}
@@ -341,13 +340,22 @@ export function VariantPanel() {
               <ul className="mt-2 space-y-1 text-[0.7rem]">
                 {Object.entries(scan.structural_candidates).flatMap(([state, entries]) =>
                   entries.map((e) => (
-                    <li key={`${state}-${e.label}`} className="flex flex-wrap gap-2">
+                    <li key={`${state}-${e.label}-${e.head}-${e.strand}`} className="flex flex-wrap gap-2">
                       <span className="font-mono text-fg">{e.label}</span>
+                      {e.head ? <span className="text-fg-subtle">{e.head}</span> : null}
                       <Badge variant="outline" className="text-[9px]">
                         {state.replace(/_/g, " ")}
                       </Badge>
                       {e.strand ? (
                         <span className="text-fg-subtle">strand {e.strand}</span>
+                      ) : null}
+                      {e.has_delta && e.delta != null ? (
+                        <span className="text-fg-muted">predicted Δ {e.delta.toFixed(3)} {e.units}</span>
+                      ) : (
+                        <span className="text-fg-subtle">no applicable numerical comparison</span>
+                      )}
+                      {e.why_listed ? (
+                        <span className="basis-full text-fg-subtle">{e.why_listed}</span>
                       ) : null}
                       <span className="text-fg-muted">
                         {e.regulatory_score !== null

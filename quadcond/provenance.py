@@ -96,25 +96,46 @@ def model_identity(pred, *, manifest_asset: str = "model") -> dict:
         except OSError:
             sha = None
 
-    expected_sha = expected_version = None
+    expected_sha = expected_version = recorded_model_version = None
     try:
         from . import assets
         asset = assets.assets().get(manifest_asset)
         if asset is not None:
             expected_sha = asset.sha256
+            recorded_model_version = asset.model_version
         expected_version = assets.manifest().get("release")
     except Exception:                                          # noqa: BLE001
         pass
 
+    from . import __version__ as _app_version
+
+    artifact_version = getattr(model, "version", None)
     matches = None if (sha is None or not expected_sha) else (sha == expected_sha)
+    # Three-valued for the same reason as `matches_manifest`: when the manifest
+    # records no model version there is nothing to compare, and "no comparison"
+    # must not serialise as agreement.
+    version_matches = (None if (artifact_version is None or not recorded_model_version)
+                       else artifact_version == recorded_model_version)
     return {
-        "model_version_reported_by_artifact": getattr(model, "version", None),
+        "model_version_reported_by_artifact": artifact_version,
         "model_file": str(path) if path else None,
         "model_file_sha256": sha,
         "dataset_fingerprint": getattr(model, "dataset_fingerprint", None) or None,
         "manifest_release": expected_version,
         "manifest_expected_model_sha256": expected_sha,
         "matches_manifest": matches,
+        # The application and the model are versioned separately and a reader
+        # who sees only one of them will assume they are the same number.
+        "application_version": _app_version,
+        "manifest_recorded_model_version": recorded_model_version,
+        "model_version_matches_manifest": version_matches,
+        "version_note": (
+            f"Application {_app_version} ships a model stamped "
+            f"{artifact_version}. That difference is recorded, not an error: "
+            "the code moved and the estimators did not. See `versions` in "
+            "assets_manifest.json."
+            if artifact_version and artifact_version != _app_version else
+            "Application and model artifact report the same version."),
         "note": (
             "A path names a location, not a set of bytes; the hash above is of "
             "the file that was actually opened. `matches_manifest: false` means "

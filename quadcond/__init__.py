@@ -20,7 +20,7 @@ Three ideas hold the package together:
    can be accompanied by the nearest real measurements.
 """
 
-__version__ = "0.4.9"
+__version__ = "0.5.0"
 
 from .conditions import PRESETS, Condition, condition_distance
 from .motifs import Element, find_g4, find_im, find_im_graph, g4hunter_mean, scan

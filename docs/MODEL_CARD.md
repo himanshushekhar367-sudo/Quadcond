@@ -1,6 +1,8 @@
 # QuadCond model card
 
-*Generated 2026-09-09 by `scripts/03_model_card.py` from `artifacts/quadcond_model.joblib`. Do not edit by hand.*
+> **VERSION NOTE** -- package 0.5.0 ships the model artifact stamped **0.4.6**. The application and the model are versioned separately; see `RELEASE_0.5.0.md` for what that rests on.
+
+*Generated 2026-09-16 by `scripts/03_model_card.py` from `artifacts/quadcond_model.joblib`. Do not edit by hand.*
 
 ## Summary
 
@@ -630,7 +632,7 @@ quadcond report
 
 ```json
 {
-  "version": "0.4.7",
+  "version": "0.4.6",
   "dataset_fingerprint_sha256": "4c5cca5a98e1259452824cc3f5aaad151a11671a4391b99f5abaa67e716d061b",
   "artifact_sha256": "",
   "atlas_snapshot": {

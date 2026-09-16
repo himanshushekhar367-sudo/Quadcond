@@ -289,32 +289,96 @@ def test_screening_separates_four_states_not_two():
 def test_a_motif_destroying_variant_never_falls_off_the_shortlist(tmp_path):
     """A delta-ranked table cannot be the only place a finding appears.
 
-    Motif loss and gain have no delta by construction, so they sort to the
-    bottom of a ranked table and off the end of a shortlist -- which is a
-    retrieval failure, not a formatting one. They get their own categorical
-    list instead, and it is not given an invented number.
+    A motif-losing substitution has no delta by construction, so it sorts to
+    the bottom of a ranked table and off the end of a shortlist -- a retrieval
+    failure, not a formatting one. The categorical list is where it survives.
     """
     src = ag.TableAtlas.from_path(_table(tmp_path, list(_all_snvs(TEL22))))
     res = var.variant_scan(_predictor(), TEL22, CHROM, START,
                            heads=["g4_tm"], atlas_source=src)
     cats = res["structural_candidates"]
-    assert set(cats) == {"motif_lost", "motif_gained", "motif_count_changed"}
+    assert set(cats) == {"motif_lost", "motif_gained", "motif_count_changed",
+                         "motif_gained_other_strand"}
     listed = [e for entries in cats.values() for e in entries]
     for entry in listed:
-        assert "delta" not in entry, "a categorical candidate must carry no delta"
-        assert entry["why_no_delta"]
-        # The regulatory axis is still attached where it exists, so the list is
+        assert entry["why_listed"]
+        assert entry["head"] == "g4_tm"
+        assert entry["units"] == "degC"
+        # The regulatory axis is attached where it exists, so the list is
         # orderable without a structural number.
         assert "regulatory_score" in entry
-    ranked_labels = {r["label"] for r in res["variants"]
-                     if r["combined_rank"] is not None}
-    for entry in listed:
-        assert entry["label"] not in ranked_labels, (
-            "a categorical finding must not also appear in the delta ranking")
-    assert "not as effects of a measured size" in res["candidate_note"]
+
+
+def test_each_candidate_category_states_its_own_delta_honestly(tmp_path):
+    """The shortlist must not tell every category the same story.
+
+    An earlier `why_no_delta` asserted "one side has no motif" for all three
+    categories. That holds only for motif_lost: the delta suppression in
+    scans.py excludes motif_lost and no_motif and nothing else, so gained and
+    count-changed rows DO carry a number while the list said they could not.
+    A reader who trusted the text would have concluded a delta was missing
+    when it was sitting in `variants`.
+    """
+    src = ag.TableAtlas.from_path(_table(tmp_path, list(_all_snvs(TEL22))))
+    res = var.variant_scan(_predictor(), TEL22, CHROM, START,
+                           heads=["g4_tm"], atlas_source=src)
+    cats = res["structural_candidates"]
+    for entry in cats["motif_lost"]:
+        assert entry["delta"] is None and entry["has_delta"] is False
+        assert "no delta is emitted" in entry["why_listed"]
+    for entry in cats["motif_count_changed"]:
+        # Both sides carry the motif, so the claim that one side lacks one is
+        # simply untrue here.
+        assert "Both sides carry" in entry["why_listed"]
+        assert entry["has_delta"] is (entry["delta"] is not None)
+    for entry in cats["motif_gained_other_strand"]:
+        assert entry["delta"] is None
+        assert "did not score" in entry["why_listed"]
+    assert "do not all lack a number" in res["candidate_note"]
 
 
 # --------------------------------------------------------------- provenance
+def test_http_variant_response_retains_condition_record_and_unscored_gain(monkeypatch):
+    """Exercise the production HTTP route using an explicit software fixture."""
+    import json
+    from http.server import ThreadingHTTPServer
+    from threading import Thread
+    from urllib.request import Request, urlopen
+
+    from quadcond import service
+    from test_comparison_contracts import _OTHER_STRAND_WINDOW
+
+    pred = _predictor()
+    monkeypatch.setattr(service, "predictor", lambda: pred)
+    monkeypatch.setattr(service, "_regulatory_source", lambda: ag.NullAtlas())
+    monkeypatch.setattr(service, "_banner", lambda: {
+        "synthetic_model": {"provenance": "synthetic", "note": "software test"}})
+    server = ThreadingHTTPServer(("127.0.0.1", 0), service.Handler)
+    thread = Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        request = Request(
+            f"http://127.0.0.1:{server.server_port}/scan/variant",
+            data=json.dumps({"sequence": _OTHER_STRAND_WINDOW,
+                             "chromosome": "chr22", "start": 1000,
+                             "heads": ["g4_tm"]}).encode(),
+            headers={"Content-Type": "application/json"})
+        with urlopen(request, timeout=30) as response:
+            assert response.status == 200
+            result = json.load(response)
+        assert result["synthetic_model"]["provenance"] == "synthetic"
+        assert result["run_record"]["condition_responsiveness"]["g4_tm"]
+        gains = result["structural_candidates"]["motif_gained_other_strand"]
+        entry = next(e for e in gains if e["mutation"] == "T32C")
+        assert entry["strand"] == "-" and entry["head"] == "g4_tm"
+        assert entry["delta"] is None and entry["has_delta"] is False
+        assert "does not guarantee" in entry["why_listed"]
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
+
+
 def test_every_result_identifies_the_model_file_by_its_contents(tmp_path):
     """`model_artifact_sha256: ""` names a version and nothing else.
 

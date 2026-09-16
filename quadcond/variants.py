@@ -198,6 +198,24 @@ def prescreen(sequence: str, chromosome: str = "", start: int | None = None) -> 
     }
 
 
+_CANDIDATE_REASON = {
+    "motif_lost": (
+        "The substitution removes this head's canonical motif, so the mutant "
+        "side has nothing for the head to be about and no delta is emitted. "
+        "This is a finding, not a gap."),
+    "motif_gained": (
+        "The substitution creates a canonical motif the wild type does not "
+        "carry. A delta may still be emitted, but it differences a value about "
+        "a motif against a value about a sequence that had none, so the "
+        "category is the result and the number is secondary."),
+    "motif_count_changed": (
+        "Both sides carry this head's motif, but not the same number of them. "
+        "A delta IS emitted and is not meaningless -- it simply does not "
+        "describe the same set of elements on each side, which is why the "
+        "variant is listed here as well as ranked."),
+}
+
+
 def variant_scan(
     pred,
     sequence: str,
@@ -332,31 +350,49 @@ def variant_scan(
     # A categorical shortlist, alongside the ranked one and never merged into it.
     #
     # The ranking needs a numeric delta on both axes, so a substitution that
-    # destroys or creates the motif -- which has no delta by construction, and is
-    # often the most interesting thing a scan can find -- lands in
+    # destroys or creates the motif may have no usable delta and land in
     # `unclassified` and disappears off the bottom of a ranked table. That is a
     # retrieval failure with scientific consequences, and the fix is not to
     # invent a number for those rows. It is to list them separately, by
     # category, with their regulatory score attached where one exists.
     categorical: dict[str, list[dict]] = {
-        "motif_lost": [], "motif_gained": [], "motif_count_changed": []}
+        "motif_lost": [], "motif_gained": [], "motif_count_changed": [],
+        "motif_gained_other_strand": []}
+
+    def _entry(row, state, reason, *, delta):
+        return {
+            "label": row["label"],
+            "mutation": row["mutation"],
+            "strand": row["structural"]["strand"],
+            "head": row["structural"]["head"],
+            "units": (inner.get("heads") or {}).get(
+                row["structural"]["head"], {}).get("units"),
+            "motif_state": state,
+            # Carried explicitly. Two of these categories DO produce a number,
+            # and an entry that stays silent about it reads as though none do.
+            "delta": delta,
+            "has_delta": delta is not None,
+            "regulatory_score": (row["regulatory"]["score"]
+                                 if row["regulatory"] else None),
+            "regulatory_rank": (row["regulatory"].get("rank")
+                                if row["regulatory"] else None),
+            "why_listed": reason,
+        }
+
     for row in rows:
         state = row["structural"]["motif_state"]
-        if state in categorical:
-            categorical[state].append({
-                "label": row["label"],
-                "mutation": row["mutation"],
-                "strand": row["structural"]["strand"],
-                "motif_state": state,
-                "regulatory_score": (row["regulatory"]["score"]
-                                     if row["regulatory"] else None),
-                "regulatory_rank": (row["regulatory"].get("rank")
-                                    if row["regulatory"] else None),
-                "why_no_delta": (
-                    "The motif this head is about is absent on one side of the "
-                    "comparison, so there is no pair of values to difference. "
-                    "This is a finding, not a gap."),
-            })
+        delta = row["structural"]["delta"]
+        if state in _CANDIDATE_REASON:
+            categorical[state].append(
+                _entry(row, state, _CANDIDATE_REASON[state], delta=delta))
+        # A gain on the strand this head was not routed to. It has no delta on
+        # this axis by construction -- the head never saw that strand.
+        axis_cell = (row.get("heads") or {}).get(row["structural"]["head"])
+        other = (axis_cell or {}).get("other_strand")
+        if other:
+            categorical["motif_gained_other_strand"].append(
+                _entry(row, "motif_gained_other_strand",
+                       other["note"], delta=None) | {"strand": other["strand"]})
     for entries in categorical.values():
         entries.sort(key=lambda e: -(e["regulatory_rank"] or 0.0))
 
@@ -403,12 +439,19 @@ def variant_scan(
         "structural_candidates": categorical,
         "structural_candidate_counts": {k: len(v) for k, v in categorical.items()},
         "candidate_note": (
-            "Motif loss, gain and count change have no melting-temperature or "
-            "transitional-pH delta by construction -- one side of the "
-            "comparison has no motif for the head to be about. They are listed "
-            "here so that a ranked table built on deltas cannot hide them. "
-            "Read them as categorical structural findings, not as effects of a "
-            "measured size."),
+            "Categorical structural findings, listed so that a table ranked on "
+            "delta magnitude cannot hide them. They do not all lack a number, "
+            "and each entry says which it is. 'motif_lost': the mutant has no "
+            "motif for the head to be about, so no delta is emitted. "
+            "'motif_gained': a delta may be emitted, but it differences a "
+            "value about a motif against a value about a sequence that had "
+            "none. 'motif_count_changed': both sides carry the motif and a "
+            "delta is emitted -- it simply does not describe the same set of "
+            "elements on each side. 'motif_gained_other_strand': the "
+            "substitution builds this head's motif on the strand the head was "
+            "not routed to, which this scan did not score. In every case read "
+            "the category as the result and the number, where there is one, as "
+            "secondary."),
         "quadrant_note": QUADRANT_NOTE,
         "rank_note": RANK_NOTE,
         "delta_note": inner["delta_note"],

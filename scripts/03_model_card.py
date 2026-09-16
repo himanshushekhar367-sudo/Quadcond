@@ -29,6 +29,15 @@ def fmt(v, nd=4):
     return str(v)
 
 
+def _version_of_package() -> str | None:
+    """The package version, for the header's version note."""
+    try:
+        from quadcond import __version__
+        return __version__
+    except Exception:                                       # noqa: BLE001
+        return None
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", default="artifacts/quadcond_model.joblib")
@@ -42,6 +51,16 @@ def main() -> None:
 
     L: list[str] = []
     L.append("# QuadCond model card\n")
+    # Emitted by the generator, not pasted into the output afterwards: this
+    # file says "do not edit by hand", so a note added by hand is a note that
+    # disappears the next time anyone regenerates it.
+    _app = _version_of_package()
+    _model = getattr(m, "version", None)
+    if _model and _app and _model != _app:
+        L.append(f"> **VERSION NOTE** -- package {_app} ships the model "
+                 f"artifact stamped **{_model}**. The application and the "
+                 f"model are versioned separately; see `RELEASE_{_app}.md` "
+                 f"for what that rests on.\n")
     L.append(f"*Generated {when} by `scripts/03_model_card.py` from "
              f"`{a.model}`. Do not edit by hand.*\n")
 

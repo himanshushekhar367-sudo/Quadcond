@@ -439,3 +439,79 @@ def test_the_total_work_of_a_request_is_bounded_not_just_one_axis(monkeypatch):
         scans.batch_predict(pred, [{"id": str(i), "sequence": TEL22}
                                    for i in range(2)],
                             [Condition(), Condition()], heads=["g4_tm"])
+
+
+# ------------------------------------------------- strand coverage of a scan
+# A 40-nt window carrying no G4 on either strand, where the single
+# substitution T32C builds one on the reverse strand alone. Found by
+# enumerating substitutions rather than written by hand, because the point is
+# that such variants exist in ordinary sequence, not that one can be contrived.
+_OTHER_STRAND_WINDOW = "AGTTGCCCGGCGGCCCGTTAACCCGCAGTAATCCGGGAGA"
+
+
+def test_a_motif_gained_on_the_unrouted_strand_is_reported():
+    """Strand routing is fixed by the wild type, so a gain elsewhere was silent.
+
+    `_strand_for_kind` chooses one strand per head from the wild-type sequence.
+    A substitution that builds the head's motif on the *other* strand cannot
+    move that choice, so the routed strand goes on reporting `no_motif` and the
+    variant leaves the scan looking like nothing happened -- while `prescreen`,
+    which checks both strands and every alternate, flags the same window as a
+    possible gain. The two disagreed, and the scan was the one that was wrong.
+    """
+    res = scans.mutation_scan(_predictor(), _OTHER_STRAND_WINDOW,
+                              Condition.preset("physiological"), heads=["g4_tm"])
+    assert res["run_record"]["strand_by_head"]["g4_tm"] == "+"
+
+    flagged = {row["label"]: row["heads"]["g4_tm"]
+               for row in res["substitutions"]
+               if "other_strand" in row["heads"]["g4_tm"]}
+    assert "T32C" in flagged, "the reverse-strand gain must not vanish"
+
+    cell = flagged["T32C"]
+    assert cell["motif"]["state"] == "no_motif"          # on the routed strand
+    assert cell["other_strand"]["strand"] == "-"
+    assert cell["other_strand"]["state"] == "motif_gained"
+    # Reported, never scored: the head was not asked about that strand, and a
+    # number for it would be the strand confusion the routing prevents.
+    assert cell["other_strand"]["scored"] is False
+    assert "did not score" in cell["other_strand"]["note"]
+
+
+# ------------------------------------------- condition response in the record
+def test_every_scan_says_which_condition_knobs_each_head_can_answer():
+    """The viewer's condition block had no backend field to read.
+
+    `condition_responsiveness` was produced only by a runner script written for
+    one comparison, so an ordinary scan response never carried it. Without it
+    a flat response curve is indistinguishable from a head whose training rows
+    never varied that buffer -- and the second is a fact about the data that
+    must not be presented as a measured non-effect.
+    """
+    res = scans.mutation_scan(_predictor(), TEL22,
+                              Condition.preset("physiological"), heads=["g4_tm"])
+    rec = res["run_record"]
+    assert "condition_responsiveness" in rec and rec["condition_note"]
+    assert set(rec["condition_responsiveness"]) == {"g4_tm"}
+    for state in rec["condition_responsiveness"]["g4_tm"].values():
+        assert state in {"varied", "fixed", "predicts", "unknown"}
+
+
+def test_a_head_whose_rows_never_varied_reports_no_varied_knob():
+    """The overclaim this field exists to stop.
+
+    A head trained at a single buffer answers the same number whatever the
+    conditions say. Describing it alongside a genuinely condition-resolved head
+    as 'condition-responsive' is the claim that had to be withdrawn, so the
+    record has to make the difference readable without opening the model.
+    """
+    model = _sentinel_model()
+    head = model.heads["g4_tm"]
+    head.applicability = dict(head.applicability)
+    for field in ("k", "na", "li_nh4", "mg", "ph", "crowder_pct", "strand_conc"):
+        head.applicability[field] = {"min": 100.0, "max": 100.0, "n_unique": 1}
+
+    states = scans.condition_responsiveness(model, ["g4_tm"])["g4_tm"]
+    assert "varied" not in states.values()
+    # Its own target is not an input it could respond to.
+    assert states["temperature"] == "predicts"

@@ -4,6 +4,7 @@ from __future__ import annotations
 import hashlib
 import json
 import sqlite3
+import threading
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Iterable, Sequence
@@ -68,20 +69,52 @@ VALUES (?,?,?,?, ?,?,?,?,?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?,?,?,?,?)
 
 
 class Atlas:
-    """Thin, explicit wrapper over the SQLite store."""
+    """Thin, explicit wrapper over the SQLite store.
+
+    The connection is per-thread, not per-instance. One ``Atlas`` is built once
+    and then read from every request thread of ``ThreadingHTTPServer``, and
+    SQLite refuses a connection used off the thread that created it:
+
+        ProgrammingError: SQLite objects created in a thread can only be used
+        in that same thread.
+
+    With a sentinel model and no atlas nothing ever opened a connection, so the
+    whole test suite and the fixture server passed while every real ``/predict``
+    after the first request returned a 500. A thread-local handle keeps the
+    single-threaded callers (the CLI, the ingest scripts, ``report.py``)
+    unchanged -- ``self.conn`` still reads like an attribute -- while giving
+    each server thread its own.
+    """
 
     def __init__(self, path: str | Path = "data/atlas.db"):
         self.path = Path(path)
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.conn = sqlite3.connect(self.path)
-        self.conn.row_factory = sqlite3.Row
-        self.conn.executescript(DDL)
-        self.conn.execute(
+        self._local = threading.local()
+        conn = self._open()
+        conn.executescript(DDL)
+        conn.execute(
             "INSERT OR REPLACE INTO meta(key,value) VALUES ('schema_version',?)",
             (str(SCHEMA_VERSION),),
         )
-        self.conn.commit()
+        conn.commit()
         self._vec_caches: dict = {}
+
+    def _open(self) -> sqlite3.Connection:
+        conn = sqlite3.connect(self.path)
+        conn.row_factory = sqlite3.Row
+        self._local.conn = conn
+        return conn
+
+    @property
+    def conn(self) -> sqlite3.Connection:
+        """This thread's connection, opened on first use.
+
+        Deliberately not ``check_same_thread=False``: that silences the error
+        without making concurrent use safe, and a shared cursor returning
+        another thread's rows is a far worse failure than a refusal.
+        """
+        conn = getattr(self._local, "conn", None)
+        return conn if conn is not None else self._open()
 
     # ------------------------------------------------------------------ write
     def register_source(
@@ -319,4 +352,17 @@ class Atlas:
         return out[:n]
 
     def close(self):
-        self.conn.close()
+        """Close this thread's connection.
+
+        Only this thread's: connections are per-thread and there is no registry
+        of the others, deliberately. The callers that close are single-threaded
+        (the CLI, the ingest scripts, test teardown), and a server thread's
+        connection is released when that thread ends. A cross-thread close
+        would need a lock and could pull a connection out from under a request
+        mid-query, which is a worse failure than a handle that outlives its
+        usefulness by a few milliseconds.
+        """
+        conn = getattr(self._local, "conn", None)
+        if conn is not None:
+            conn.close()
+            self._local.conn = None

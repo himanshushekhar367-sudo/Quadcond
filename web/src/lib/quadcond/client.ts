@@ -566,16 +566,37 @@ export type VariantRow = {
   heads: Record<string, MutationCell>;
 };
 
-/** A structural finding with no number by construction. Kept off the ranked
- *  table and out of reach of anything that would give it an invented delta. */
+/** A motif event per head and strand. Count changes can retain a numeric delta. */
 export type StructuralCandidate = {
   label: string;
   mutation: string;
   strand: "+" | "-" | null;
-  motif_state: "motif_lost" | "motif_gained" | "motif_count_changed";
+  motif_state:
+    | "motif_lost"
+    | "motif_gained"
+    | "motif_count_changed"
+    /** Built on the strand this head was NOT routed to, and so not scored. */
+    | "motif_gained_other_strand";
+  head?: string;
+  motif_before?: number;
+  motif_after?: number;
+  /**
+   * Present and possibly a number. Only `motif_lost` and the unrouted-strand
+   * gain lack one by construction; `motif_gained` and `motif_count_changed`
+   * are ranked as well as listed. `has_delta` says which, so a reader never
+   * has to infer absence from a missing key.
+   */
+  delta: number | null;
+  has_delta: boolean;
+  delta_paired_sd?: number | null;
+  units?: string;
   regulatory_score: number | null;
   regulatory_rank: number | null;
-  why_no_delta: string;
+  /**
+   * Why this variant is on the list, in this category's own terms. Replaces
+   * `why_no_delta`, which told all three categories the same untrue story.
+   */
+  why_listed: string;
 };
 
 /**

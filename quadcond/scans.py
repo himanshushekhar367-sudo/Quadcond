@@ -204,7 +204,58 @@ def _applicability_state(entry: dict | None) -> dict:
     return {"state": "in_domain", "warnings": ap.get("warnings", [])}
 
 
-def _run_record(pred, **extra) -> dict:
+CONDITION_RESPONSE_NOTE = (
+    "Per head, what the training rows can support for each condition knob. "
+    "'varied' -- the rows span more than one value; this does not demonstrate "
+    "that the fitted model learned an effect. 'fixed' -- the training rows "
+    "share one value or the head uses no condition features; a condition "
+    "response is not supported by this record. 'predicts' -- the knob is this head's target, "
+    "not an input. 'unknown' -- the artifact records no range for it. "
+    "Unknown fields cannot establish either responsiveness or invariance."
+)
+
+#: A head whose target IS a condition variable does not take it as an input.
+_TARGET_CONDITION_FIELD = {"tm": "temperature", "ph_t": "ph"}
+
+
+def condition_responsiveness(model, names) -> dict:
+    """Which condition knobs each head can actually respond to.
+
+    Read off the artifact's own applicability record rather than assumed from
+    the head's name: `im_pht` sounds condition-aware and is not -- every one of
+    its 160 training rows sits at one buffer, so each field reports n_unique 1
+    and the head can only return the same number whatever the conditions say.
+    Describing it alongside `im_pht_condition` as condition-responsive was the
+    overclaim this function exists to stop.
+    """
+    from .conditions import CONDITION_FIELDS
+
+    out: dict[str, dict[str, str]] = {}
+    for name in names:
+        head = getattr(model, "heads", {}).get(name)
+        if head is None:
+            continue
+        target_field = _TARGET_CONDITION_FIELD.get(getattr(head, "target", None))
+        per: dict[str, str] = {}
+        for field in CONDITION_FIELDS:
+            if field == target_field:
+                per[field] = "predicts"
+                continue
+            record = (head.applicability or {}).get(field)
+            n_unique = record.get("n_unique") if isinstance(record, dict) else None
+            if not getattr(head, "use_conditions", True):
+                # No condition features in the model at all: what the rows did
+                # is irrelevant, the knob is not wired to anything.
+                per[field] = "fixed"
+            elif n_unique is None:
+                per[field] = "unknown"
+            else:
+                per[field] = "varied" if n_unique > 1 else "fixed"
+        out[name] = per
+    return out
+
+
+def _run_record(pred, *, heads=None, **extra) -> dict:
     """The identity block every comparison workflow carries.
 
     One function rather than three hand-written dictionaries, because the batch
@@ -227,6 +278,9 @@ def _run_record(pred, **extra) -> dict:
         "prediction_schema_version": PREDICTION_SCHEMA_VERSION,
         "provenance": _prov.run_provenance(pred),
     }
+    if heads:
+        rec["condition_responsiveness"] = condition_responsiveness(model, heads)
+        rec["condition_note"] = CONDITION_RESPONSE_NOTE
     rec.update(extra)
     return rec
 
@@ -368,6 +422,9 @@ def mutation_scan(
             wt_entry = wt_by_strand[strand].get(name)
             mut_entry = mut_by_strand[strand][k].get(name)
             motif = _motif_state(strand_seq, mut_seq, head.kind)
+            other_strand = "-" if strand == "+" else "+"
+            other = _motif_state(strand_sequence[other_strand],
+                                 by_strand[other_strand][k], head.kind)
             cell: dict[str, Any] = {
                 # Which strand this head was asked about. Without it a reader
                 # comparing a G4 row and an i-motif row is comparing two
@@ -379,6 +436,29 @@ def mutation_scan(
                 "wild_type": _applicability_state(wt_entry),
                 "mutant": _applicability_state(mut_entry),
             }
+            # The routing above chose one strand from the wild type. A
+            # substitution that builds this head's motif on the other one
+            # cannot move that choice, so without this the scan reports
+            # "no motif" for a variant the prescreen flagged as a possible
+            # gain. Reported, never scored: the head was not asked about this
+            # strand, and inventing a value for it would be the strand
+            # confusion the routing exists to prevent.
+            if other["state"] == "motif_gained":
+                cell["other_strand"] = {
+                    "strand": other_strand,
+                    "state": "motif_gained",
+                    "before": other["before"],
+                    "after": other["after"],
+                    "scored": False,
+                    "note": ("This substitution creates this head's canonical "
+                             "motif on the " + other_strand + " strand, which "
+                             "this scan did not score: the head was routed to "
+                             "the " + strand + " strand from the wild-type "
+                             "sequence. This is a sequence-pattern candidate, "
+                             "not a structural prediction. Scoring it requires "
+                             "an explicit strand-selection workflow; reversing "
+                             "the input alone does not guarantee that selection."),
+                }
             # A delta is emitted only when both sides carry a value and the head
             # is applicable to both. A mutant whose motif is gone, or whose query
             # the head refused, produces a state and no number -- there is no key
@@ -402,6 +482,7 @@ def mutation_scan(
         # a model version but not the file that produced it.
         "run_record": _run_record(
             pred,
+            heads=sorted(names),
             workflow="mutation_scan",
             heads_requested=sorted(names),
             n_substitutions=len(rows),
@@ -663,6 +744,7 @@ def condition_scan(
         "atlas_fingerprint": getattr(pred.model, "dataset_fingerprint", None) or None,
         "run_record": _run_record(
             pred,
+            heads=sorted(n for n, _ in responsive),
             workflow="condition_scan",
             axis=axis,
             n_points=len(axis_values),
@@ -907,6 +989,7 @@ def batch_predict(
         "scan": "batch",
         "run_record": _run_record(
             pred,
+            heads=sorted(heads) if heads else sorted(pred.model.heads),
             workflow="batch",
             input_mode=parse_mode_used,
             heads_requested=sorted(heads) if heads else "all",

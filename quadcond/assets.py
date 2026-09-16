@@ -63,6 +63,18 @@ class Asset:
     # used only to validate a fresh download.
     checksum_stable: bool = True
     content_fingerprint: str | None = None
+    #: What this artifact stamps inside itself, which is not the release it
+    #: ships in. 0.5.0 of this package ships a model trained under 0.4.6; one
+    #: number for both would have to be wrong about one of them.
+    model_version: str | None = None
+    #: The identity an earlier manifest recorded for this slot, kept on the
+    #: record rather than overwritten. A checksum that is simply replaced
+    #: leaves no trace that it was ever expected, which is exactly the history
+    #: someone auditing a release needs.
+    supersedes: dict | None = None
+    #: How the artifact now recorded was established to be the one the
+    #: documentation describes. Empty is not acceptable for a substituted asset.
+    identity_evidence: str | None = None
 
     @property
     def size_mb(self) -> float:

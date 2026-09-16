@@ -1061,12 +1061,19 @@ def test_condition_scan_measures_whether_the_prediction_actually_moved():
 
     fold = r["series"]["g4_fold"]["observed_response"]
     assert fold["quantity"] == "probability"
-    assert fold["spread"] < 0.01, "this head has no real potassium response"
-    # The verdict word matters. "flat" reads as a measured insensitivity to
-    # potassium, which is a claim nobody made; the comparison behind it is a
-    # response range set beside a marginal residual half-width, which is
-    # descriptive and not a test.
-    assert fold["verdict"] in ("below_error_scale", "unknown_scale")
+    # This assertion used to be `spread < 0.01` -- a flat-but-present response.
+    # It could not run without the model artifact, so it went years without
+    # executing while the summary logic became stricter underneath it. Every
+    # point of a potassium sweep sits at the preset's 37 C, and `g4_fold` was
+    # trained entirely at 25 C, so not one point is in its domain. The summary
+    # is now withheld rather than computed across extrapolated points, which is
+    # the stronger and more honest result: a near-zero spread here would have
+    # been a number about nothing, and it would have read as a measured
+    # insensitivity to potassium -- a claim nobody made.
+    assert fold["verdict"] == "insufficient_supported_points"
+    assert fold["n_supported"] == 0 and fold["n_out_of_domain"] == 5
+    assert "spread" not in fold, (
+        "an entirely out-of-domain series must not be summarised at all")
     assert "no resolvable response" not in fold.get("note", "")
     # Summaries cover the supported part of the range only.
     assert fold["summary_basis"] == "in_domain_points_only"
