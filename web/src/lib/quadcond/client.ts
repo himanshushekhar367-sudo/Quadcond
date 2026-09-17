@@ -549,6 +549,9 @@ export type VariantRow = {
     motif_state: string | null;
     magnitude: number | null;
     rank?: number | null;
+    /** "delta" when ranked on |delta|; "motif_lost" when the substitution destroys
+     *  the motif and is placed structurally high by category (no delta emitted). */
+    basis?: "delta" | "motif_lost" | null;
     applicability?: { state: string; warnings?: string[] } | null;
   };
   /** Null means Atlas has no record for this substitution — which is not a low

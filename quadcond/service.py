@@ -335,6 +335,47 @@ def _regulatory_source():
     return _regulatory
 
 
+_scanner = None
+
+
+def genome_scanner():
+    """The G4-seq-trained window scanner (optional asset), loaded once."""
+    global _scanner
+    with _lock:
+        if _scanner is None:
+            from .genome_scan import G4SeqScanner
+            a = assets.assets().get("g4seq_scanner")
+            if a is None:
+                raise assets.AssetError("no g4seq_scanner asset is recorded in the manifest")
+            _scanner = G4SeqScanner.load(assets.resolve_asset(a))
+    return _scanner
+
+
+GENOME_SCAN_MAX_NT = 20_000
+
+
+def genome_scan_payload(payload: dict) -> dict:
+    """Scan a long sequence with the G4-seq scanner; score the motifs it finds."""
+    seq = str(payload.get("sequence") or "")
+    if len(seq) > GENOME_SCAN_MAX_NT:
+        raise ValueError(f"genome scan is capped at {GENOME_SCAN_MAX_NT} nt per request")
+    sc = genome_scanner()
+    regions = sc.scan(seq, step=int(payload.get("step", 25)),
+                      threshold=float(payload.get("threshold", 0.5)))
+    cond = _condition(payload)
+    pred = predictor()
+    for r in regions:
+        for m in r["motifs"]:
+            p = pred.predict(m["sequence"], cond, heads=["g4_tm", "g4_topology"],
+                             n_neighbours=0)[0]
+            m["predictions"] = p["predictions"]
+    return {"scan": "genome", "scanner": sc.describe(), "condition": cond.to_dict(),
+            "regions": regions,
+            "note": ("Region scores come from the G4-seq-trained scanner (genomic, "
+                     "in vitro, K+). Motif Tm and topology come from the buffer-aware "
+                     "heads under the requested condition.")}
+
+
 def batch_payload(payload: dict) -> dict:
     """Many sequences, many buffers, one run record.
 
@@ -831,7 +872,7 @@ class Handler(BaseHTTPRequestHandler):
         self._send(404, {"error": "unknown endpoint",
                          "endpoints": ["/health", "/info", "/predict", "/evidence",
                                        "/scan/mutations", "/scan/conditions",
-                                       "/scan/variant", "/batch",
+                                       "/scan/variant", "/scan/genome", "/batch",
                                        "/schema/prediction"]})
 
     def do_POST(self):
@@ -856,6 +897,8 @@ class Handler(BaseHTTPRequestHandler):
                 self._send(200, variant_payload(payload))
             elif route == "/batch":
                 self._send(200, batch_payload(payload))
+            elif route == "/scan/genome":
+                self._send(200, genome_scan_payload(payload))
             elif route in ("/evidence", "/ensemble"):
                 # /ensemble is kept as an alias so an older viewer gets the
                 # corrected payload rather than a 404 -- but the response no
@@ -886,7 +929,7 @@ def serve(host: str = "127.0.0.1", port: int = 8765) -> None:
     print(f"  health     http://{shown}:{port}/health")
     print(f"  readiness  http://{shown}:{port}/ready    (503 until the assets verify)")
     print(f"  info       http://{shown}:{port}/info")
-    print("  POST /predict  /scan/mutations  /scan/conditions  /scan/variant  /batch")
+    print("  POST /predict  /scan/mutations  /scan/conditions  /scan/variant  /scan/genome  /batch")
     print("  no accounts, no sessions, no stored requests")
     try:
         srv.serve_forever()

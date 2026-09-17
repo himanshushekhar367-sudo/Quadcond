@@ -1,4 +1,4 @@
-"""Attach an exported score table to the QuadCond 0.4.9 or 0.5.0 AENNA service.
+"""Attach an exported score table to the QuadCond 0.4.9-0.5.1 AENNA service.
 
 This small version-specific adapter uses the service's existing cached source
 slot. It does not modify the installed package or disable its asset checks.
@@ -15,8 +15,8 @@ def main():
     import quadcond
     from quadcond import service
     from quadcond.alphagenome import TableAtlas
-    if quadcond.__version__ not in {'0.4.9', '0.5.0'}:
-        raise RuntimeError('This launcher supports QuadCond 0.4.9 and 0.5.0 only')
+    if quadcond.__version__ not in {'0.4.9', '0.5.0', '0.5.1'}:
+        raise RuntimeError('This launcher supports QuadCond 0.4.9, 0.5.0 and 0.5.1 only')
     source = TableAtlas.from_path(a.table)
     if not source._records:
         raise RuntimeError('The table has no variants')

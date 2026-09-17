@@ -193,7 +193,7 @@ export function MutationExplorer() {
       </header>
 
       {error ? (
-        <p className="mt-3 rounded-[var(--radius-md)] border border-amber-500/40 bg-amber-500/10 p-2 text-xs text-amber-200">
+        <p className="mt-3 rounded-[var(--radius-md)] border border-amber-500/40 bg-amber-500/10 p-2 text-xs text-amber-700">
           {error}
         </p>
       ) : null}

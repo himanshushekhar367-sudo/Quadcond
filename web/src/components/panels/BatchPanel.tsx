@@ -151,7 +151,7 @@ export function BatchPanel() {
       </label>
 
       {error ? (
-        <p className="mt-2 rounded-[var(--radius-md)] border border-amber-500/40 bg-amber-500/10 p-2 text-xs text-amber-200">
+        <p className="mt-2 rounded-[var(--radius-md)] border border-amber-500/40 bg-amber-500/10 p-2 text-xs text-amber-700">
           {error}
         </p>
       ) : null}
@@ -188,7 +188,7 @@ export function BatchPanel() {
                         // from a head that simply was not requested.
                         if (e.refused) {
                           return (
-                            <td key={h} className="py-1 pr-3 text-amber-300" title={String(e.refusal_reason ?? "")}>
+                            <td key={h} className="py-1 pr-3 text-amber-700" title={String(e.refusal_reason ?? "")}>
                               refused
                             </td>
                           );
@@ -198,7 +198,7 @@ export function BatchPanel() {
                         return (
                           <td
                             key={h}
-                            className={`py-1 pr-3 ${ap.in_domain === false ? "text-amber-300" : "text-fg"}`}
+                            className={`py-1 pr-3 ${ap.in_domain === false ? "text-amber-700" : "text-fg"}`}
                             title={
                               ap.in_domain === false
                                 ? `out of domain: ${((ap.warnings as string[]) ?? []).join(" | ")}`
@@ -218,16 +218,16 @@ export function BatchPanel() {
 
           {result.excluded.length ? (
             <div className="mt-3 rounded-[var(--radius-md)] border border-amber-500/40 bg-amber-500/10 p-2">
-              <p className="text-xs font-medium text-amber-200">
+              <p className="text-xs font-medium text-amber-700">
                 {result.excluded.length} input
                 {result.excluded.length === 1 ? "" : "s"} not scored
               </p>
-              <ul className="mt-1 space-y-0.5 text-[0.7rem] text-amber-100/90">
+              <ul className="mt-1 space-y-0.5 text-[0.7rem] text-amber-700/90">
                 {result.excluded.map((e) => (
                   <li key={`${e.record_index ?? e.id}`}>
                     <span className="font-mono">{e.id}</span>
                     {e.record_index !== undefined ? (
-                      <span className="text-amber-100/60"> (record {e.record_index + 1})</span>
+                      <span className="text-amber-700/60"> (record {e.record_index + 1})</span>
                     ) : null}{" "}
                     — {e.reason}
                   </li>
@@ -246,7 +246,7 @@ export function BatchPanel() {
             {result.run_record.n_sequences_excluded ?? result.excluded.length} excluded ·{" "}
             {result.run_record.n_rows} rows
             {result.run_record.duplicate_identifiers?.length ? (
-              <span className="text-amber-300">
+              <span className="text-amber-700">
                 {" "}
                 · {result.run_record.duplicate_identifiers.length} identifier
                 {result.run_record.duplicate_identifiers.length === 1 ? "" : "s"} used

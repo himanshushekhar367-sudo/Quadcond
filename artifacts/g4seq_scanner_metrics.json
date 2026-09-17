@@ -1,0 +1,68 @@
+{
+  "name": "g4seq_scanner",
+  "version": "g4seq-scanner-1",
+  "window": 124,
+  "claim": "P(window resembles an observed G4-seq window, human genomic DNA, K+ buffer). GENOMIC IN-VITRO OBSERVATION: polymerase stalling on purified genomic DNA (G4-seq, GSE110582), not a folding measurement under a chosen buffer. Calibrated at 50 % prevalence; recalibrate to your own background before reading it as an absolute probability.",
+  "target_semantics": "genomic_in_vitro",
+  "biophysically_grounded": false,
+  "metrics": {
+    "internal_chromosome_grouped_cv": {
+      "auroc": 0.9389704059354884,
+      "auprc": 0.9397616068276008
+    },
+    "test_heldout_chr": {
+      "vs_random": {
+        "auroc": 0.9414765677118079,
+        "auprc": 0.9650091985757515,
+        "n_pos": 5996,
+        "n_neg": 3000
+      },
+      "vs_pq": {
+        "auroc": 0.9277423687863982,
+        "auprc": 0.9634691243887579,
+        "n_pos": 5996,
+        "n_neg": 2997
+      },
+      "all": {
+        "auroc": 0.9346129035164681,
+        "brier": 0.09879645518648708,
+        "ece": 0.008639050483889757
+      }
+    },
+    "test_mouse": {
+      "vs_random": {
+        "auroc": 0.928420111111111,
+        "auprc": 0.955294965567972,
+        "n_pos": 6000,
+        "n_neg": 3000
+      },
+      "vs_pq": {
+        "auroc": 0.7744968868134311,
+        "auprc": 0.8480256645512381,
+        "n_pos": 6000,
+        "n_neg": 2998
+      },
+      "all": {
+        "auroc": 0.851484161387129,
+        "brier": 0.16626201547278086,
+        "ece": 0.10016182151404637
+      }
+    }
+  },
+  "training": {
+    "source": "G4-seq K+ (GSE110582) via the G4detector benchmark release",
+    "n_train": 119865,
+    "n_pos": 59988,
+    "negatives": "random genomic windows + canonical-motif windows not observed by G4-seq",
+    "held_out_chromosomes": [
+      "chr2",
+      "chr8",
+      "chr17"
+    ],
+    "cross_species_test": "mouse G4-seq K+",
+    "features": 266,
+    "seeds": 3,
+    "calibration": "isotonic on chromosome-grouped OOF",
+    "seconds": 321.9
+  }
+}

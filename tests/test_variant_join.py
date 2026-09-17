@@ -124,17 +124,33 @@ def test_a_source_that_failed_is_not_a_source_that_found_nothing():
 
 # ------------------------------------------------------------------ quadrants
 def test_the_quadrant_needs_both_coordinates(tmp_path):
-    """A variant that destroys the motif has no delta, so it has no quadrant."""
+    """No delta and no motif loss -> no quadrant. Motif loss -> structurally high."""
     src = ag.TableAtlas.from_path(_table(tmp_path, list(_all_snvs(TEL22))))
     res = var.variant_scan(_predictor(), TEL22, CHROM, START,
                            heads=["g4_tm"], atlas_source=src)
     for row in res["variants"]:
-        if row["structural"]["magnitude"] is None:
+        if row["structural"]["motif_state"] == "motif_lost":
+            assert row["structural"]["delta"] is None
+            assert row["structural"]["basis"] == "motif_lost"
+            assert row["structural"]["rank"] == 1.0
+            assert row["quadrant"] in {"both", "structural_only"}
+        elif row["structural"]["magnitude"] is None:
             assert row["quadrant"] == "unclassified"
         else:
             assert row["quadrant"] in {"both", "structural_only",
                                        "regulatory_only", "neither"}
     assert sum(res["quadrant_counts"].values()) == len(res["variants"])
+
+
+def test_motif_loss_is_ranked_structurally_high(tmp_path):
+    """G-tract-destroying substitutions must not sink to the bottom of the table."""
+    src = ag.TableAtlas.from_path(_table(tmp_path, list(_all_snvs(TEL22))))
+    res = var.variant_scan(_predictor(), TEL22, CHROM, START,
+                           heads=["g4_tm"], atlas_source=src)
+    lost = [r for r in res["variants"] if r["structural"]["motif_state"] == "motif_lost"]
+    assert lost, "a telomeric G4 has G-tract-breaking substitutions"
+    assert all(r["combined_rank"] is not None for r in lost)
+    assert res["structural_candidate_counts"]["motif_lost"] == len(lost)
 
 
 def test_the_combined_rank_requires_both_axes(tmp_path):

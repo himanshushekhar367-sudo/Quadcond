@@ -25,13 +25,14 @@ import { MutationExplorer } from "./MutationExplorer";
 import { VariantPanel } from "./VariantPanel";
 import { ConditionResponse } from "./ConditionResponse";
 import { BatchPanel } from "./BatchPanel";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const SEMANTICS_TONE: Record<string, string> = {
-  biophysical: "text-emerald-300",
-  genomic_proxy: "text-amber-300",
+  biophysical: "text-emerald-700",
+  genomic_proxy: "text-amber-700",
   derived: "text-fg-muted",
   predicted: "text-fg-muted",
-  synthetic: "text-red-300",
+  synthetic: "text-red-700",
 };
 
 /**
@@ -135,23 +136,37 @@ export function Workbench() {
           className="rounded-[var(--radius-md)] border border-red-500/50 bg-red-500/10 p-3"
           data-testid="synthetic-banner"
         >
-          <p className="text-xs font-semibold text-red-200">
+          <p className="text-xs font-semibold text-red-700">
             {meta.synthetic_model.warning}
           </p>
-          <p className="mt-1 text-[0.7rem] text-red-100/80">{meta.synthetic_model.note}</p>
+          <p className="mt-1 text-[0.7rem] text-red-700/80">{meta.synthetic_model.note}</p>
         </div>
       ) : null}
 
-      <MutationExplorer />
-      <VariantPanel />
-      <ConditionResponse />
-      <BatchPanel />
+      <div className="px-1 pt-1 pb-2">
+        <p className="text-xs font-medium text-accent">EXPLORATION TOOLS</p>
+        <h2 className="mt-1 text-xl font-semibold text-fg">What would you like to compare?</h2>
+        <p className="mt-1 text-sm text-fg-muted">Choose a workflow. Each uses the sequence and buffer you set.</p>
+      </div>
+      <Tabs defaultValue="variants" className="min-w-0">
+        <TabsList aria-label="Comparison workflows" className="mb-4 flex h-auto flex-wrap justify-start gap-1 bg-surface-2 p-1.5">
+          <TabsTrigger value="variants">Variant join</TabsTrigger>
+          <TabsTrigger value="mutations">Mutations</TabsTrigger>
+          <TabsTrigger value="conditions">Conditions</TabsTrigger>
+          <TabsTrigger value="batch">Batch</TabsTrigger>
+          <TabsTrigger value="models">Model guide</TabsTrigger>
+        </TabsList>
+        <TabsContent forceMount value="variants" className="data-[state=inactive]:hidden"><VariantPanel /></TabsContent>
+        <TabsContent forceMount value="mutations" className="data-[state=inactive]:hidden"><MutationExplorer /></TabsContent>
+        <TabsContent forceMount value="conditions" className="data-[state=inactive]:hidden"><ConditionResponse /></TabsContent>
+        <TabsContent forceMount value="batch" className="data-[state=inactive]:hidden"><BatchPanel /></TabsContent>
+        <TabsContent forceMount value="models" className="data-[state=inactive]:hidden">
 
       <section className="rounded-[var(--radius-lg)] border border-border bg-surface p-4">
         <header>
           <h3 className="flex items-center gap-2 text-sm font-medium text-fg">
             <Info className="h-4 w-4" aria-hidden />
-            Heads
+            Model guide
           </h3>
           <p className="text-xs text-fg-subtle">{meta.headline}</p>
         </header>
@@ -210,6 +225,8 @@ export function Workbench() {
           </span>
         </p>
       </section>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

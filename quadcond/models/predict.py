@@ -27,6 +27,10 @@ from ..thermo import (DEFAULT_DH_G4, DEFAULT_HILL_IM, folded_fraction_ph,
 from .base import MultiTaskModel
 
 
+#: Binary folding heads whose output on long genomic windows is refused.
+GENOMIC_WINDOW_REFUSED = frozenset({"g4_fold", "g4_fold_genomic", "im_fold", "im_fold_genomic"})
+
+
 def _motif_gate(head, seq: str) -> list[str]:
     """Warn when a head is being asked about a sequence class it never saw.
 
@@ -181,6 +185,23 @@ def _domain_check(head, condition: Condition, seq: str) -> dict:
             f"conditions, not how sequence affects the response, and it returns "
             f"essentially the same value whatever sequence it is given. There is "
             f"no prediction to report, not an uncertain one."
+        )
+        issues.append(refused)
+    # Folding classifiers on genomic-length windows: refused, not extrapolated.
+    # These heads were trained on oligos (and, for the genomic-proxy pair, on
+    # short motifs cut from peaks). On 124-nt human G4-seq windows g4_fold scored
+    # AUROC 0.29-0.69 -- at or below chance against motif-matching windows that
+    # G4-seq did not observe (benchmarks/published_tools). A flagged number that
+    # is worse than chance is not a number to hand out; the genomic question has
+    # its own model trained on G4-seq.
+    if (refused is None and head.name in GENOMIC_WINDOW_REFUSED
+            and lr and len(cleaned) > lr["max"]):
+        refused = (
+            f"a {len(cleaned)}-nt window is longer than any sequence this "
+            f"folding head was trained on (max {lr['max']:g} nt), and on "
+            f"genomic windows it performs at or below chance. Use "
+            f"`quadcond genome-scan` (trained on G4-seq, K+) to find G4 windows, "
+            f"then score the motifs it reports with g4_tm / g4_topology."
         )
         issues.append(refused)
     return {

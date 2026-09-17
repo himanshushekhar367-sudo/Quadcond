@@ -1,0 +1,139 @@
+task,tool,metric,value,ci_low,ci_high,n,note
+G4 folding vs dinucleotide shuffles,QuadCond g4_fold (grouped OOF),AUROC,0.9566,0.9487,0.963,5214,
+G4 folding vs dinucleotide shuffles,QuadCond g4_fold (grouped OOF),AUPRC,0.9309,0.9165,0.9431,5214,
+G4 folding vs dinucleotide shuffles,G4Hunter (whole-seq mean),AUROC,0.3944,0.3677,0.4211,5214,
+G4 folding vs dinucleotide shuffles,G4Hunter (whole-seq mean),AUPRC,0.3101,0.2856,0.3436,5214,
+G4 folding vs dinucleotide shuffles,G4Hunter (max 25-nt window),AUROC,0.3841,0.3572,0.4104,5214,
+G4 folding vs dinucleotide shuffles,G4Hunter (max 25-nt window),AUPRC,0.3039,0.2788,0.3318,5214,
+G4 folding vs dinucleotide shuffles,pqsfinder,AUROC,0.6633,0.6336,0.6897,5214,
+G4 folding vs dinucleotide shuffles,pqsfinder,AUPRC,0.515,0.471,0.5589,5214,
+G4 folding vs dinucleotide shuffles,QGRS Mapper G-score,AUROC,0.7515,0.7243,0.7768,5214,
+G4 folding vs dinucleotide shuffles,QGRS Mapper G-score,AUPRC,0.6531,0.6004,0.7087,5214,
+G4 folding vs dinucleotide shuffles,G4Catchall,AUROC,0.6864,0.6632,0.7094,5214,
+G4 folding vs dinucleotide shuffles,G4Catchall,AUPRC,0.4486,0.4137,0.4892,5214,
+G4 folding vs dinucleotide shuffles,G4Catchall (+G2),AUROC,0.6058,0.5845,0.6275,5214,
+G4 folding vs dinucleotide shuffles,G4Catchall (+G2),AUPRC,0.3768,0.3473,0.4077,5214,
+G4 folding vs dinucleotide shuffles,G4Boost (default motif search),AUROC,0.3283,0.3044,0.3489,5214,
+G4 folding vs dinucleotide shuffles,G4Boost (default motif search),AUPRC,0.2766,0.2544,0.3013,5214,
+G4 folding vs dinucleotide shuffles,G4Boost (canonical G3 motifs),AUROC,0.6439,0.6247,0.6648,5214,
+G4 folding vs dinucleotide shuffles,G4Boost (canonical G3 motifs),AUPRC,0.4821,0.4442,0.5247,5214,
+G4 folding vs dinucleotide shuffles,DeepG4,AUROC,0.5444,0.5202,0.5682,5214,
+G4 folding vs dinucleotide shuffles,DeepG4,AUPRC,0.3879,0.355,0.4288,5214,
+G4 folding vs dinucleotide shuffles,"G4detector (K, PQ-neg model)",AUROC,0.3702,0.3439,0.3945,5214,
+G4 folding vs dinucleotide shuffles,"G4detector (K, PQ-neg model)",AUPRC,0.2883,0.265,0.3148,5214,
+G4 folding vs dinucleotide shuffles,"G4detector (K, random-neg model)",AUROC,0.4065,0.3749,0.4351,5214,
+G4 folding vs dinucleotide shuffles,"G4detector (K, random-neg model)",AUPRC,0.3008,0.2747,0.3295,5214,
+G4 folding vs dinucleotide shuffles,"G4detector (K, dishuffle model)",AUROC,0.6577,0.636,0.6817,5214,
+G4 folding vs dinucleotide shuffles,"G4detector (K, dishuffle model)",AUPRC,0.4784,0.4399,0.5149,5214,
+G4 folding vs dinucleotide shuffles,G4mismatch (K),AUROC,0.5265,0.4967,0.5568,5214,
+G4 folding vs dinucleotide shuffles,G4mismatch (K),AUPRC,0.3922,0.3525,0.4298,5214,
+G4 folding vs dinucleotide shuffles,Canonical G3+ regex count,AUROC,0.6992,0.6798,0.7183,5214,
+G4 folding vs dinucleotide shuffles,Canonical G3+ regex count,AUPRC,0.5385,0.4974,0.5846,5214,
+G4 folding vs dinucleotide shuffles,GC content,AUROC,0.5106,0.4825,0.5387,5214,
+G4 folding vs dinucleotide shuffles,GC content,AUPRC,0.3764,0.3448,0.4139,5214,
+G4-seq K+ (human) positives vs PQS-matched unobserved negatives,QuadCond g4_fold (whole window),AUROC,0.2886,0.2755,0.3008,6002,
+G4-seq K+ (human) positives vs PQS-matched unobserved negatives,"QuadCond g4_fold (motif scan, max)",AUROC,0.4761,0.4636,0.4886,6002,
+G4-seq K+ (human) positives vs PQS-matched unobserved negatives,QuadCond g4_fold_genomic (whole window),AUROC,0.3905,0.3752,0.4038,6002,
+G4-seq K+ (human) positives vs PQS-matched unobserved negatives,G4Hunter (whole-seq mean),AUROC,0.6023,0.5874,0.617,6002,
+G4-seq K+ (human) positives vs PQS-matched unobserved negatives,G4Hunter (max 25-nt window),AUROC,0.6845,0.6709,0.6973,6002,
+G4-seq K+ (human) positives vs PQS-matched unobserved negatives,pqsfinder,AUROC,0.5396,0.5252,0.5556,6002,
+G4-seq K+ (human) positives vs PQS-matched unobserved negatives,QGRS Mapper G-score,AUROC,0.5086,0.4934,0.523,6002,
+G4-seq K+ (human) positives vs PQS-matched unobserved negatives,G4Catchall,AUROC,0.6024,0.5879,0.6175,6002,
+G4-seq K+ (human) positives vs PQS-matched unobserved negatives,G4Catchall (+G2),AUROC,0.6527,0.6378,0.667,6002,
+G4-seq K+ (human) positives vs PQS-matched unobserved negatives,G4Boost (default motif search),AUROC,0.5003,0.4877,0.5148,6002,
+G4-seq K+ (human) positives vs PQS-matched unobserved negatives,G4Boost (canonical G3 motifs),AUROC,0.5264,0.5142,0.5399,6002,
+G4-seq K+ (human) positives vs PQS-matched unobserved negatives,DeepG4,AUROC,0.5458,0.5319,0.5616,6002,
+G4-seq K+ (human) positives vs PQS-matched unobserved negatives,"G4detector (K, PQ-neg model)",AUROC,0.9252,0.918,0.9313,6002,trained on this benchmark (G4detector held-out split unknown)
+G4-seq K+ (human) positives vs PQS-matched unobserved negatives,"G4detector (K, random-neg model)",AUROC,0.8231,0.8123,0.8331,6002,trained on this benchmark (G4detector held-out split unknown)
+G4-seq K+ (human) positives vs PQS-matched unobserved negatives,"G4detector (K, dishuffle model)",AUROC,0.7736,0.7629,0.7858,6002,trained on this benchmark (G4detector held-out split unknown)
+G4-seq K+ (human) positives vs PQS-matched unobserved negatives,G4mismatch (K),AUROC,0.8541,0.8442,0.8637,6002,
+G4-seq K+ (human) positives vs PQS-matched unobserved negatives,Canonical G3+ regex count,AUROC,0.5272,0.5142,0.5386,6002,
+G4-seq K+ (human) positives vs PQS-matched unobserved negatives,GC content,AUROC,0.3816,0.3674,0.3949,6002,
+G4-seq K+ (human) positives vs random genomic negatives,QuadCond g4_fold (whole window),AUROC,0.6568,0.6442,0.6703,5793,
+G4-seq K+ (human) positives vs random genomic negatives,"QuadCond g4_fold (motif scan, max)",AUROC,0.687,0.679,0.6964,5793,
+G4-seq K+ (human) positives vs random genomic negatives,QuadCond g4_fold_genomic (whole window),AUROC,0.6071,0.5924,0.6226,5793,
+G4-seq K+ (human) positives vs random genomic negatives,G4Hunter (whole-seq mean),AUROC,0.9224,0.9145,0.9304,5793,
+G4-seq K+ (human) positives vs random genomic negatives,G4Hunter (max 25-nt window),AUROC,0.966,0.9613,0.9703,5793,
+G4-seq K+ (human) positives vs random genomic negatives,pqsfinder,AUROC,0.9446,0.938,0.9509,5793,
+G4-seq K+ (human) positives vs random genomic negatives,QGRS Mapper G-score,AUROC,0.9457,0.9404,0.9515,5793,
+G4-seq K+ (human) positives vs random genomic negatives,G4Catchall,AUROC,0.8582,0.8495,0.867,5793,
+G4-seq K+ (human) positives vs random genomic negatives,G4Catchall (+G2),AUROC,0.8851,0.877,0.8929,5793,
+G4-seq K+ (human) positives vs random genomic negatives,G4Boost (default motif search),AUROC,0.52,0.5032,0.5367,5793,
+G4-seq K+ (human) positives vs random genomic negatives,G4Boost (canonical G3 motifs),AUROC,0.6728,0.6642,0.6821,5793,
+G4-seq K+ (human) positives vs random genomic negatives,DeepG4,AUROC,0.7366,0.7225,0.7481,5793,
+G4-seq K+ (human) positives vs random genomic negatives,"G4detector (K, PQ-neg model)",AUROC,0.4139,0.3989,0.4278,5793,trained on this benchmark (G4detector held-out split unknown)
+G4-seq K+ (human) positives vs random genomic negatives,"G4detector (K, random-neg model)",AUROC,0.9752,0.9714,0.98,5793,trained on this benchmark (G4detector held-out split unknown)
+G4-seq K+ (human) positives vs random genomic negatives,"G4detector (K, dishuffle model)",AUROC,0.854,0.8442,0.8641,5793,trained on this benchmark (G4detector held-out split unknown)
+G4-seq K+ (human) positives vs random genomic negatives,G4mismatch (K),AUROC,0.9724,0.9678,0.9769,5793,
+G4-seq K+ (human) positives vs random genomic negatives,Canonical G3+ regex count,AUROC,0.6885,0.6796,0.6969,5793,
+G4-seq K+ (human) positives vs random genomic negatives,GC content,AUROC,0.8075,0.797,0.8178,5793,
+"G4 topology (K+, 3-class)",QuadCond g4_topology (grouped OOF),balanced accuracy,0.7227,0.6514,0.7736,1005,
+"G4 topology (K+, 3-class)",Majority class baseline,balanced accuracy,0.3333,0.3333,0.3333,1005,
+"G4 topology (K+, 3-class)",G4ShapePredictor LightGBM (pretrained),balanced accuracy,1.0,1.0,1.0,1005,"released model; trained on this same dataset (in-sample, optimistic)"
+"G4 topology (K+, 3-class)",G4ShapePredictor LightGBM (grouped),balanced accuracy,0.6723,0.6277,0.6999,1005,same estimator + hyper-parameters retrained on QuadCond grouped folds
+"G4 topology (K+, 3-class)",G4ShapePredictor CatBoost (pretrained),balanced accuracy,0.9954,0.9913,1.0,1005,"released model; trained on this same dataset (in-sample, optimistic)"
+"G4 topology (K+, 3-class)",G4ShapePredictor CatBoost (grouped),balanced accuracy,0.6618,0.6044,0.701,1005,same estimator + hyper-parameters retrained on QuadCond grouped folds
+"G4 topology (K+, 3-class)",G4ShapePredictor XGB (pretrained),balanced accuracy,0.9781,0.9695,0.991,1005,"released model; trained on this same dataset (in-sample, optimistic)"
+G4 melting temperature (buffer-resolved),QuadCond g4_tm (grouped OOF),R2,0.6724,0.6055,0.7286,2274,
+G4 melting temperature (buffer-resolved),QuadCond g4_tm (grouped OOF),MAE (°C),5.5595,4.9835,6.2312,2274,
+G4 melting temperature (buffer-resolved),QuadCond g4_tm (grouped OOF),Spearman,0.8185,0.7775,0.8594,2274,
+G4 melting temperature (buffer-resolved),QuadCond g4_tm sequence-only (grouped OOF),R2,0.2563,0.1562,0.344,2274,
+G4 melting temperature (buffer-resolved),QuadCond g4_tm sequence-only (grouped OOF),MAE (°C),9.1822,8.4283,10.1931,2274,
+G4 melting temperature (buffer-resolved),QuadCond g4_tm sequence-only (grouped OOF),Spearman,0.4954,0.4153,0.5772,2274,
+G4 melting temperature (buffer-resolved),G4STAB released ensemble,R2,0.8353,0.786,0.8731,2274,"trained on this same dataset (in-sample, optimistic)"
+G4 melting temperature (buffer-resolved),G4STAB released ensemble,MAE (°C),3.2894,2.9343,3.6203,2274,"trained on this same dataset (in-sample, optimistic)"
+G4 melting temperature (buffer-resolved),G4STAB released ensemble,Spearman,0.924,0.9026,0.9415,2274,"trained on this same dataset (in-sample, optimistic)"
+G4 melting temperature (buffer-resolved),G4STAB architecture retrained (grouped 5-fold),R2,0.4775,0.39,0.5577,2274,
+G4 melting temperature (buffer-resolved),G4STAB architecture retrained (grouped 5-fold),MAE (°C),7.4227,6.5145,8.216,2274,
+G4 melting temperature (buffer-resolved),G4STAB architecture retrained (grouped 5-fold),Spearman,0.7024,0.651,0.7549,2274,
+G4 melting temperature (buffer-resolved),"QuadCond g4_tm (random 5-fold, for comparison with published G4STAB protocol)",R2,0.8259,0.7812,0.8582,2274,
+G4 melting temperature (buffer-resolved),"QuadCond g4_tm (random 5-fold, for comparison with published G4STAB protocol)",MAE (°C),3.7569,3.415,4.1232,2274,
+G4 melting temperature (buffer-resolved),"QuadCond g4_tm (random 5-fold, for comparison with published G4STAB protocol)",Spearman,0.9046,0.8795,0.9268,2274,
+G4 melting temperature (buffer-resolved),G4Hunter (whole-seq mean),Spearman,0.3403,0.2491,0.4343,2274,buffer-blind score
+G4 melting temperature (buffer-resolved),pqsfinder,Spearman,0.3001,0.2214,0.3917,2274,buffer-blind score
+G4 melting temperature (buffer-resolved),QGRS Mapper G-score,Spearman,0.197,0.0945,0.3131,2274,buffer-blind score
+G4 melting temperature (buffer-resolved),G4Boost (−predicted MFE),Spearman,-0.0058,-0.0946,0.0891,2274,buffer-blind score
+G4 melting temperature (buffer-resolved),G4Boost G3 (−predicted MFE),Spearman,0.1479,0.0632,0.2352,2274,buffer-blind score
+G4 melting temperature (buffer-resolved),G4mismatch (K),Spearman,0.3931,0.3215,0.4619,2274,buffer-blind score
+G4 melting temperature (buffer-resolved),DeepG4,Spearman,0.1061,0.0193,0.1963,2274,buffer-blind score
+Within-sequence buffer response of G4 Tm,QuadCond g4_tm (grouped OOF),median per-sequence Spearman,0.8963,0.8,0.9487,128,
+Within-sequence buffer response of G4 Tm,QuadCond g4_tm (grouped OOF),R2 of centred Tm (buffer effect only),0.7486,,,956,
+Within-sequence buffer response of G4 Tm,QuadCond g4_tm sequence-only (grouped OOF),median per-sequence Spearman,0.0,0.0,0.0,128,no buffer input: cannot respond
+Within-sequence buffer response of G4 Tm,QuadCond g4_tm sequence-only (grouped OOF),R2 of centred Tm (buffer effect only),0.0,,,956,no buffer input: cannot respond
+Within-sequence buffer response of G4 Tm,G4STAB released ensemble,median per-sequence Spearman,0.9019,0.8572,0.9487,128,in-sample
+Within-sequence buffer response of G4 Tm,G4STAB released ensemble,R2 of centred Tm (buffer effect only),0.7744,,,956,in-sample
+Within-sequence buffer response of G4 Tm,G4STAB architecture retrained (grouped 5-fold),median per-sequence Spearman,0.8,0.8,0.8571,128,
+Within-sequence buffer response of G4 Tm,G4STAB architecture retrained (grouped 5-fold),R2 of centred Tm (buffer effect only),0.47,,,956,
+Within-sequence buffer response of G4 Tm,"Any buffer-blind tool (G4Hunter, pqsfinder, QGRS, G4Catchall, G4Boost, DeepG4, G4detector, G4mismatch)",median per-sequence Spearman,0.0,0.0,0.0,128,constant across buffers by construction
+Within-sequence buffer response of G4 Tm,"Any buffer-blind tool (G4Hunter, pqsfinder, QGRS, G4Catchall, G4Boost, DeepG4, G4detector, G4mismatch)",R2 of centred Tm (buffer effect only),0.0,,,956,constant across buffers by construction
+"Single-substitution effect on G4 Tm (ΔTm, same buffer)",QuadCond g4_tm (Δ of grouped OOF predictions),Spearman,0.537,0.4609,0.6136,1020,
+"Single-substitution effect on G4 Tm (ΔTm, same buffer)",QuadCond g4_tm (Δ of grouped OOF predictions),sign accuracy |ΔTm|≥2°C,0.8087,0.7635,0.8479,1020,
+"Single-substitution effect on G4 Tm (ΔTm, same buffer)",G4STAB released ensemble (Δ),Spearman,0.8287,0.7781,0.8733,1020,in-sample
+"Single-substitution effect on G4 Tm (ΔTm, same buffer)",G4STAB released ensemble (Δ),sign accuracy |ΔTm|≥2°C,0.9279,0.8925,0.9579,1020,in-sample
+"Single-substitution effect on G4 Tm (ΔTm, same buffer)","G4STAB architecture retrained, grouped (Δ)",Spearman,0.3305,0.2067,0.4352,1020,
+"Single-substitution effect on G4 Tm (ΔTm, same buffer)","G4STAB architecture retrained, grouped (Δ)",sign accuracy |ΔTm|≥2°C,0.6963,0.6211,0.7656,1020,
+"Single-substitution effect on G4 Tm (ΔTm, same buffer)",ΔG4Hunter (G4SNVHunter core score),Spearman,0.028,-0.0733,0.1543,1020,buffer-blind
+"Single-substitution effect on G4 Tm (ΔTm, same buffer)",ΔG4Hunter (G4SNVHunter core score),sign accuracy |ΔTm|≥2°C,0.4899,0.4421,0.5448,1020,buffer-blind
+"Single-substitution effect on G4 Tm (ΔTm, same buffer)",Δpqsfinder,Spearman,0.4059,0.3338,0.4781,1020,buffer-blind
+"Single-substitution effect on G4 Tm (ΔTm, same buffer)",Δpqsfinder,sign accuracy |ΔTm|≥2°C,0.5562,0.537,0.579,1020,buffer-blind
+"Single-substitution effect on G4 Tm (ΔTm, same buffer)",ΔQGRS G-score,Spearman,0.3777,0.3041,0.44,1020,buffer-blind
+"Single-substitution effect on G4 Tm (ΔTm, same buffer)",ΔQGRS G-score,sign accuracy |ΔTm|≥2°C,0.5478,0.5324,0.5691,1020,buffer-blind
+"Single-substitution effect on G4 Tm (ΔTm, same buffer)",ΔG4mismatch,Spearman,0.336,0.2105,0.4583,1020,buffer-blind
+"Single-substitution effect on G4 Tm (ΔTm, same buffer)",ΔG4mismatch,sign accuracy |ΔTm|≥2°C,0.6544,0.5726,0.7237,1020,buffer-blind
+"Single-substitution effect on G4 Tm (ΔTm, same buffer)",ΔDeepG4,Spearman,0.315,0.219,0.4098,1020,buffer-blind
+"Single-substitution effect on G4 Tm (ΔTm, same buffer)",ΔDeepG4,sign accuracy |ΔTm|≥2°C,0.7685,0.7095,0.8144,1020,buffer-blind
+"Single-substitution effect on G4 Tm (ΔTm, same buffer)",G4SNVHunter G4VarImpact (ΔG4Hunter window score),Spearman,0.0357,-0.0702,0.1575,1020,buffer-blind; package run
+"Single-substitution effect on G4 Tm (ΔTm, same buffer)",G4SNVHunter G4VarImpact (ΔG4Hunter window score),sign accuracy |ΔTm|≥2°C,0.4832,0.4338,0.5481,1020,buffer-blind; package run
+i-motif folding vs dinucleotide shuffles,QuadCond im_fold (grouped OOF),AUROC,0.8505,0.7939,0.9007,304,
+i-motif folding vs dinucleotide shuffles,iM-Seeker (folding probability),AUROC,0.6196,0.5546,0.7073,304,iM-Seeker returns no call when no C3+ motif is found; scored 0
+i-motif folding vs dinucleotide shuffles,G4Hunter on C-strand (−min window),AUROC,0.5003,0.4326,0.5892,304,
+i-motif folding vs dinucleotide shuffles,Canonical C3+ i-motif regex count,AUROC,0.6179,0.5472,0.721,304,
+i-motif folding vs dinucleotide shuffles,GC content,AUROC,0.4978,0.4399,0.5698,304,
+i-motif transitional pH (pH_T),QuadCond im_pht (grouped OOF),R2,0.5854,0.3546,0.725,160,
+i-motif transitional pH (pH_T),QuadCond im_pht (grouped OOF),Spearman,0.7863,0.6585,0.8571,160,
+i-motif transitional pH (pH_T),iM-Seeker folding strength,Spearman,0.966,0.9305,0.9841,137,trained on these pH_T values (in-sample); min-max scaled so R2 not comparable
+i-motif transitional pH (pH_T),iM-Seeker architecture retrained (grouped folds),Spearman,0.4651,0.1922,0.7019,137,137/160 sequences with an iM-Seeker motif call
+i-motif transitional pH (pH_T),iM-Seeker architecture retrained (grouped folds),R2,0.2526,-0.0963,0.5265,137,137/160
+i-motif transitional pH (pH_T),QuadCond im_pht on the same 137 sequences,Spearman,0.7297,0.559,0.8215,137,
+i-motif transitional pH (pH_T),QuadCond im_pht on the same 137 sequences,R2,0.4844,0.2069,0.6588,137,
+i-motif transitional pH (pH_T),G4Hunter on C-strand (−min window),Spearman,0.52,0.2431,0.6877,160,

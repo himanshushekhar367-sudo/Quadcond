@@ -56,15 +56,15 @@ const AXES: { id: string; label: string; min: number; max: number; unit: string 
 ];
 
 const VERDICT_TONE: Record<string, string> = {
-  responds: "text-emerald-300",
+  responds: "text-emerald-700",
   // `flat` is retired. It read as a measured insensitivity to the axis, which
   // is a claim nobody made: what was computed is a response range beside a
   // marginal residual half-width.
-  below_error_scale: "text-amber-300",
+  below_error_scale: "text-amber-700",
   unknown_scale: "text-fg-muted",
-  refused_throughout: "text-amber-300",
+  refused_throughout: "text-amber-700",
   insufficient_points: "text-fg-muted",
-  insufficient_supported_points: "text-amber-300",
+  insufficient_supported_points: "text-amber-700",
 };
 
 const VERDICT_LABEL: Record<string, string> = {
@@ -341,7 +341,7 @@ export function ConditionResponse() {
       </div>
 
       {error ? (
-        <p className="mt-3 rounded-[var(--radius-md)] border border-amber-500/40 bg-amber-500/10 p-2 text-xs text-amber-200">
+        <p className="mt-3 rounded-[var(--radius-md)] border border-amber-500/40 bg-amber-500/10 p-2 text-xs text-amber-700">
           {error}
         </p>
       ) : null}
@@ -425,7 +425,7 @@ export function ConditionResponse() {
                     "No response summary for this head."}
                 </p>
                 {series.observed_response.n_out_of_domain ? (
-                  <p className="mt-1 text-[0.65rem] text-amber-300/90">
+                  <p className="mt-1 text-[0.65rem] text-amber-700/90">
                     {series.observed_response.n_out_of_domain} of{" "}
                     {series.observed_response.n_points} points are outside this
                     head&rsquo;s domain and are not in the summary above.

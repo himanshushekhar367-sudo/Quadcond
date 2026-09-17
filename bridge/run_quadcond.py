@@ -56,8 +56,8 @@ def load_quadcond(root):
             raise ValueError(f'Not a QuadCond source directory: {root}')
         sys.path.insert(0, str(root))
     import quadcond
-    if quadcond.__version__ not in {'0.4.9', '0.5.0'}:
-        raise ValueError(f'Expected QuadCond 0.4.9 or 0.5.0, found {quadcond.__version__}')
+    if quadcond.__version__ not in {'0.4.9', '0.5.0', '0.5.1'}:
+        raise ValueError(f'Expected QuadCond 0.4.9, 0.5.0 or 0.5.1, found {quadcond.__version__}')
     from quadcond import assets, variants
     return assets, variants
 

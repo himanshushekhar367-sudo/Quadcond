@@ -41,20 +41,22 @@ function ConditionRow({
   hint?: string;
 }) {
   return (
-    <div className="space-y-3 p-3 rounded-xl bg-black/20 border border-white/5 hover:border-accent/30 hover:bg-black/40 transition-all duration-300 group">
+    <div className="space-y-3 p-3 rounded-xl bg-surface border border-border group">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-fg-muted group-hover:text-accent transition-colors">
-          <Icon className="w-4 h-4 drop-shadow-md" />
-          <span className="text-xs font-semibold uppercase tracking-wider">{label}</span>
+          <Icon className="w-4 h-4 " />
+          <span className="text-xs font-medium">{label}</span>
         </div>
-        <div className="px-2 py-0.5 rounded-md bg-black/40 border border-white/10 shadow-inner">
-          <span className="font-mono text-xs tabular-nums text-accent font-bold">
-            {value}
-            <span className="text-fg-subtle text-[10px] ml-1">{unit}</span>
-          </span>
+        <div className="flex items-center gap-1">
+          <input type="number" aria-label={`${label} value`} value={value}
+            min={min} max={max} step={step}
+            onChange={(e) => { const next = e.target.valueAsNumber; if (Number.isFinite(next) && next >= min && next <= max) onChange(next); }}
+            className="w-16 rounded-md border border-border bg-surface-2 px-1.5 py-1 text-right font-mono text-xs text-fg" />
+          <span className="text-fg-subtle text-[10px]">{unit}</span>
         </div>
       </div>
       <Slider
+        aria-label={label}
         min={min}
         max={max}
         step={step}
@@ -80,16 +82,17 @@ export function LeftPanel() {
 
   return (
     <ScrollArea className="h-full">
-      <div className="space-y-8 p-5">
+      <div className="space-y-5 p-5">
         
         {/* Sequence Input Section */}
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-fg-subtle">
             <Dna className="w-4 h-4 text-accent" />
-            <p className="text-xs font-bold tracking-widest uppercase">Sequence Input</p>
+            <h2 className="text-sm font-semibold text-fg">Your sequence</h2>
           </div>
+          <p className="text-xs leading-relaxed text-fg-muted">Paste DNA below or start with an example. Predictions update automatically.</p>
           
-          <div className="flex gap-2 p-1 rounded-lg bg-black/30 border border-white/5">
+          <div className="flex gap-2 p-1 rounded-lg bg-surface-2 border border-border">
             {(["DNA", "RNA"] as const).map((p) => (
               <Button
                 key={p}
@@ -97,42 +100,51 @@ export function LeftPanel() {
                 variant="ghost"
                 className={`flex-1 text-xs font-bold tracking-wider transition-all ${
                   polymer === p 
-                    ? "bg-accent/20 text-accent border border-accent/50 shadow-[0_0_15px_rgba(59,130,246,0.3)]" 
-                    : "text-fg-muted hover:text-fg hover:bg-white/5"
+                    ? "bg-accent/20 text-accent border border-accent/50 shadow-sm"
+                    : "text-fg-muted hover:text-fg hover:bg-surface-3"
                 }`}
                 onClick={() => setPolymer(p)}
+                aria-pressed={polymer === p}
               >
                 {p}
               </Button>
             ))}
           </div>
+          {polymer === "RNA" ? <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-2 text-xs text-amber-800">RNA is not supported by the DNA-trained model. Select DNA for predictions.</p> : null}
           
           <div className="relative group">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-accent/0 to-accent/0 group-focus-within:from-accent/40 group-focus-within:to-purple-500/40 rounded-xl blur opacity-50 transition duration-500"></div>
             <textarea
               value={sequence}
               onChange={(e) => setSequence(e.target.value)}
               spellCheck={false}
-              rows={4}
-              className="relative w-full resize-y rounded-xl border border-white/10 bg-black/60 px-4 py-3 font-mono text-sm leading-relaxed text-fg outline-none focus:border-accent/50 backdrop-blur-md transition-all shadow-inner"
+              rows={5}
+              className="relative w-full resize-y rounded-xl border border-border-strong bg-surface px-3 py-3 font-mono text-sm leading-7 text-fg outline-none focus:border-accent transition-colors"
               aria-label="Nucleic acid sequence"
             />
           </div>
-          <div className="flex justify-end">
-            <Badge variant="outline" className="bg-black/50 border-white/10 font-mono text-[10px] text-accent">
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-fg-subtle">5′ → 3′ · {polymer}</span>
+            <Badge variant="outline" className="bg-surface-2 border-border font-mono text-[10px] text-accent">
               {sequence.replace(/[^ACGTUacgtu]/g, "").length} nt
             </Badge>
           </div>
+          <label className="block text-xs text-fg-muted">
+            Try an example
+            <select aria-label="Choose an example" value="" onChange={(e) => { if (e.target.value) loadExample(e.target.value); }} className="mt-2 w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-fg">
+              <option value="" disabled>Choose a sequence…</option>
+              {EXAMPLES.map((ex) => <option value={ex.id} key={ex.id}>{ex.name}{ex.polymer === "RNA" ? " (unsupported RNA)" : ""}</option>)}
+            </select>
+          </label>
         </div>
 
-        <Separator className="bg-white/10" />
+        <Separator className="bg-surface-3" />
 
         {/* Library Section */}
         <details className="group [&_summary::-webkit-details-marker]:hidden">
           <summary className="flex items-center justify-between cursor-pointer list-none text-fg-subtle hover:text-fg transition-colors select-none">
             <div className="flex items-center gap-2">
-              <Library className="w-4 h-4 text-purple-400" />
-              <p className="text-xs font-bold tracking-widest uppercase">Presets Library</p>
+              <Library className="w-4 h-4 text-purple-700" />
+              <p className="text-sm font-medium text-fg">About the examples</p>
             </div>
             <ChevronRight className="w-4 h-4 transition-transform group-open:rotate-90" />
           </summary>
@@ -143,19 +155,19 @@ export function LeftPanel() {
                 key={ex.id}
                 type="button"
                 onClick={() => loadExample(ex.id)}
-                className="group/btn relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-b from-surface-2 to-black/60 p-3 text-left transition-all duration-300 hover:border-purple-400/50 hover:shadow-[0_0_20px_rgba(168,85,247,0.15)]"
+                className="group/btn relative overflow-hidden rounded-xl border border-border bg-gradient-to-b from-surface-2 to-surface-2 p-3 text-left transition-all duration-300 hover:border-purple-400/50 hover:shadow-sm"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/0 to-purple-500/0 group-hover/btn:via-purple-500/10 transition-all duration-700 translate-x-[-100%] group-hover/btn:translate-x-[100%]"></div>
                 <div className="flex items-center justify-between gap-2 relative z-10">
-                  <span className="text-sm font-semibold text-fg group-hover/btn:text-purple-300 transition-colors">{ex.name}</span>
+                  <span className="text-sm font-semibold text-fg group-hover/btn:text-purple-700 transition-colors">{ex.name}</span>
                   <div className="flex items-center gap-1">
                     {ex.coverage && ex.coverage !== "full" ? (
                       <Badge
                         variant="outline"
                         className={`text-[9px] ${
                           ex.coverage === "refused"
-                            ? "border-red-500/40 bg-red-500/10 text-red-300"
-                            : "border-amber-500/40 bg-amber-500/10 text-amber-300"
+                            ? "border-red-500/40 bg-red-500/10 text-red-700"
+                            : "border-amber-500/40 bg-amber-500/10 text-amber-700"
                         }`}
                       >
                         {ex.coverage === "refused"
@@ -165,7 +177,7 @@ export function LeftPanel() {
                             : "not modelled"}
                       </Badge>
                     ) : null}
-                    <Badge className="bg-black/50 border-purple-500/30 text-purple-200 text-[10px]">{ex.polymer}</Badge>
+                    <Badge className="bg-surface-2 border-purple-500/30 text-purple-700 text-[10px]">{ex.polymer}</Badge>
                   </div>
                 </div>
                 <p className="mt-1.5 text-xs text-fg-muted relative z-10">{ex.note}</p>
@@ -174,20 +186,21 @@ export function LeftPanel() {
           </div>
         </details>
 
-        <Separator className="bg-white/10" />
+        <Separator className="bg-surface-3" />
 
         {/* Conditions Section */}
-        <details className="group [&_summary::-webkit-details-marker]:hidden">
+        <details open className="group [&_summary::-webkit-details-marker]:hidden">
           <summary className="flex items-center justify-between cursor-pointer list-none text-fg-subtle hover:text-fg transition-colors select-none">
             <div className="flex items-center gap-2">
-              <Activity className="w-4 h-4 text-green-400" />
-              <p className="text-xs font-bold tracking-widest uppercase">
+              <Activity className="w-4 h-4 text-green-700" />
+              <p className="text-sm font-semibold text-fg">
                 Buffer conditions
               </p>
             </div>
             <ChevronRight className="w-4 h-4 transition-transform group-open:rotate-90" />
           </summary>
           
+          <p className="mt-2 text-xs leading-relaxed text-fg-muted">Set your experimental buffer. Some heads use fixed reference conditions; see each result’s applicability.</p>
           <div className="space-y-2 mt-4">
             <ConditionRow
               icon={Droplets}
@@ -285,7 +298,7 @@ export function LeftPanel() {
 
           <Button
             variant="outline"
-            className="w-full mt-4 bg-transparent border-white/10 hover:bg-white/5 text-xs tracking-wider uppercase text-fg-muted hover:text-fg transition-all"
+            className="w-full mt-4 bg-transparent border-border hover:bg-surface-3 text-xs tracking-wider uppercase text-fg-muted hover:text-fg transition-all"
             onClick={() => {
               (Object.keys(DEFAULT_CONDITIONS) as (keyof Conditions)[]).forEach((k) =>
                 setCondition(k, DEFAULT_CONDITIONS[k]),
@@ -342,15 +355,15 @@ export function RightPanel() {
         <div
           className={`flex items-center justify-between gap-2 p-2 rounded-lg border transition-all duration-300 ${
             backend === "connected"
-              ? "bg-black/30 border-white/5"
+              ? "bg-surface-2 border-border"
               : backend === "offline"
                 ? "bg-amber-500/10 border-amber-500/40"
-                : "bg-black/30 border-white/5"
+                : "bg-surface-2 border-border"
           }`}
         >
           <div className="flex items-center gap-2">
             <Activity
-              className={`w-4 h-4 ${busy ? "text-accent animate-pulse" : backend === "offline" ? "text-amber-400" : "text-fg-subtle"}`}
+              className={`w-4 h-4 ${busy ? "text-accent animate-pulse" : backend === "offline" ? "text-amber-700" : "text-fg-subtle"}`}
             />
             <span className="text-[10px] font-bold tracking-widest uppercase text-fg-subtle">
               {busy
@@ -364,7 +377,7 @@ export function RightPanel() {
           </div>
         </div>
         {backend === "offline" ? (
-          <p className="-mt-6 text-[10px] leading-relaxed text-amber-300/80">
+          <p className="-mt-6 text-[10px] leading-relaxed text-amber-700/80">
             The structures below are drawn at published helical parameters, but
             no calibrated number is available. Nothing is substituted for them.
             {backendMessage ? ` (${backendMessage})` : null}
@@ -372,7 +385,7 @@ export function RightPanel() {
         ) : null}
 
         {/* Viewer Controls */}
-        <div className="flex flex-col gap-2 p-2 rounded-lg bg-black/30 border border-white/5">
+        <div className="flex flex-col gap-2 p-2 rounded-lg bg-surface-2 border border-border">
           <div className="flex items-center justify-between">
             <Button 
               size="sm" 
@@ -383,7 +396,7 @@ export function RightPanel() {
               <Layers className="w-3 h-3 mr-2" />
               Overlay Folds
             </Button>
-            <div className="w-px h-4 bg-white/10 mx-1" />
+            <div className="w-px h-4 bg-surface-3 mx-1" />
             <Button
               size="sm"
               variant="ghost"
@@ -394,13 +407,13 @@ export function RightPanel() {
               Auto-Rotate
             </Button>
           </div>
-          <div className="flex items-center gap-1 border-t border-white/5 pt-2">
+          <div className="flex items-center gap-1 border-t border-border pt-2">
             {(['ball-and-stick', 'space-filling', 'licorice'] as const).map(mode => (
               <Button 
                 key={mode} 
                 size="sm" 
                 variant="ghost" 
-                className={`flex-1 text-[9px] font-bold tracking-widest uppercase transition-all ${visMode === mode ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'text-fg-muted hover:bg-white/5'}`}
+                className={`flex-1 text-[9px] font-bold tracking-widest uppercase transition-all ${visMode === mode ? 'bg-purple-500/20 text-purple-700 border border-purple-500/30' : 'text-fg-muted hover:bg-surface-3'}`}
                 onClick={() => setVisMode(mode)}
               >
                 {mode.replace(/-/g, ' ')}
@@ -458,7 +471,7 @@ export function RightPanel() {
             */
             <div className="mt-4 space-y-3">
               <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
-                <p className="text-[11px] leading-relaxed text-amber-200/90">
+                <p className="text-[11px] leading-relaxed text-amber-700/90">
                   {backend === "connected" && !busy ? (
                     <>QuadCond is connected, but returned no structural evidence
                     cards for this sequence under its implemented rules. This is
@@ -486,7 +499,7 @@ export function RightPanel() {
                         className={`w-full rounded-xl border p-3 text-left transition-all ${
                           active
                             ? "border-accent/50 bg-accent/5"
-                            : "border-white/5 bg-black/40 hover:border-white/20 hover:bg-black/60"
+                            : "border-border bg-surface-2 hover:border-border hover:bg-surface-2"
                         }`}
                       >
                         <div className="flex items-center justify-between gap-2">
@@ -499,7 +512,7 @@ export function RightPanel() {
                             </span>
                             <Badge
                               variant="outline"
-                              className="border-white/10 text-[9px] tracking-wide text-fg-subtle"
+                              className="border-border text-[9px] tracking-wide text-fg-subtle"
                             >
                               {m.topology}
                             </Badge>
@@ -523,7 +536,7 @@ export function RightPanel() {
                 template match is a claim about a specific molecule, and the
                 telomeric 22-mer and its complement are different ones. */}
             <StructureProvenance sequence={selected.strandSequence} kind={selected.kind} />
-            <div className="rounded-xl border border-white/5 bg-black/30 p-4">
+            <div className="rounded-xl border border-border bg-surface-2 p-4">
               <div className="mb-2 flex items-center justify-between gap-2">
                 <p className="text-xs font-bold uppercase tracking-widest text-fg-subtle">
                   Dot-bracket notation
@@ -538,14 +551,14 @@ export function RightPanel() {
               <p className="mt-2 break-all font-mono text-[10px] leading-relaxed text-fg-subtle">
                 {selected.strandSequence}
               </p>
-              <p className="mt-3 border-l-2 border-white/10 pl-2 text-[11px] text-fg-muted">
+              <p className="mt-3 border-l-2 border-border pl-2 text-[11px] text-fg-muted">
                 {selected.description}
               </p>
             </div>
           </>
         )}
 
-        <Separator className="bg-white/10" />
+        <Separator className="bg-surface-3" />
 
         {/*
           The protein-binder panel is gone rather than hidden. Its records were
@@ -560,7 +573,7 @@ export function RightPanel() {
 
         {joint ? <LocusOverlapPanel joint={joint} /> : null}
 
-        <Separator className="bg-white/10" />
+        <Separator className="bg-surface-3" />
 
         <WithheldFolds />
 

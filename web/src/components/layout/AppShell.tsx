@@ -5,6 +5,7 @@ import { ViewerPane } from "@/components/viewer/ViewerPane";
 import { Workbench } from "@/components/panels/Workbench";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNA } from "@/lib/na/store";
+import { Dna, FlaskConical, ArrowRight } from "lucide-react";
 
 export function AppShell() {
   const polymer = useNA((s) => s.polymer);
@@ -19,31 +20,32 @@ export function AppShell() {
   return (
     <div className="flex h-dvh overflow-hidden flex-col text-fg relative bg-transparent">
       
-      <header className="glass relative z-10 gap-3 px-4 py-3 mx-4 mt-4 rounded-2xl flex items-center justify-between border border-border shadow-lg">
-        <div className="flex flex-col">
-          <p className="text-[0.65rem] tracking-[0.2em] text-accent font-semibold uppercase">QuadCond workbench</p>
-          <h1 className="font-display text-2xl font-bold tracking-tight text-fg drop-shadow-md">AENNA<span className="text-accent">3D</span></h1>
+      <header className="app-header relative z-10 flex items-center justify-between gap-3 border-b border-border bg-surface px-5 py-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent/10 text-accent"><Dna size={26} aria-hidden /></div>
+          <div>
+            <h1 className="font-display text-xl font-semibold tracking-tight text-fg">QuadCond <span className="font-normal text-fg-subtle">/</span> <span className="text-accent">AENNA-3D</span></h1>
+            <p className="mt-0.5 text-xs text-fg-muted">DNA structure &amp; variant evidence</p>
+          </div>
         </div>
         
-        <div className="hidden md:block flex-1 max-w-xl mx-8">
-          <p className="text-xs leading-relaxed text-fg-muted">
-            A viewer for non-canonical DNA structures. One sequence, its candidate
-            folds drawn at published helical parameters, each annotated with what
-            QuadCond predicts for it under the buffer you set.
-          </p>
+        <div className="hidden xl:flex items-center gap-3 text-xs text-fg-muted" aria-label="Workflow">
+          <span>1. Add a sequence</span><ArrowRight size={13} aria-hidden />
+          <span>2. Set conditions</span><ArrowRight size={13} aria-hidden />
+          <span>3. Explore evidence</span>
         </div>
 
-        <div className="hidden sm:flex items-center gap-2 bg-surface-2 px-4 py-2 rounded-lg border border-border">
+        <div className="hidden sm:flex items-center gap-2 bg-surface-2 px-3 py-2 rounded-full border border-border">
           <div className={`h-2 w-2 rounded-full ${backend === "connected" ? "bg-emerald-400" : "bg-amber-400"}`} title={backend === "connected" ? "Prediction service connected" : "Prediction service unavailable"} />
-          <p className="font-mono text-xs tabular-nums text-fg-subtle font-medium">
-            {polymer} · <span className="text-fg">{n} nt</span>
+          <p className="text-xs tabular-nums text-fg-muted">
+            {backend === "connected" ? "Model connected" : "Model unavailable"} <span className="ml-2 font-mono">{polymer} · {n} nt</span>
           </p>
         </div>
         <HelpDialog />
       </header>
 
       {/* Desktop Layout */}
-      <div className="hidden min-h-0 flex-1 lg:grid lg:grid-cols-[320px_1fr_340px] gap-4 p-4 relative z-10">
+      <div className="hidden min-h-0 flex-1 lg:grid lg:grid-cols-[280px_minmax(0,1fr)_320px] xl:grid-cols-[296px_minmax(0,1fr)_340px] gap-4 p-4 relative z-10">
         <aside className="glass-panel flex flex-col overflow-hidden">
           <LeftPanel />
         </aside>
@@ -62,20 +64,20 @@ export function AppShell() {
         */}
         <main className="glass-card flex min-w-0 flex-col overflow-hidden relative group">
           <Tabs defaultValue="structure" className="flex min-h-0 flex-1 flex-col">
-            <div className="border-b border-border p-2">
+            <div className="border-b border-border p-3">
               <TabsList className="w-full bg-surface-3">
                 <TabsTrigger
                   className="flex-1 data-[state=active]:bg-accent data-[state=active]:text-white"
                   value="structure"
                 >
-                  Structure
+                  <Dna size={15} className="mr-2" aria-hidden /> Structure
                 </TabsTrigger>
                 <TabsTrigger
                   className="flex-1 data-[state=active]:bg-accent data-[state=active]:text-white"
                   value="workbench"
                   data-testid="workbench-tab"
                 >
-                  Compare
+                  <FlaskConical size={15} className="mr-2" aria-hidden /> Compare
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -99,7 +101,7 @@ export function AppShell() {
             >
               <ViewerPane />
               {/* Subtle inner glow for the 3D viewer container */}
-              <div className="absolute inset-0 border border-white/5 rounded-2xl pointer-events-none group-hover:border-accent/20 transition-colors duration-500" />
+              <div className="absolute inset-0 border border-border rounded-2xl pointer-events-none group-hover:border-accent/20 transition-colors duration-500" />
             </TabsContent>
             <TabsContent value="workbench" className="min-h-0 flex-1 overflow-y-auto p-3">
               <Workbench />

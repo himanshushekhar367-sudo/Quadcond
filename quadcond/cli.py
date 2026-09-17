@@ -157,6 +157,59 @@ def _print_predictions(res) -> None:
                       f"{e['source_id'] or ''}")
 
 
+def cmd_genome_scan(a) -> None:
+    """G4-seq-trained window scan of long sequences; motifs then scored with g4_tm."""
+    import csv
+
+    from . import assets
+    from .genome_scan import G4SeqScanner
+
+    try:
+        spath = assets.resolve_asset(assets.assets()["g4seq_scanner"], a.scanner)
+    except (KeyError, assets.AssetError) as exc:
+        sys.exit(f"genome scanner unavailable: {exc}\n"
+                 "Run 'quadcond assets fetch --name g4seq_scanner'.")
+    scanner = G4SeqScanner.load(spath)
+    pred = None
+    if not a.no_stability:
+        from .models.predict import Predictor
+        pred = Predictor.load(_resolve(a, "model"), None)
+    cond = _condition(a)
+    items = list(iter_fasta(a.fasta)) if a.fasta else [("query", a.sequence)]
+    rows = []
+    for name, seq in items:
+        for r in scanner.scan(seq, step=a.step, threshold=a.threshold, name=name):
+            motifs = r.pop("motifs")
+            base = {"seq_name": name, "region_start_1based": r["start_1based"],
+                    "region_end": r["end"], "g4seq_score": round(r["best_score"], 4),
+                    "n_windows": r["n_windows"], "call_basis": r["call_basis"]}
+            if not motifs:
+                rows.append({**base, "motif": "", "motif_strand": "", "motif_start_1based": ""})
+                continue
+            for m in motifs:
+                row = {**base, "motif": m["sequence"], "motif_strand": m["strand"],
+                       "motif_start_1based": m["start"] + 1}
+                if pred is not None:
+                    p = pred.predict(m["sequence"], cond, heads=["g4_tm", "g4_topology"],
+                                     n_neighbours=0)[0]["predictions"]
+                    tm = p.get("g4_tm", {})
+                    row["g4_tm"] = None if readout.is_refused(tm) else tm.get("value")
+                    topo = p.get("g4_topology", {})
+                    row["g4_topology"] = None if readout.is_refused(topo) else topo.get("argmax")
+                rows.append(row)
+    fields = sorted({k for r in rows for k in r}, key=lambda k: list(rows[0]).index(k)
+                    if rows and k in rows[0] else 99)
+    out = open(a.out, "w", newline="") if a.out else sys.stdout
+    w = csv.DictWriter(out, fieldnames=fields or ["seq_name"])
+    w.writeheader()
+    w.writerows(rows)
+    if a.out:
+        out.close()
+        print(f"{len(rows)} rows -> {a.out}", file=sys.stderr)
+    print("score = P(window resembles an observed K+ G4-seq window); genomic in-vitro "
+          "observation, calibrated at 50% prevalence.", file=sys.stderr)
+
+
 def cmd_scan(a) -> None:
     from .models.predict import Predictor
 
@@ -543,6 +596,20 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("--forward-only", action="store_true")
     _condition_args(q)
     q.set_defaults(func=cmd_scan)
+
+    q = sub.add_parser(
+        "genome-scan",
+        help="find G4 windows in long/genomic sequence with the G4-seq-trained scanner")
+    q.add_argument("sequence", nargs="?", default="")
+    q.add_argument("--fasta")
+    q.add_argument("--out")
+    q.add_argument("--scanner", help="path to quadcond_g4seq_scanner.joblib")
+    q.add_argument("--step", type=int, default=25)
+    q.add_argument("--threshold", type=float, default=0.5)
+    q.add_argument("--no-stability", action="store_true",
+                   help="skip g4_tm / g4_topology on the motifs found")
+    _condition_args(q)
+    q.set_defaults(func=cmd_genome_scan)
 
     q = sub.add_parser(
         "competition",

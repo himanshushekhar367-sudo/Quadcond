@@ -30,9 +30,9 @@ import { useNA } from "@/lib/na/store";
 import { AlertTriangle, Ban, ChevronRight, Dna, Eye, EyeOff, Microscope } from "lucide-react";
 
 const TONE: Record<string, string> = {
-  solid: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
-  warn: "bg-amber-500/15 text-amber-300 border-amber-500/30",
-  muted: "bg-white/5 text-fg-subtle border-white/10",
+  solid: "bg-emerald-500/15 text-emerald-700 border-emerald-500/30",
+  warn: "bg-amber-500/15 text-amber-700 border-amber-500/30",
+  muted: "bg-surface-3 text-fg-subtle border-border",
 };
 
 export function ClaimBadge({ fold }: { fold: EvidenceCard }) {
@@ -76,8 +76,8 @@ export function SyntheticNotice({ banner }: { banner?: SyntheticBanner }) {
       className="mb-3 rounded-[var(--radius-md)] border border-red-500/50 bg-red-500/10 p-3"
       data-testid="synthetic-banner"
     >
-      <p className="text-xs font-semibold text-red-200">{banner.warning}</p>
-      <p className="mt-1 text-[0.7rem] text-red-100/80">{banner.note}</p>
+      <p className="text-xs font-semibold text-red-700">{banner.warning}</p>
+      <p className="mt-1 text-[0.7rem] text-red-700/80">{banner.note}</p>
     </div>
   );
 }
@@ -159,7 +159,7 @@ export function EvidenceCards({
                 className={`w-full rounded-xl border p-4 text-left transition-all duration-300 ${
                   active
                     ? "border-accent/50 bg-accent/5"
-                    : "border-white/5 bg-black/40 hover:bg-black/60 hover:border-white/20"
+                    : "border-border bg-surface-2 hover:bg-surface-2 hover:border-border"
                 } ${out ? "border-dashed opacity-80" : ""}`}
               >
                 <div className="mb-3 flex items-center justify-between gap-2">
@@ -172,7 +172,7 @@ export function EvidenceCards({
                   {/* Which strand, always. A G4 and an i-motif at one duplex
                       position sit on opposite strands, and the previous build
                       evaluated both heads on whichever strand the user typed. */}
-                  <Badge variant="outline" className="border-white/10 font-mono text-[10px] text-fg-subtle">
+                  <Badge variant="outline" className="border-border font-mono text-[10px] text-fg-subtle">
                     strand {c.strand}
                   </Badge>
                 </div>
@@ -203,13 +203,13 @@ export function EvidenceCards({
                     the topology it names. Saying so beats drawing a different
                     fold, and beats a card that does nothing when clicked. */}
                 {!drawable ? (
-                  <p className="mt-2 rounded border border-amber-500/25 bg-amber-500/5 px-2 py-1 text-[10px] leading-relaxed text-amber-200/90">
+                  <p className="mt-2 rounded border border-amber-500/25 bg-amber-500/5 px-2 py-1 text-[10px] leading-relaxed text-amber-700/90">
                     No 3D archetype for the <strong>{c.topology}</strong> topology, so
                     nothing is drawn for this card. The prediction above is unaffected.
                   </p>
                 ) : null}
 
-                <p className="mt-2 break-all border-l-2 border-white/10 pl-2 font-mono text-[9px] leading-snug text-fg-subtle">
+                <p className="mt-2 break-all border-l-2 border-border pl-2 font-mono text-[9px] leading-snug text-fg-subtle">
                   {c.strand_sequence}
                 </p>
                 <p className="mt-1 pl-2 font-mono text-[9px] text-fg-subtle">{c.source}</p>
@@ -222,15 +222,15 @@ export function EvidenceCards({
       {hidden.length > 0 ? (
         <div className="rounded-lg border border-amber-500/25 bg-amber-500/5 p-3">
           <div className="flex items-start gap-2">
-            <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-400" />
+            <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-700" />
             <div className="space-y-2">
-              <p className="text-[11px] leading-relaxed text-amber-200/90">
+              <p className="text-[11px] leading-relaxed text-amber-700/90">
                 {hidden.length} structure{hidden.length > 1 ? "s are" : " is"} hidden
                 because the query falls outside what the head was trained on.
               </p>
               <ul className="space-y-1">
                 {allWarnings(hidden).map((w) => (
-                  <li key={w} className="text-[10px] leading-relaxed text-amber-200/70">
+                  <li key={w} className="text-[10px] leading-relaxed text-amber-700/70">
                     · {w}
                   </li>
                 ))}
@@ -238,7 +238,7 @@ export function EvidenceCards({
               <Button
                 size="sm"
                 variant="ghost"
-                className="h-6 px-2 text-[10px] tracking-wider text-amber-300 hover:bg-amber-500/10"
+                className="h-6 px-2 text-[10px] tracking-wider text-amber-700 hover:bg-amber-500/10"
                 onClick={() => setShow(!show)}
               >
                 {show ? <EyeOff className="mr-1 h-3 w-3" /> : <Eye className="mr-1 h-3 w-3" />}
@@ -250,7 +250,7 @@ export function EvidenceCards({
       ) : null}
 
       {shown.length > 0 && allWarnings(shown).length > 0 ? (
-        <ul className="space-y-1 rounded-lg border border-white/5 bg-black/30 p-3">
+        <ul className="space-y-1 rounded-lg border border-border bg-surface-2 p-3">
           {allWarnings(shown).map((w) => (
             <li key={w} className="text-[10px] leading-relaxed text-fg-subtle">
               · {w}
@@ -291,20 +291,20 @@ export function GenomicEvidencePanel({
     <details className="group [&_summary::-webkit-details-marker]:hidden">
       <summary className="flex cursor-pointer select-none items-center justify-between text-fg-subtle transition-colors hover:text-fg">
         <div className="flex items-center gap-2">
-          <Microscope className="h-4 w-4 text-amber-400" />
+          <Microscope className="h-4 w-4 text-amber-700" />
           <p className="text-xs font-bold uppercase tracking-widest">Genomic evidence</p>
         </div>
         <ChevronRight className="h-4 w-4 transition-transform group-open:rotate-90" />
       </summary>
 
-      <p className="mt-2 text-[11px] leading-relaxed text-amber-200/80">
+      <p className="mt-2 text-[11px] leading-relaxed text-amber-700/80">
         {note ??
           "Antibody occupancy at genomic loci. An observation of a different quantity than folding — never read as P(folds)."}
       </p>
 
       <ul className="mt-3 space-y-2">
         {visible.map((g) => (
-          <li key={g.head} data-testid="genomic-readout" data-refused={g.refused === true} className={`rounded-lg border bg-black/40 p-3 ${
+          <li key={g.head} data-testid="genomic-readout" data-refused={g.refused === true} className={`rounded-lg border bg-surface-2 p-3 ${
             g.applicability?.in_domain === false
               ? "border-dashed border-amber-500/30"
               : "border-amber-500/20"
@@ -320,11 +320,11 @@ export function GenomicEvidencePanel({
             </div>
             <p className="mt-2 text-[10px] leading-relaxed text-fg-subtle">{g.claim}</p>
             {g.refused ? (
-              <p className="mt-2 text-xs leading-relaxed text-amber-200" role="status">
+              <p className="mt-2 text-xs leading-relaxed text-amber-700" role="status">
                 {g.refusal_reason} No score is available; extrapolation cannot override this refusal.
               </p>
             ) : g.applicability?.in_domain === false ? (
-              <p className="mt-1 text-[10px] leading-relaxed text-amber-300/80">
+              <p className="mt-1 text-[10px] leading-relaxed text-amber-700/80">
                 Extrapolation: {g.applicability.warnings[0]}
               </p>
             ) : null}
@@ -342,15 +342,15 @@ export function GenomicEvidencePanel({
       {outOfDomain.length && !show ? (
         <div className="mt-3 rounded-lg border border-amber-500/25 bg-amber-500/5 p-3">
           <div className="flex items-start gap-2">
-            <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-400" />
+            <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-700" />
             <div className="space-y-2">
-              <p className="text-[11px] leading-relaxed text-amber-200/90">
+              <p className="text-[11px] leading-relaxed text-amber-700/90">
                 {outOfDomain.length} score{outOfDomain.length > 1 ? "s are" : " is"} hidden:
                 the query falls outside what {outOfDomain.length > 1 ? "these heads were" : "this head was"} trained on.
               </p>
               <ul className="space-y-1">
                 {[...new Set(outOfDomain.flatMap((g) => g.applicability?.warnings ?? []))].map((w) => (
-                  <li key={w} className="text-[10px] leading-relaxed text-amber-200/70">
+                  <li key={w} className="text-[10px] leading-relaxed text-amber-700/70">
                     · {w}
                   </li>
                 ))}
@@ -358,7 +358,7 @@ export function GenomicEvidencePanel({
               <Button
                 size="sm"
                 variant="ghost"
-                className="h-6 px-2 text-[10px] tracking-wider text-amber-300 hover:bg-amber-500/10"
+                className="h-6 px-2 text-[10px] tracking-wider text-amber-700 hover:bg-amber-500/10"
                 onClick={() => setShow(true)}
               >
                 <Eye className="mr-1 h-3 w-3" />
@@ -394,7 +394,7 @@ export function WithheldFolds() {
       </summary>
       <ul className="mt-3 space-y-2">
         {withheld.map((w) => (
-          <li key={w.kind} className="rounded-lg border border-white/5 bg-black/30 p-3">
+          <li key={w.kind} className="rounded-lg border border-border bg-surface-2 p-3">
             <p className="text-xs font-semibold text-fg-muted">{w.kind}</p>
             <p className="mt-1 text-[10px] leading-relaxed text-fg-subtle">{w.reason}</p>
           </li>
@@ -409,12 +409,12 @@ export function RefusalNotice({ reason }: { reason: string }) {
   return (
     <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4">
       <div className="flex items-start gap-2">
-        <Dna className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
+        <Dna className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" />
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-amber-300">
+          <p className="text-xs font-bold uppercase tracking-widest text-amber-700">
             No prediction for this input
           </p>
-          <p className="mt-2 text-[11px] leading-relaxed text-amber-100/80">{reason}</p>
+          <p className="mt-2 text-[11px] leading-relaxed text-amber-700/80">{reason}</p>
         </div>
       </div>
     </div>
@@ -445,7 +445,7 @@ export function StructureProvenance({
 }) {
   const matches = templatesForKind(sequence, kind);
   return (
-    <div className="rounded-xl border border-white/5 bg-black/30 p-4">
+    <div className="rounded-xl border border-border bg-surface-2 p-4">
       <p className="text-[10px] font-bold uppercase tracking-widest text-fg-subtle">
         What you are looking at
       </p>
@@ -454,8 +454,8 @@ export function StructureProvenance({
       </p>
 
       {matches.length ? (
-        <div className="mt-3 border-t border-white/5 pt-3">
-          <p className="text-[10px] leading-relaxed text-emerald-300/90">
+        <div className="mt-3 border-t border-border pt-3">
+          <p className="text-[10px] leading-relaxed text-emerald-700/90">
             {matches.length === 1
               ? "A solved structure exists for this exact sequence:"
               : `${matches.length} solved structures exist for this exact sequence — the fold depends on the buffer:`}
@@ -514,7 +514,7 @@ export function LocusOverlapPanel({
     <details className="group [&_summary::-webkit-details-marker]:hidden">
       <summary className="flex cursor-pointer select-none items-center justify-between text-fg-subtle transition-colors hover:text-fg">
         <div className="flex items-center gap-2">
-          <Microscope className="h-4 w-4 text-amber-400" />
+          <Microscope className="h-4 w-4 text-amber-700" />
           <p className="text-xs font-bold uppercase tracking-widest">
             Peak overlap (201-nt windows)
           </p>
@@ -522,7 +522,7 @@ export function LocusOverlapPanel({
         <ChevronRight className="h-4 w-4 transition-transform group-open:rotate-90" />
       </summary>
 
-      <div className="mt-3 rounded-xl border border-amber-500/20 bg-black/30 p-4">
+      <div className="mt-3 rounded-xl border border-amber-500/20 bg-surface-2 p-4">
         <div className="mb-2 flex items-center justify-between gap-2">
           <Badge variant="outline" className={`text-[9px] ${TONE.warn}`}>
             genomic proxy
@@ -533,7 +533,7 @@ export function LocusOverlapPanel({
         </div>
 
         {joint.refused ? (
-          <div data-testid="locus-refusal" role="status" className="space-y-2 text-xs leading-relaxed text-amber-200">
+          <div data-testid="locus-refusal" role="status" className="space-y-2 text-xs leading-relaxed text-amber-700">
             <p className="font-semibold">Prediction refused</p>
             <p>{joint.refusal_reason}</p>
             <p>No posterior is available; extrapolation cannot override this refusal.</p>
@@ -541,14 +541,14 @@ export function LocusOverlapPanel({
         ) : out && !show ? (
           <>
             <div className="flex items-start gap-2">
-              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-400" />
+              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-700" />
               <div className="space-y-2">
-                <p className="text-[11px] leading-relaxed text-amber-200/90">
+                <p className="text-[11px] leading-relaxed text-amber-700/90">
                   Not shown: this query is outside what the head was trained on.
                 </p>
                 <ul className="space-y-1">
                   {(joint.applicability?.warnings ?? []).map((w) => (
-                    <li key={w} className="text-[10px] leading-relaxed text-amber-200/70">
+                    <li key={w} className="text-[10px] leading-relaxed text-amber-700/70">
                       · {w}
                     </li>
                   ))}
@@ -556,7 +556,7 @@ export function LocusOverlapPanel({
                 <Button
                   size="sm"
                   variant="ghost"
-                  className="h-6 px-2 text-[10px] tracking-wider text-amber-300 hover:bg-amber-500/10"
+                  className="h-6 px-2 text-[10px] tracking-wider text-amber-700 hover:bg-amber-500/10"
                   onClick={() => setShow(true)}
                 >
                   <Eye className="mr-1 h-3 w-3" />
@@ -568,7 +568,7 @@ export function LocusOverlapPanel({
         ) : (
           <>
             {out ? (
-              <p className="mb-2 text-[10px] leading-relaxed text-amber-300/80">
+              <p className="mb-2 text-[10px] leading-relaxed text-amber-700/80">
                 Extrapolation — shown because you asked.{" "}
                 {(joint.applicability?.warnings ?? [])[0]}
               </p>
@@ -586,7 +586,7 @@ export function LocusOverlapPanel({
           </>
         )}
 
-        <p className="mt-3 border-t border-white/5 pt-3 text-[10px] leading-relaxed text-fg-subtle">
+        <p className="mt-3 border-t border-border pt-3 text-[10px] leading-relaxed text-fg-subtle">
           {joint.note}
         </p>
       </div>

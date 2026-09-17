@@ -41,11 +41,11 @@ const QUADRANT_LABEL: Record<VariantRow["quadrant"], string> = {
 };
 
 const QUADRANT_TONE: Record<VariantRow["quadrant"], string> = {
-  both: "border-emerald-500/40 bg-emerald-500/10 text-emerald-200",
+  both: "border-emerald-500/40 bg-emerald-500/10 text-emerald-700",
   structural_only: "border-accent/40 bg-accent/10 text-fg",
-  regulatory_only: "border-sky-500/40 bg-sky-500/10 text-sky-200",
+  regulatory_only: "border-sky-500/40 bg-sky-500/10 text-sky-700",
   neither: "border-border bg-bg/40 text-fg-muted",
-  unclassified: "border-dashed border-amber-500/40 bg-amber-500/5 text-amber-200",
+  unclassified: "border-dashed border-amber-500/40 bg-amber-500/5 text-amber-700",
 };
 
 /** The 2×2, drawn from the counts the service computed rather than recounted here. */
@@ -76,9 +76,11 @@ export function VariantPanel() {
   const sequence = useNA((s) => s.sequence);
   const conditions = useNA((s) => s.conditions);
   const backend = useNA((s) => s.backend);
+  const setSequence = useNA((s) => s.setSequence);
+  const setPolymer = useNA((s) => s.setPolymer);
 
-  const [chromosome, setChromosome] = useState("chr8");
-  const [start, setStart] = useState("128748301");
+  const [chromosome, setChromosome] = useState("");
+  const [start, setStart] = useState("");
   const [scan, setScan] = useState<VariantScan | null>(null);
   const [busy, setBusy] = useState(false);
   const [showAll, setShowAll] = useState(false);
@@ -106,8 +108,8 @@ export function VariantPanel() {
 
   const run = useCallback(async () => {
     const id = ++runId.current;
-    const pos = Number.parseInt(start, 10);
-    if (!Number.isFinite(pos) || pos < 1) {
+    const pos = Number(start);
+    if (!/^\d+$/.test(start) || !Number.isSafeInteger(pos) || pos < 1) {
       setError("Start must be the 1-based coordinate of the window's first base.");
       return;
     }
@@ -162,7 +164,7 @@ export function VariantPanel() {
           </p>
         </div>
         <div className="flex items-center gap-1">
-          <Button size="sm" onClick={run} disabled={busy} data-testid="run-variant-scan">
+          <Button size="sm" onClick={run} disabled={busy || !chromosome.trim() || !start.trim()} data-testid="run-variant-scan">
             {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden /> : null}
             {scan ? "Re-run" : "Join"}
           </Button>
@@ -192,11 +194,22 @@ export function VariantPanel() {
           ) : null}
         </div>
       </header>
+      <div className="mt-4 flex flex-wrap items-center gap-2 rounded-xl bg-surface-2 p-3">
+        <Button size="sm" variant="outline" disabled={busy} onClick={() => {
+          setPolymer("DNA");
+          setSequence("AGGAGGGCAGAGAGCTGGGGCCTCGGACTCACCCGACGCTTGTGATGAGCTGCACCCAGGA");
+          setChromosome("chr22");
+          setStart("36201668");
+          setScan(null); setPin(null); setShowAll(false); setError(null);
+        }}>Use chr22 example</Button>
+        <p className="text-xs text-fg-muted">Negative control · requires the matching saved Atlas export.</p>
+      </div>
 
       <div className="mt-3 flex flex-wrap items-end gap-2">
         <label className="text-[0.7rem] text-fg-subtle">
           Chromosome
           <input
+            placeholder="e.g. chr22"
             value={chromosome}
             onChange={(e) => setChromosome(e.target.value)}
             data-testid="variant-chromosome"
@@ -206,6 +219,7 @@ export function VariantPanel() {
         <label className="text-[0.7rem] text-fg-subtle">
           Start of window (1-based)
           <input
+            placeholder="e.g. 36201668"
             value={start}
             onChange={(e) => setStart(e.target.value)}
             inputMode="numeric"
@@ -220,7 +234,7 @@ export function VariantPanel() {
       </div>
 
       {error ? (
-        <p className="mt-3 rounded-[var(--radius-md)] border border-amber-500/40 bg-amber-500/10 p-2 text-xs text-amber-200">
+        <p className="mt-3 rounded-[var(--radius-md)] border border-amber-500/40 bg-amber-500/10 p-2 text-xs text-amber-700">
           {error}
         </p>
       ) : null}
@@ -235,7 +249,7 @@ export function VariantPanel() {
             <span className="font-mono text-fg">{source?.source ?? "unknown"}</span>{" "}
             {source?.note}
             {scan.run_record.regulatory_error ? (
-              <span className="text-amber-300">
+              <span className="text-amber-700">
                 {" "}
                 The source failed for this request: {scan.run_record.regulatory_error}. An
                 empty regulatory column below is that failure, not a quiet locus.
@@ -251,7 +265,7 @@ export function VariantPanel() {
               className={`mt-2 rounded-[var(--radius-md)] border p-2 text-[0.7rem] leading-relaxed ${
                 identity.matches_manifest === true
                   ? "border-border bg-bg/40 text-fg-subtle"
-                  : "border-amber-500/40 bg-amber-500/10 text-amber-200"
+                  : "border-amber-500/40 bg-amber-500/10 text-amber-700"
               }`}
               data-testid="variant-model-identity"
             >
@@ -281,10 +295,11 @@ export function VariantPanel() {
           {/* Per head, per axis. One overall "structural" verdict hides that a
               head may have no learned response to the buffer that was set. */}
           {responsiveness ? (
-            <div
+            <details
               className="mt-2 rounded-[var(--radius-md)] border border-border bg-bg/40 p-2 text-[0.7rem]"
               data-testid="variant-condition-responsiveness"
             >
+              <summary className="cursor-pointer text-xs font-medium text-fg">Condition applicability by model</summary>
               {Object.entries(responsiveness).map(([head, axesOf]) => {
                 const inert = Object.entries(axesOf)
                   .filter(([, st]) => st === "fixed")
@@ -296,7 +311,7 @@ export function VariantPanel() {
                   <p key={head} className="text-fg-subtle">
                     <span className="font-mono text-fg">{head}</span>{" "}
                     {inert.length === Object.keys(axesOf).length ? (
-                      <span className="text-amber-300">
+                      <span className="text-amber-700">
                         has no condition variation supported by this record;
                         interpret its output within the recorded reference conditions
                       </span>
@@ -320,12 +335,12 @@ export function VariantPanel() {
               {scan.run_record.condition_note ? (
                 <p className="mt-1 text-fg-subtle">{scan.run_record.condition_note}</p>
               ) : null}
-            </div>
+            </details>
           ) : null}
 
           <Quadrants counts={scan.quadrant_counts} />
           <p className="mt-2 text-xs text-fg-muted" data-testid="variant-coverage">
-            {scan.variants.length} variants · {scan.variants.filter((v) => v.regulatory !== null).length} with regulatory scores · {scan.variants.filter((v) => v.structural.delta !== null).length} with structural deltas.
+            {scan.variants.length} variants · {scan.variants.filter((v) => v.regulatory !== null).length} with regulatory scores · {scan.variants.filter((v) => v.structural.delta != null).length} with structural deltas · {scan.variants.filter((v) => v.structural.basis === "motif_lost").length} motif-destroying (ranked structurally high without a delta).
             Unclassified variants remain in the table; a missing value is not zero.
           </p>
 
@@ -409,7 +424,9 @@ export function VariantPanel() {
                       <td className="py-1 pr-3 text-fg">
                         {row.structural.delta != null
                           ? `${row.structural.delta > 0 ? "+" : ""}${row.structural.delta.toFixed(2)}`
-                          : "—"}
+                          : row.structural.basis === "motif_lost"
+                            ? "motif lost"
+                            : "—"}
                       </td>
                       <td className="py-1 pr-3 text-fg">
                         {row.regulatory

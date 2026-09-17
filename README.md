@@ -85,6 +85,7 @@ npm --prefix web run dev            # terminal 2 — http://127.0.0.1:8080, prox
 | `/scan/mutations` | POST | every single-base substitution across a window |
 | `/scan/conditions` | POST | response across a condition grid |
 | `/scan/variant` | POST | mutation scan joined to AlphaGenome scores |
+| `/scan/genome` | POST | G4-seq-trained window scan of a long sequence (<= 20 kb) |
 | `/batch` | POST | many sequences in one call |
 
 `/health` and `/ready` are deliberately different questions: a process whose
@@ -102,8 +103,14 @@ quadcond scan --fasta window.fa --heads g4_tm,im_pht
 quadcond competition <sequence>                 # both strands, scored separately
 quadcond sweep <sequence> --vary k --start 0 --stop 150
 quadcond atlas summary
+quadcond genome-scan --fasta promoters.fa --out regions.csv    # genomic windows, then their motifs
 quadcond report --out report.html
 ```
+
+`genome-scan` is the genomic path and is deliberately a different model from
+`predict`: the folding heads are oligonucleotide models and do not transfer to
+genomic windows, so they now refuse windows longer than their training range and
+point here. `docs/GENOME_SCAN.md` has the benchmark that forced the split.
 
 `competition` reports each strand on its own. It does not emit a combined
 "which structure wins" score: the two motifs sit on opposite strands of the
@@ -144,7 +151,16 @@ returns one of `motif_present`, `motif_gain_possible`, `borderline` or
 possible.
 
 `docs/ALPHAGENOME.md` covers the data files, their licences, and the exact
-semantics of the join.
+semantics of the join. A substitution that destroys the motif carries no delta,
+and since 0.5.1 it is nonetheless placed **structurally high** in the 2x2 by
+category (`structural.basis = "motif_lost"`) rather than left unclassified: it
+is the strongest structural result the scan can produce and it was sinking to
+the bottom of a table ranked on |delta|.
+
+`genomewide/` runs the same join over every canonical motif on chr1-22 and chrX,
+against matched out-of-motif control SNVs, and asks whether structure-changing
+variants carry larger AlphaGenome effects. Its README is a step-by-step bash
+session.
 
 ### Worked example
 
@@ -177,6 +193,18 @@ and are not described as condition-responsive anywhere in the interface.
 
 ---
 
+## Benchmarks against other tools
+
+`benchmarks/published_tools/` compares this package with G4Hunter, pqsfinder,
+QGRS Mapper, G4Catchall, G4Boost, DeepG4, G4detector, G4mismatch,
+G4ShapePredictor, G4STAB, iM-Seeker and G4SNVHunter, on grouped hold-outs and,
+where a tool's training recipe is public, with that tool retrained on the same
+folds. It reports where QuadCond wins (buffer-resolved Tm, buffer response,
+measured single-substitution dTm, i-motif pH_T) and where it lost badly enough
+to change the software (genomic G4 detection -- see `docs/GENOME_SCAN.md`).
+
+---
+
 ## Tests
 
 ```bash
@@ -198,6 +226,8 @@ web/            AENNA-3D workbench (React, TypeScript, Three.js, Vite)
 bridge/         AlphaGenome export, table server, join runner
 examples/       complete worked runs with provenance
 docs/           claims, model card, data sources, release gate, quickstart
+genomewide/     genome-scale motif enumeration, structural scan, AVI join, statistics
+benchmarks/     head-to-head against published G4 / i-motif tools
 tests/          backend test suite
 ```
 

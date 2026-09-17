@@ -22,37 +22,37 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg: #0a0a0c;
-  --color-bg-gradient-start: #0a0a0c;
-  --color-bg-gradient-end: #13141a;
+  --color-bg: #f5f8f7;
+  --color-bg-gradient-start: #f5f8f7;
+  --color-bg-gradient-end: #eef4f2;
   
-  --color-surface: rgba(18, 22, 26, 0.4);
-  --color-surface-2: rgba(24, 29, 34, 0.5);
-  --color-surface-3: rgba(32, 38, 44, 0.6);
-  --color-surface-solid: #12161a;
+  --color-surface: #ffffff;
+  --color-surface-2: #f1f6f4;
+  --color-surface-3: #e7efec;
+  --color-surface-solid: #ffffff;
   
-  --color-fg: #f8f9fa;
-  --color-fg-muted: #a1aab3;
-  --color-fg-subtle: #a0aab5;
+  --color-fg: #20302f;
+  --color-fg-muted: #4d625e;
+  --color-fg-subtle: #586e68;
   
-  --color-accent: #3b82f6;
+  --color-accent: #087f74;
   --color-accent-foreground: #ffffff;
-  --color-accent-glow: rgba(59, 130, 246, 0.5);
+  --color-accent-glow: rgba(8, 127, 116, 0.16);
   
-  --color-border: rgba(255, 255, 255, 0.08);
-  --color-border-strong: rgba(255, 255, 255, 0.16);
-  --color-ring: rgba(59, 130, 246, 0.5);
+  --color-border: #dbe5e1;
+  --color-border-strong: #c5d6cf;
+  --color-ring: rgba(8, 127, 116, 0.16);
   
-  --color-base-a: #60a5fa;
-  --color-base-t: #fcd34d;
-  --color-base-g: #34d399;
-  --color-base-c: #f87171;
+  --color-base-a: #2463a7;
+  --color-base-t: #9b710a;
+  --color-base-g: #0b8064;
+  --color-base-c: #c84b52;
 
   --radius-xs: 6px;
   --radius-sm: 10px;
   --radius-md: 14px;
-  --radius-lg: 20px;
-  --radius-xl: 28px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
 
   /* "Inter" and "Outfit" led these stacks but were never loaded by anything,
      so both already resolved to IBM Plex Sans. Naming a font you do not ship
@@ -70,6 +70,7 @@
 
 @layer base {
   html {
+    color-scheme: light;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -93,17 +94,17 @@
 
 @layer utilities {
   .glass {
-    @apply bg-surface backdrop-blur-xl border border-border shadow-[0_4px_30px_rgba(0,0,0,0.1)];
+    @apply bg-surface border border-border shadow-[0_2px_10px_rgba(31,66,52,0.03)];
   }
   .glass-panel {
-    @apply bg-surface-2 backdrop-blur-md border border-border rounded-xl;
+    @apply bg-surface border border-border rounded-xl;
   }
   .glass-card {
-    @apply bg-surface-3 backdrop-blur-lg border border-border-strong rounded-2xl shadow-xl transition-all duration-300;
+    @apply bg-surface border border-border rounded-2xl shadow-sm;
   }
   .glass-card:hover {
-    @apply shadow-2xl border-accent/30;
-    box-shadow: 0 0 20px var(--color-accent-glow);
+    @apply border-border;
+    box-shadow: 0 2px 12px rgb(31 66 52 / 0.04);
   }
 }
 
@@ -127,9 +128,33 @@
   background: var(--color-surface-solid); color: var(--color-fg);
   border: 1px solid var(--color-border-strong); overflow-y: auto;
 }
-.workbench-guide::backdrop { background: rgb(0 0 0 / 0.7); }
+.workbench-guide::backdrop { background: rgb(26 48 42 / 0.3); }
 [data-testid="evidence-card"] p, [data-testid="genomic-readout"] p { font-size: 0.75rem; line-height: 1.5; }
 @media (max-width: 1023px) {
   button:not([role="checkbox"]), [role="tab"] { min-height: 44px; }
   .glass-panel { min-width: 0; }
+}
+
+/* A readable light workbench: semantic colours stay distinct from magnitude. */
+input, textarea, select { accent-color: var(--color-accent); }
+input::placeholder, textarea::placeholder { color: var(--color-fg-subtle); }
+button, summary, select { -webkit-tap-highlight-color: transparent; }
+[data-testid="workbench"] > section,
+[data-testid="workbench"] [role="tabpanel"] > section { padding: 1.25rem; }
+[data-testid="workbench"] h3 { font-size: 1rem; font-weight: 600; }
+[data-testid="workbench"] p { line-height: 1.65; }
+[data-testid="workbench"] th { background: var(--color-surface-2); }
+[data-testid="workbench"] td, [data-testid="workbench"] th { padding: 0.65rem 0.6rem; }
+[data-testid="workbench"] tbody tr:hover { background: var(--color-surface-2); }
+[data-testid="variant-quadrant"] { border-radius: 12px; }
+[data-testid="variant-quadrant"][data-quadrant="unclassified"] { grid-column: 1 / -1; }
+[data-testid="variant-coverage"] { background: var(--color-surface-2); border-radius: 10px; padding: 0.85rem; }
+[class*="text-[0.6"], [class*="text-[0.7"], [class*="text-[10px]"], [class*="text-[11px]"] { font-size: 0.75rem; }
+[class*="text-[9px]"] { font-size: 0.68rem; }
+.workbench-guide { box-shadow: 0 24px 70px rgb(26 48 42 / 0.15); }
+@media (max-width: 639px) {
+  .app-header { padding: 0.9rem 1rem; }
+  .app-header h1 { font-size: 1rem; }
+  .app-header h1 + p { font-size: 0.7rem; }
+  [data-testid="workbench"] [role="tabpanel"] > section { padding: 0.9rem; }
 }

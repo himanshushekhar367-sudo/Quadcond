@@ -127,7 +127,7 @@ class AssetError(RuntimeError):
 
 def search_paths(asset: Asset) -> list[Path]:
     """Every place this asset could legitimately be, in resolution order."""
-    sub = "artifacts" if asset.kind == "model" else "data"
+    sub = "data" if asset.kind == "atlas" else "artifacts"
     return [
         Path.cwd() / sub / asset.filename,
         cache_dir() / asset.filename,

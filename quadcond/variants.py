@@ -317,6 +317,19 @@ def variant_scan(
     reg_rank = _percentile_ranks(
         [abs(r["regulatory"]["score"]) if r["regulatory"] else None for r in rows])
 
+    # A substitution that destroys the head's motif is the most disruptive
+    # structural outcome the scan can report, yet it carries no delta (there is
+    # no mutant motif to put a number on). Leaving it `unclassified` dropped the
+    # strongest structural candidates to the bottom of the ranked table. It is
+    # placed on the structural axis categorically instead: structurally high,
+    # structural rank 1.0, `structural.basis = "motif_lost"`, and still no
+    # invented delta.
+    for i, r in enumerate(rows):
+        r["structural"]["basis"] = "delta" if r["structural"]["magnitude"] is not None else None
+        if r["structural"]["motif_state"] == "motif_lost":
+            struct_rank[i] = 1.0
+            r["structural"]["basis"] = "motif_lost"
+
     counts = {"structural_only": 0, "regulatory_only": 0,
               "both": 0, "neither": 0, "unclassified": 0}
     for row, sr, rr in zip(rows, struct_rank, reg_rank):
@@ -324,24 +337,31 @@ def variant_scan(
         if row["regulatory"] is not None:
             row["regulatory"]["rank"] = rr
         mag = row["structural"]["magnitude"]
+        lost = row["structural"]["basis"] == "motif_lost"
         reg = abs(row["regulatory"]["score"]) if row["regulatory"] else None
-        if mag is None or reg is None:
+        if (mag is None and not lost) or reg is None:
             # Two different absences: the head declined or lost the motif, or
             # the regulatory source has no record. Either way the variant is
             # unclassified, because a quadrant needs two coordinates.
             row["quadrant"] = "unclassified"
             row["quadrant_reason"] = (
-                "no structural delta (motif lost, refused or out of domain)"
+                "no structural delta (no motif, refused or out of domain)"
                 if mag is None else "no regulatory record for this substitution")
             row["combined_rank"] = None
             counts["unclassified"] += 1
             continue
-        s_hi = mag >= structural_threshold if structural_threshold is not None else (sr or 0) >= 0.75
+        if lost:
+            s_hi = True
+        else:
+            s_hi = mag >= structural_threshold if structural_threshold is not None else (sr or 0) >= 0.75
         r_hi = reg >= regulatory_threshold if regulatory_threshold is not None else (rr or 0) >= 0.75
         row["quadrant"] = ("both" if s_hi and r_hi else
                            "structural_only" if s_hi else
                            "regulatory_only" if r_hi else "neither")
         row["combined_rank"] = round(min(sr or 0.0, rr or 0.0), 4)
+        if lost:
+            row["quadrant_reason"] = ("motif lost: structurally high by category "
+                                      "(no delta is emitted for a destroyed motif)")
         counts[row["quadrant"]] += 1
 
     rows.sort(key=lambda r: (r["combined_rank"] is None,
@@ -459,9 +479,11 @@ def variant_scan(
         "interpretation_note": (
             "A variant in the 'both' cell is a candidate for a structure-mediated "
             "regulatory mechanism: the regulatory model expects an effect and "
-            "this head expects the local G-quadruplex or i-motif to change. That "
-            "is a hypothesis to test, not a finding. Neither axis observes the "
-            "other, no joint model was fitted, and the structural axis carries "
-            "the same limitation as every other QuadCond delta -- mutation-effect "
-            "prediction has not been validated here as its own task."),
+            "this head expects the local G-quadruplex or i-motif to change (or "
+            "loses its motif outright). That is a hypothesis to test, not a "
+            "finding. Neither axis observes the other and no joint model was "
+            "fitted. The structural delta has been benchmarked on its own on "
+            "1,020 measured single-substitution Tm pairs (grouped hold-out, "
+            "Spearman 0.54, direction correct 81 % for |dTm| >= 2 C; "
+            "benchmarks/published_tools); the combined ranking has not."),
     }
