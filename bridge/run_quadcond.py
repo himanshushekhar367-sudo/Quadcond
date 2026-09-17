@@ -1,4 +1,4 @@
-"""Fetch Atlas scores and run QuadCond 0.4.9 on the same GRCh38 motif window.
+"""Fetch Atlas scores and run QuadCond on the same GRCh38 motif window.
 
 Run without arguments for prompts. --export-only saves scores without loading
 a model. --reuse EXPORT_FOLDER runs QuadCond on an existing export, without a key.
@@ -13,7 +13,8 @@ import subprocess
 import sys
 
 HERE = Path(__file__).resolve().parent
-DEFAULT_ROOT = HERE.parent / 'release-v0.4.9' / 'quadcond'
+DEFAULT_ROOT = (HERE.parent if (HERE.parent / 'quadcond' / 'variants.py').is_file()
+                else HERE.parent / 'quadcond-repo')
 
 
 def prompt_value(label, convert, explanation):
@@ -55,8 +56,8 @@ def load_quadcond(root):
             raise ValueError(f'Not a QuadCond source directory: {root}')
         sys.path.insert(0, str(root))
     import quadcond
-    if quadcond.__version__ != '0.4.9':
-        raise ValueError(f'Expected QuadCond 0.4.9, found {quadcond.__version__}')
+    if quadcond.__version__ not in {'0.4.9', '0.5.0'}:
+        raise ValueError(f'Expected QuadCond 0.4.9 or 0.5.0, found {quadcond.__version__}')
     from quadcond import assets, variants
     return assets, variants
 

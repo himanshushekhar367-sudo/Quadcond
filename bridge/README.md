@@ -1,5 +1,33 @@
 # Easy AlphaGenome -> QuadCond -> AENNA integration
 
+## QuadCond 0.5.0: use the isolated model environment
+
+From the `quadcond-repo` directory, create this environment once:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -e . -r requirements-model.txt
+```
+
+Start the workbench with your existing export (no AlphaGenome key or new query):
+
+```powershell
+.\.venv\Scripts\python.exe bridge\serve_table.py ..\alphagenome_bridge\results\chr22_example_20260915_105922_ce722e\quadcond_scores.csv
+```
+
+Open http://localhost:8765/ and use Compare > Variant join. For that export,
+the chromosome is `chr22`, first base `36201668`, and sequence:
+
+```text
+AGGAGGGCAGAGAGCTGGGGCCTCGGACTCACCCGACGCTTGTGATGAGCTGCACCCAGGA
+```
+
+The export has 183 AVI-scored substitutions. It is a negative-control software
+case: missing structural deltas remain missing and variants stay unclassified.
+Use the environment's Python for model inference; the machine's default Python
+may contain incompatible versions. Stop the old server before starting another
+on port 8765.
+
 ## New: one-command workflow
 
 Run in PowerShell:
@@ -16,7 +44,7 @@ confirms AVI_SCORE is available for your account.
 
 To fetch and immediately run the full comparison, omit `--export-only`.
 This requires the matching trained model. The runner automatically imports
-your extracted release-v0.4.9 source, so a separate editable install is not
+the current `quadcond-repo` source, so a separate editable install is not
 required when its Python dependencies are already present.
 
 To run an already exported window without another API request:
@@ -149,7 +177,7 @@ AENNA interface to that local backend. Enter the SAME sequence, chromosome and
 first-base coordinate in Variant join, choose conditions, and click Join.
 The table only covers the exported window; export again for a different locus.
 Restart this service to load a different table. Only run one backend on port
-8765. The launcher uses the v0.4.9 service's private cached-source slot and is
+8765. The launcher supports the inspected 0.4.9 and 0.5.0 cached-source interface and is
 version-guarded. It preserves normal model provenance/asset checks.
 
 A hosted AENNA site may need a reachable backend with its normal deployment

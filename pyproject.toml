@@ -47,7 +47,7 @@ tabix = ["pysam>=0.22"]
 live = ["alphagenome"]
 # ruff is pinned to a minor series on purpose: a new release that adds a
 # rule would otherwise turn a green CI red without a line of code changing.
-dev = ["pytest>=8.0", "ruff>=0.15,<0.16"]
+dev = ["pytest>=8.0", "ruff>=0.15,<0.16", "openpyxl>=3.1.5", "jsonschema>=4"]
 
 [project.scripts]
 quadcond = "quadcond.cli:main"

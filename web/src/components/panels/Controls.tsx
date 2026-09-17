@@ -459,11 +459,20 @@ export function RightPanel() {
             <div className="mt-4 space-y-3">
               <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
                 <p className="text-[11px] leading-relaxed text-amber-200/90">
+                  {backend === "connected" && !busy ? (
+                    <>QuadCond is connected, but returned no structural evidence
+                    cards for this sequence under its implemented rules. This is
+                    an applicability result, not evidence that the DNA cannot form
+                    a structure. The drawings below are schematic.</>
+                  ) : busy ? (
+                    <>Waiting for QuadCond predictions. The drawings below are schematic.</>
+                  ) : (<>
                   QuadCond is not reachable, so there are no predicted values —
                   no melting temperature, no transitional pH, no probabilities.
                   The structures below are drawn at published helical parameters
                   from the motifs in your sequence. Nothing has been substituted
                   for the missing numbers.
+                  </>)}
                 </p>
               </div>
               <ul className="space-y-2">

@@ -55,8 +55,8 @@ refusal paths return their reasons in full.
 ## What was NOT established
 
 1. **These metrics were read back, not re-derived.** They are stored inside the
-   artifact. Matching them proves this is the artifact the model card was
-   written from. Re-deriving them needs the 354 MB `atlas` asset and
+   artifact. Matching them establishes agreement with the model card's stored
+   metrics, not unique artifact identity or estimator equivalence. Re-deriving them needs the 354 MB `atlas` asset and
    `scripts/02_train.py`; that atlas is not present, so this reproduction is
    still open.
 2. **Whether the superseded hashes describe a different model or a different

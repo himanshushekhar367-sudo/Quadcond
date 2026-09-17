@@ -24,6 +24,7 @@ web/.vite/
 *.db
 *.db-journal
 *.db-wal
+*.db-shm
 quadcond/_web/
 
 # AlphaGenome bundles and other large third-party data

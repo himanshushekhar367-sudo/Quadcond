@@ -67,6 +67,7 @@ function Quadrants({ counts }: { counts: Record<string, number> }) {
       {cell("regulatory_only", "Regulatory only", "effect without a structural account here")}
       {cell("structural_only", "Structural only", "structure moves; no regulatory signal")}
       {cell("neither", "Neither", "low on both axes")}
+      {cell("unclassified", "Not classifiable", "one or both numerical axes unavailable")}
     </div>
   );
 }
@@ -80,6 +81,7 @@ export function VariantPanel() {
   const [start, setStart] = useState("128748301");
   const [scan, setScan] = useState<VariantScan | null>(null);
   const [busy, setBusy] = useState(false);
+  const [showAll, setShowAll] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   /** Same pin-and-discard guard as the other comparison panels. A join is only
@@ -127,8 +129,8 @@ export function VariantPanel() {
   }, [sequence, chromosome, start, conditions, conditionKey, locusKey]);
 
   const top = useMemo(
-    () => (scan ? scan.variants.filter((v) => v.combined_rank !== null).slice(0, 25) : []),
-    [scan],
+    () => (scan ? (showAll ? scan.variants : scan.variants.slice(0, 25)) : []),
+    [scan, showAll],
   );
 
   if (backend !== "connected") return null;
@@ -212,8 +214,8 @@ export function VariantPanel() {
           />
         </label>
         <p className="text-[0.65rem] text-fg-subtle">
-          The coordinate of the first base of the sequence above. It is checked
-          against the assembly, not assumed — an off-by-one is a different variant.
+          Use the verified GRCh38 forward-strand coordinate of the first base.
+          This panel does not fetch the reference assembly to verify your input.
         </p>
       </div>
 
@@ -322,6 +324,10 @@ export function VariantPanel() {
           ) : null}
 
           <Quadrants counts={scan.quadrant_counts} />
+          <p className="mt-2 text-xs text-fg-muted" data-testid="variant-coverage">
+            {scan.variants.length} variants · {scan.variants.filter((v) => v.regulatory !== null).length} with regulatory scores · {scan.variants.filter((v) => v.structural.delta !== null).length} with structural deltas.
+            Unclassified variants remain in the table; a missing value is not zero.
+          </p>
 
           {/* Preserve motif events, including those without numerical deltas. */}
           {candidateTotal ? (
@@ -377,7 +383,7 @@ export function VariantPanel() {
             <div className="mt-3 min-w-0 max-w-full overflow-x-auto">
               <table className="w-full min-w-[38rem] text-left text-xs">
                 <caption className="sr-only">
-                  Substitutions ranked by the smaller of the two percentile ranks
+                  Variants with ranked rows first; unclassified rows retained
                 </caption>
                 <thead className="text-fg-subtle">
                   <tr>
@@ -416,7 +422,7 @@ export function VariantPanel() {
                       <td className="py-1 pr-3 text-fg-muted">
                         {row.combined_rank != null ? row.combined_rank.toFixed(2) : "—"}
                       </td>
-                      <td className="py-1">
+                      <td className="py-1" title={row.quadrant_reason ?? undefined}>
                         <Badge variant="outline" className="text-[9px]">
                           {QUADRANT_LABEL[row.quadrant]}
                         </Badge>
@@ -428,10 +434,14 @@ export function VariantPanel() {
             </div>
           ) : (
             <p className="mt-3 text-xs text-fg-muted">
-              No substitution in this window carries both axes, so nothing can be
-              ranked. The quadrant counts above say why.
+              No variant rows were returned for this window.
             </p>
           )}
+          {scan.variants.length > 25 ? (
+            <Button size="sm" variant="ghost" onClick={() => setShowAll(!showAll)}>
+              {showAll ? "Show first 25 variants" : `Show all ${scan.variants.length} variants`}
+            </Button>
+          ) : null}
 
           <p className="mt-3 flex gap-2 text-[0.7rem] leading-relaxed text-fg-subtle">
             <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" aria-hidden />
