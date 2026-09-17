@@ -1,0 +1,9 @@
+{
+  "name": "TERT_hT21",
+  "chromosome": "chr5",
+  "start_1based": 1295084,
+  "sequence": "AGGAAGGGGAGGGGCTGGGAGGGCCCGGAGGG",
+  "motif": "GGGGAGGGGCTGGGAGGGCCCG",
+  "motif_strand": "+",
+  "source": "file:C:\\Users\\pc\\GRCh38.p13.genome.fa"
+}

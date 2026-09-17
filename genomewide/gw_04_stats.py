@@ -102,6 +102,12 @@ def main():
         both["subst"] = [subst_type(r, x) for r, x in zip(both.ref, both.alt)]
         frames.append(both.dropna(subset=["abs_avi"]))
         print(f"{chrom}: {len(frames[-1])} SNVs with AVI", flush=True)
+    if not frames:
+        raise SystemExit(
+            "nothing to analyse: no chromosome has both a structural and an AVI table.\n"
+            f"  structural: {base / 'structural'}\n"
+            f"  avi:        {base / 'avi'}\n"
+            "Run gw_03_avi.py (Tabix bundle) or gw_03_avi_live.py (sampled, live API) first.")
     D = pd.concat(frames, ignore_index=True)
     if _has_parquet():
         D.to_parquet(sd / "snv_table.parquet")

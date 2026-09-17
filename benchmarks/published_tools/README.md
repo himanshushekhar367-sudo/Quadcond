@@ -155,27 +155,43 @@ differs from this one. Its regressor was trained on these very pH_T values.
 
 ![](figures/fig4_condition_pht.png)
 
-### 8. AlphaGenome join: a positive control
+### 8. AlphaGenome join: a positive control (run 17 September 2026)
 
-The chr22 window remains a negative control (0 / 183 structural deltas). On six
-published promoter G4s the same `g4_tm` scan (K 140, Na 10, Mg 1 mM, pH 7.4,
-37 °C) does return structural deltas:
+The chr22 window is a negative control: 183 variants, 183 regulatory scores,
+**0** structural deltas, because no canonical motif is there to perturb. The
+same join on six published promoter G4s, with coordinates derived from the local
+GRCh38 FASTA and AVI scores from the live Atlas, at K 140 / Na 10 / Mg 1 mM /
+pH 7.4 / 37 °C, `g4_tm` as the structural axis:
 
-| control | substitutions | with Δ | motif lost | \|Δ\| ≥ 5 °C | most destabilising |
-|---|---|---|---|---|---|
-| MYC Pu27 | 81 | 81 | 0 | 10 | −7.2 °C |
-| VEGFA Pu22 | 69 | 45 | 24 | 7 | −9.4 °C |
-| BCL2 Pu39 | 117 | 105 | 12 | 9 | −6.8 °C |
-| hTERT hT21 | 66 | 36 | 30 | 4 | −3.3 °C |
-| KIT c-kit1 | 66 | 30 | 36 | 3 | −1.8 °C |
-| KIT c-kit2 | 63 | 30 | 33 | 1 | −3.0 °C |
+| control | locus (hg38) | variants | both | structural only | regulatory only | neither | unclassified | motif-destroying | most destabilising |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| MYC Pu27 | chr8:127,735,923 (−) | 111 | 6 | 22 | 22 | 61 | 0 | 0 | −5.4 °C |
+| KIT c-kit1 | chr4:54,657,879 | 96 | 14 | 34 | 10 | 38 | 0 | 33 | −4.5 °C |
+| KIT c-kit2 | chr4:54,657,829 | 93 | 11 | 37 | 12 | 33 | 0 | 33 | −5.9 °C |
+| VEGFA Pu22 | chr6:43,770,118 | 90 | 14 | 27 | 9 | 40 | 0 | 24 | −8.0 °C |
+| BCL2 Pu39 | chr18:63,320,112 | 147 | 16 | 30 | 21 | 80 | 0 | 12 | −4.8 °C |
+| TERT hT21 | chr5:1,295,084 | 96 | 4 | 27 | 20 | 45 | 0 | 9 | −6.6 °C |
+| **total** | | **633** | **65** | **177** | **94** | **297** | **0** | **111** | |
 
-`alphagenome_bridge/positive_controls.py` finds these motifs in hg38 through the
-UCSC API, derives the exact windows and runs the full join. It needs your
-AlphaGenome key. It was not run in the sandbox, because UCSC is blocked there.
-Substitutions that remove a motif currently carry no Δ, only a
-`motif_lost` state. They are the most disruptive class, so the 2×2 should count
-them as structural-high explicitly.
+Three things this establishes that the chr22 run could not:
+
+1. **The 2×2 is exercised.** 65 variants land in `both` — the regulatory model
+   expects an effect *and* the structural head expects the local G4 to change.
+2. **Nothing is unclassified.** Before 0.5.1, the 111 motif-destroying
+   substitutions had no delta and therefore no quadrant, and fell to the bottom
+   of a table ranked on |delta|. They now rank structurally high by category, and
+   two of the six top-ranked variants are exactly those: `chr22`-style silence
+   turns out to have been hiding the most disruptive class.
+3. **The top of the ranking is biologically sensible.** Every top-ranked variant
+   is a G>T or G>A in a G-tract: KIT c-kit2 `G21T` (motif destroyed,
+   AVI 0.75, rank 0.98), TERT `G8A` (−5.5 °C, AVI 1.04, rank 0.95), VEGFA
+   `G19A` (−6.3 °C, AVI 0.97, rank 0.95), KIT c-kit1 `G28T` (−4.5 °C, AVI 1.07).
+
+Reproduce with `alphagenome_bridge/positive_controls.py --fasta <GRCh38.fa>`;
+the run records are in each control's `joined_variants.json`. This is a software
+and plausibility check on the join, not evidence that any of these variants
+changes expression: both axes are model output, and the combined ranking has
+never been benchmarked against measured regulatory variants.
 
 ## What this means
 
@@ -199,7 +215,7 @@ in-cell meaning of the genomic-proxy heads.
 | motif-destroying variants unclassified in the 2×2 (section 8) | they are now ranked structurally high by category (`structural.basis = "motif_lost"`, rank 1.0), with no invented delta, in the API and the workbench. |
 | assets unreachable from a clone | every asset except the 354 MB training atlas now carries its v0.5.1 release URL. |
 | genome-wide scale | `genomewide/` implements the whole analysis (motifs, structural scan, matched controls, AVI join, statistics with a within-motif paired test) as a resumable bash pipeline. |
-| positive control not runnable | `alphagenome_bridge/positive_controls.py` no longer needs `requests` and drives the two Python environments itself. |
+| positive control not runnable | `alphagenome_bridge/positive_controls.py` reads the reference from a local FASTA (no TLS roots needed), drives the two Python environments itself, and has run: six promoter G4s, 633 variants, 65 in `both`, 0 unclassified (section 8). |
 
 `results/scanner_benchmark.csv` holds the genome-scanner comparison.
 
@@ -214,7 +230,9 @@ in-cell meaning of the genomic-proxy heads.
 4. **Publish the assets.** The URLs are now recorded (v0.5.1); the release still
    has to be created and the four files attached to it, then archived on Zenodo
    for a DOI.
-5. **Run `positive_controls.py`** and add one positive-control figure to the paper.
+5. ~~Run `positive_controls.py`.~~ **Done** — section 8 above. Worth one figure
+   in the paper: the 2×2 for the six controls, with the motif-destroying class
+   marked.
 6. **Genome-wide scale (all chromosomes).** The pipeline exists (`genomewide/`,
    step-by-step in its README); it needs the AVI Tabix bundle downloaded and an
    overnight run. That analysis — do structure-changing SNVs carry larger

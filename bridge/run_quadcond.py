@@ -123,6 +123,24 @@ def model_path(assets, explicit, root):
         raise assets.AssetError('\n'.join(errors) or 'No matching trained model found; provide --model PATH')
 
 
+def write_csv(path, rows):
+    """Local, on purpose.
+
+    This used to be `from export_atlas import write_csv`, and export_atlas
+    imports the `alphagenome` client at module level -- so the structural half
+    of a run, which needs no key, no network and no client, died on
+    `ModuleNotFoundError: alphagenome` *after* writing joined_variants.json.
+    A CSV writer is five lines; importing an API client to get one is how an
+    optional dependency becomes a required one.
+    """
+    if not rows:
+        raise ValueError('nothing to write')
+    with Path(path).open('w', encoding='utf-8', newline='') as f:
+        w = csv.DictWriter(f, fieldnames=list(rows[0]))
+        w.writeheader()
+        w.writerows(rows)
+
+
 def flatten(result):
     rows = []
     for v in result['variants']:
@@ -214,7 +232,6 @@ def main():
         table_sha256=hashlib.sha256((folder / 'quadcond_scores.csv').read_bytes()).hexdigest(),
         interpretation='Two prediction axes; not validated causal or clinical evidence')
     result_json.write_text(json.dumps(result, indent=2, default=str), encoding='utf-8')
-    from export_atlas import write_csv
     write_csv(result_csv, flatten(result))
     print(f'Saved joined comparison: {result_csv}')
     print(f'Full predictions, flags and provenance: {result_json}')

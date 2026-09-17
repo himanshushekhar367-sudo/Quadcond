@@ -1,0 +1,9 @@
+{
+  "name": "KIT_ckit1",
+  "chromosome": "chr4",
+  "start_1based": 54657879,
+  "sequence": "CGCAGAGGGAGGGCGCTGGGAGGAGGGGCTGC",
+  "motif": "AGGGAGGGCGCTGGGAGGAGGG",
+  "motif_strand": "+",
+  "source": "file:C:\\Users\\pc\\GRCh38.p13.genome.fa"
+}

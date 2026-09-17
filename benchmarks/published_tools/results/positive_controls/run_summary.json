@@ -1,0 +1,62 @@
+[
+  {
+    "name": "MYC_Pu27",
+    "chromosome": "chr8",
+    "start_1based": 127735923,
+    "sequence": "CCCCACCTTCCCCACCCTCCCCACCCTCCCCATAAGC",
+    "motif": "TGGGGAGGGTGGGGAGGGTGGGGAAGG",
+    "motif_strand": "-",
+    "source": "file:C:\\Users\\pc\\GRCh38.p13.genome.fa",
+    "status": "exit 1"
+  },
+  {
+    "name": "KIT_ckit1",
+    "chromosome": "chr4",
+    "start_1based": 54657879,
+    "sequence": "CGCAGAGGGAGGGCGCTGGGAGGAGGGGCTGC",
+    "motif": "AGGGAGGGCGCTGGGAGGAGGG",
+    "motif_strand": "+",
+    "source": "file:C:\\Users\\pc\\GRCh38.p13.genome.fa",
+    "status": "exit 1"
+  },
+  {
+    "name": "KIT_ckit2",
+    "chromosome": "chr4",
+    "start_1based": 54657829,
+    "sequence": "AGACCCGGGCGGGCGCGAGGGAGGGGAGGCG",
+    "motif": "CGGGCGGGCGCGAGGGAGGGG",
+    "motif_strand": "+",
+    "source": "file:C:\\Users\\pc\\GRCh38.p13.genome.fa",
+    "status": "exit 1"
+  },
+  {
+    "name": "VEGFA_Pu22",
+    "chromosome": "chr6",
+    "start_1based": 43770118,
+    "sequence": "CCCCCGGGGCGGGCCGGGGGCGGGGTCCCG",
+    "motif": "GGGGCGGGCCGGGGGCGGGG",
+    "motif_strand": "+",
+    "source": "file:C:\\Users\\pc\\GRCh38.p13.genome.fa",
+    "status": "exit 1"
+  },
+  {
+    "name": "BCL2_Pu39",
+    "chromosome": "chr18",
+    "start_1based": 63320112,
+    "sequence": "CGCGGAGGGGCGGGCGCGGGAGGAAGGGGGCGGGAGCGGGGCTGTGGTG",
+    "motif": "AGGGGCGGGCGCGGGAGGAAGGGGGCGGGAGCGGGGCTG",
+    "motif_strand": "+",
+    "source": "file:C:\\Users\\pc\\GRCh38.p13.genome.fa",
+    "status": "exit 1"
+  },
+  {
+    "name": "TERT_hT21",
+    "chromosome": "chr5",
+    "start_1based": 1295084,
+    "sequence": "AGGAAGGGGAGGGGCTGGGAGGGCCCGGAGGG",
+    "motif": "GGGGAGGGGCTGGGAGGGCCCG",
+    "motif_strand": "+",
+    "source": "file:C:\\Users\\pc\\GRCh38.p13.genome.fa",
+    "status": "exit 1"
+  }
+]

@@ -1,0 +1,9 @@
+{
+  "name": "MYC_Pu27",
+  "chromosome": "chr8",
+  "start_1based": 127735923,
+  "sequence": "CCCCACCTTCCCCACCCTCCCCACCCTCCCCATAAGC",
+  "motif": "TGGGGAGGGTGGGGAGGGTGGGGAAGG",
+  "motif_strand": "-",
+  "source": "file:C:\\Users\\pc\\GRCh38.p13.genome.fa"
+}
