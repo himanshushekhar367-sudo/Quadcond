@@ -48,3 +48,6 @@ Thumbs.db
 .idea/
 .vscode/
 *.swp
+
+# Genome-wide run output (per-chromosome tables, tens of GB)
+gw_out/
