@@ -50,6 +50,7 @@ out for it).
 |---|---|---|---|---|
 | **QuadCond genome-scan** | 0.942 | **0.928** | 0.928 | **0.775** |
 | G4Hunter (max 25-nt window) | 0.947 | 0.672 | 0.930 | 0.554 |
+| pqsfinder | 0.935 | 0.536 | 0.914 | 0.479 |
 | G4mismatch (K) | 0.965 | 0.849 | **0.942** | 0.636 |
 | G4detector (K, random-neg) *in-sample* | **0.970** | 0.818 | 0.956 | 0.623 |
 | G4detector (K, PQ-neg) *in-sample* | 0.441 | 0.928 | 0.470 | 0.761 |
@@ -66,8 +67,8 @@ labelled human-genomic.
 The point of the table is the second column. Telling observed G4-seq windows
 from random genome is easy and G4Hunter already does it; telling them from
 *other canonical motifs that were not observed* is the discrimination a genomic
-scanner has to have, and there the rule-based scores are near chance while this
-scanner holds up, including on a genome it never saw.
+scanner has to have, and there the rule-based scores are near chance (pqsfinder 0.54 and
+0.48, G4Hunter 0.67 and 0.55) while this scanner holds up, including on a genome it never saw.
 
 ## Known failure mode: isolated motifs in G-poor context
 

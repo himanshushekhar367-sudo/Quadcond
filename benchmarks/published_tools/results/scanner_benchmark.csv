@@ -5,6 +5,8 @@ test_heldout_chr,random,G4Hunter (max |25-nt window|),0.9466,0.9701,8996
 test_heldout_chr,pq,G4Hunter (max |25-nt window|),0.6716,0.8097,8993
 test_heldout_chr,random,G4Hunter (|whole-window mean|),0.8755,0.934,8996
 test_heldout_chr,pq,G4Hunter (|whole-window mean|),0.6045,0.7546,8993
+test_heldout_chr,random,pqsfinder,0.935,0.9618,8996
+test_heldout_chr,pq,pqsfinder,0.5362,0.7388,8993
 test_heldout_chr,random,canonical G3 regex count,0.6906,0.7931,8996
 test_heldout_chr,pq,canonical G3 regex count,0.5316,0.7059,8993
 test_heldout_chr,random,DeepG4,0.7252,0.8395,8996
@@ -23,6 +25,8 @@ test_mouse,random,G4Hunter (max |25-nt window|),0.9302,0.952,9000
 test_mouse,pq,G4Hunter (max |25-nt window|),0.554,0.693,8998
 test_mouse,random,G4Hunter (|whole-window mean|),0.8882,0.9332,9000
 test_mouse,pq,G4Hunter (|whole-window mean|),0.5807,0.7483,8998
+test_mouse,random,pqsfinder,0.9135,0.9437,9000
+test_mouse,pq,pqsfinder,0.4787,0.6855,8998
 test_mouse,random,canonical G3 regex count,0.6894,0.7898,9000
 test_mouse,pq,canonical G3 regex count,0.4734,0.7014,8998
 test_mouse,random,DeepG4,0.7535,0.8512,9000

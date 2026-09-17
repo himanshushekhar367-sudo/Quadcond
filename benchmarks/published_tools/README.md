@@ -191,27 +191,36 @@ layer. As far as a literature search found, no published tool combines these.
 i-motif buffer response for new sequences (only two 5DUVMA constructs); the
 in-cell meaning of the genomic-proxy heads.
 
+## What 0.5.1 changed (this benchmark's consequences)
+
+| finding | what was done |
+|---|---|
+| `g4_fold` at or below chance on genomic windows (section 2) | the binary folding heads now **refuse** windows longer than their training range, and a new G4-seq-trained model answers the genomic question: `quadcond genome-scan`, `POST /scan/genome`, `docs/GENOME_SCAN.md`. On the hard negatives it scores 0.928 (held-out chromosomes) and 0.775 (mouse), against 0.672 / 0.554 for G4Hunter. |
+| motif-destroying variants unclassified in the 2×2 (section 8) | they are now ranked structurally high by category (`structural.basis = "motif_lost"`, rank 1.0), with no invented delta, in the API and the workbench. |
+| assets unreachable from a clone | every asset except the 354 MB training atlas now carries its v0.5.1 release URL. |
+| genome-wide scale | `genomewide/` implements the whole analysis (motifs, structural scan, matched controls, AVI join, statistics with a within-motif paired test) as a resumable bash pipeline. |
+| positive control not runnable | `alphagenome_bridge/positive_controls.py` no longer needs `requests` and drives the two Python environments itself. |
+
+`results/scanner_benchmark.csv` holds the genome-scanner comparison.
+
 ## Before submission
 
-1. **Fix or demote `g4_fold` for genomic use.** Either retrain with measured
-   non-folders plus genomic negatives (G4-seq unobserved PQS are a ready source),
-   or in the web server route genomic windows to a validated scanner
-   (G4Hunter/pqsfinder) and use QuadCond only for stability, topology and Δ.
-   Report section 2 either way.
+1. ~~Fix or demote `g4_fold` for genomic use.~~ **Done in 0.5.1** — refusal plus
+   a G4-seq-trained scanner (`docs/GENOME_SCAN.md`). Section 2 is reported as
+   the reason, not hidden.
 2. **Lead the paper with sections 4–6**, and include the ΔTm pair set as a
    released benchmark; it is itself a contribution.
-3. **Give `motif_lost` substitutions a structural rank** in the 2×2.
-4. **Publish the assets.** Every `url` in `assets_manifest.json` is `null`, so
-   a colleague who clones the public repo cannot run it. Attach the model and atlas
-   to a tagged GitHub release, then archive it on Zenodo.
+3. ~~Give `motif_lost` substitutions a structural rank in the 2×2.~~ **Done in 0.5.1.**
+4. **Publish the assets.** The URLs are now recorded (v0.5.1); the release still
+   has to be created and the four files attached to it, then archived on Zenodo
+   for a DOI.
 5. **Run `positive_controls.py`** and add one positive-control figure to the paper.
-6. **Genome-wide scale (all chromosomes).** Needed for the paper, but not as
-   "all 9 billion variants". Take every SNV inside G4/iM motifs on chr1–22 and X,
-   plus matched out-of-motif controls, and read the AVI scores from the
-   88.5 GB AVI Tabix bundle (commercial-use licence, read by seek), not the live API.
-   Test whether structure-changing SNVs carry larger AlphaGenome effects than
-   matched controls. That is the biological result the paper needs.
-7. Commit the 11 modified web files (currently only in the working tree).
+6. **Genome-wide scale (all chromosomes).** The pipeline exists (`genomewide/`,
+   step-by-step in its README); it needs the AVI Tabix bundle downloaded and an
+   overnight run. That analysis — do structure-changing SNVs carry larger
+   AlphaGenome effects than matched controls in the same element — is the
+   biological result the paper needs.
+7. ~~Commit the 11 modified web files.~~ **Done** (commit `c995cd0`); still to push.
 
 ## Reproduce
 
