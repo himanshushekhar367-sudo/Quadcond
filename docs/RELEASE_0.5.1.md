@@ -58,6 +58,32 @@ with that stated.
   single-substitution Tm pairs (Spearman 0.54, direction correct 81 % at
   |ΔTm| ≥ 2 °C). The *combined* ranking remains unvalidated, and says so.
 
+## Publishing the assets
+
+The manifest URLs point at the `v0.5.1` release, which has to exist for
+`quadcond assets fetch` to work. With the GitHub CLI:
+
+```powershell
+winget install --id GitHub.cli        # if `gh` is not installed
+gh auth login
+gh release create v0.5.1 `
+  artifacts\quadcond_model.joblib artifacts\quadcond_model_seqonly.joblib `
+  artifacts\quadcond_g4seq_scanner.joblib data\atlas_core.db `
+  --title "QuadCond 0.5.1" --notes-file docs\RELEASE_0.5.1.md
+```
+
+Without it, do the same thing in the browser: Releases -> Draft a new release ->
+tag `v0.5.1` on `main` -> attach those four files -> publish. Either way the
+file names must match `assets_manifest.json`, because the manifest checks each
+download against the SHA-256 recorded there.
+
+Then verify from a clean directory:
+
+```powershell
+quadcond assets fetch
+quadcond assets status
+```
+
 ## Versions
 
 | | |

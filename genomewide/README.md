@@ -33,6 +33,10 @@ The FASTA must be GRCh38/hg38 and use `chr` names (the GENCODE file above does).
 AlphaGenome Atlas is on the same assembly; a mismatch here is a wrong answer,
 not a warning.
 
+Observed on this machine: chr22 gives 10,737 G4 and 22,410 i-motif motifs with
+21,775 matched controls, and step 2 scored 3.0 M SNVs for it; chr1 gives 99,116
+motifs and 8.9 M SNVs. Step 1 and step 2 need no network and no AVI file.
+
 ## 2. The AlphaGenome AVI bundle
 
 Download the AVI SNV score bundle (and its `.tbi`) from
@@ -47,8 +51,25 @@ ls -l "$AVI" "$AVI".tbi || tabix -s 1 -b 2 -e 2 -S 1 "$AVI"   # only if no index
 Nothing here assumes the column order: `quadcond.alphagenome` reads the file's
 own header and fails loudly if it cannot find chromosome/position/ref/alt.
 
-Live-API alternative: only for a pilot. One interval per motif is ~500,000
-calls genome-wide, which is not a reasonable use of the service.
+### No bundle yet? Run the pilot through the live API
+
+`run_all.sh` now stops before step 1 if the bundle is not on disk, because steps
+1-2 are the long ones. Without it, use the sampled live-API path — it needs only
+`ALPHAGENOME_API_KEY` and produces the same file format, so step 4 is unchanged:
+
+```bash
+python genomewide/gw_01_motifs.py --fasta "$FASTA" --chroms chr22
+python genomewide/gw_02_structural.py --chroms chr22 --workers $(( $(nproc) - 1 ))
+python genomewide/gw_03_avi_live.py --chroms chr22 --max-motifs 500   # 1,000 queries
+python genomewide/gw_04_stats.py --fasta "$FASTA" --chroms chr22
+```
+
+`gw_03_avi_live.py` samples motifs that actually have a motif-destroying SNV, at
+random with a fixed seed, so the pilot is not spent on windows where nothing
+happens — and it is a **sample**: report `--max-motifs` and `--strategy` in the
+methods. One interval query per motif and per control is ~66,000 calls for chr22
+alone and ~2.2 M genome-wide, which is why the bundle is the way to do this
+properly.
 
 ## 3. Pilot on one chromosome (do this first)
 
