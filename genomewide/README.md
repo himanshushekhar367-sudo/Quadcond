@@ -64,6 +64,11 @@ python genomewide/gw_03_avi_live.py --chroms chr22 --max-motifs 500   # 1,000 qu
 python genomewide/gw_04_stats.py --fasta "$FASTA" --chroms chr22
 ```
 
+It asks the Atlas for `AVI_SCORE` alone. The full default scorer set returns
+every track for every variant — about 20 MB for a 21-nt window, which overruns
+the gRPC client's 4 MB receive cap and fails with `RESOURCE_EXHAUSTED`. The cap
+is raised here as well (`--max-message-mb`, default 256).
+
 `gw_03_avi_live.py` samples motifs that actually have a motif-destroying SNV, at
 random with a fixed seed, so the pilot is not spent on windows where nothing
 happens — and it is a **sample**: report `--max-motifs` and `--strategy` in the

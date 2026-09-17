@@ -478,6 +478,36 @@ class TabixAtlas(AtlasSource):
         return out
 
 
+def _large_message_client(_atlas, key: str, timeout, address, limit_bytes: int):
+    """The Atlas client, with gRPC's receive limit raised.
+
+    `atlas.create` builds its channel without `grpc.max_receive_message_length`,
+    so it inherits the 4 MB default. A whole-interval query for the default
+    scorer set returns far more than that -- a 21 nt window came back at 20 MB --
+    and the call fails with RESOURCE_EXHAUSTED "Received message larger than
+    max". That is a client-side cap, not a service limit, so it is raised here
+    rather than worked around by splitting windows.
+
+    Everything else matches `atlas.create`, and if its internals ever move, this
+    falls back to it.
+    """
+    try:
+        grpc = _atlas.grpc
+        cfg = (_atlas.importlib.resources.files("alphagenome")
+               / "protos/grpc_service_config.json").read_text()
+        channel = grpc.secure_channel(
+            address or "dns:///gdmscience.googleapis.com:443",
+            grpc.ssl_channel_credentials(),
+            options=(("grpc.service_config", cfg),
+                     ("grpc.max_receive_message_length", limit_bytes),
+                     ("grpc.max_send_message_length", limit_bytes)))
+        grpc.channel_ready_future(channel).result(timeout)
+        stub = _atlas.atlas_service_pb2_grpc.AtlasServiceStub(channel=channel)
+        return _atlas.AtlasClient(stub, metadata=[("x-goog-api-key", key)])
+    except AttributeError:
+        return _atlas.create(key, timeout=timeout, address=address)
+
+
 class LiveAtlas(AtlasSource):
     """The AlphaGenome Atlas gRPC service, queried one interval at a time.
 
@@ -502,7 +532,8 @@ class LiveAtlas(AtlasSource):
     def from_api_key(cls, api_key: str | None = None, *,
                      scorers: Sequence[str] | None = None,
                      timeout: float | None = 30.0,
-                     address: str | None = None) -> "LiveAtlas":
+                     address: str | None = None,
+                     max_message_mb: int = 256) -> "LiveAtlas":
         key = api_key or os.environ.get("ALPHAGENOME_API_KEY", "")
         if not key:
             raise AtlasUnavailable(
@@ -517,7 +548,8 @@ class LiveAtlas(AtlasSource):
                 "the `alphagenome` package is not installed; "
                 "`pip install alphagenome`, or use --atlas-table") from exc
         try:
-            client = _atlas.create(key, timeout=timeout, address=address)
+            client = _large_message_client(_atlas, key, timeout, address,
+                                           int(max_message_mb) * 1024 * 1024)
         except Exception as exc:                              # noqa: BLE001
             # The endpoint is not reachable from every network -- notably not
             # from sandboxes without outbound DNS -- and a connection failure

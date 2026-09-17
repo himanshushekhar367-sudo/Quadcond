@@ -51,9 +51,18 @@ def main():
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--sleep", type=float, default=0.0, help="seconds between queries")
     ap.add_argument("--api-key", help="defaults to $ALPHAGENOME_API_KEY")
+    ap.add_argument("--scorers", default="AVI_SCORE",
+                    help="comma-separated Atlas scorers. The default is AVI_SCORE alone, "
+                         "which is the axis this analysis uses; asking for the full default "
+                         "set returns megabytes of per-track scores per window and is what "
+                         "made these queries fail")
+    ap.add_argument("--max-message-mb", type=int, default=256,
+                    help="gRPC receive limit for the Atlas channel")
     a = ap.parse_args()
     from quadcond import alphagenome as ag
-    src = ag.LiveAtlas.from_api_key(a.api_key)
+    src = ag.LiveAtlas.from_api_key(
+        a.api_key, scorers=[x.strip() for x in a.scorers.split(",") if x.strip()],
+        max_message_mb=a.max_message_mb)
     base = out_dir()
     od = base / "avi"
     od.mkdir(exist_ok=True)
@@ -80,6 +89,10 @@ def main():
                         failed += 1
                         if failed <= 3:
                             print(f"  query failed ({tag} {chrom}:{s1}-{e1}): {exc}", flush=True)
+                            if "RESOURCE_EXHAUSTED" in str(exc) or "larger than max" in str(exc):
+                                print("  hint: that is the gRPC receive cap, not the service. "
+                                      "Keep --scorers to AVI_SCORE (the default) and/or raise "
+                                      "--max-message-mb.", flush=True)
                         if failed > 25:
                             raise SystemExit("too many failed queries; stopping rather than "
                                              "writing a table with silent holes")
