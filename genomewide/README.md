@@ -181,8 +181,9 @@ the same percentile scale: a SNV at a CpG shifts |AVI| by +0.097 percentile
 0.043. Substitution type separates too (joint p = 7e-86 and 1e-183). CpG and
 substitution type explain 0.69 % and 0.65 % of the |AVI| rank; motif class
 explains 0.068 % and 0.022 %, and adds 0.056 % and 0.026 % over composition
-alone. The feature that is known to matter moves the readout roughly sixteen
-times further than the largest effect motif destruction is compatible with.
+alone. The feature that is known to matter moves the readout about seven times
+further than the largest effect motif destruction is compatible with, and about
+sixteen times its point estimate.
 
 **Equivalence bound.** Destroying a G4 shifts the |AVI| percentile by at most
 1.43 points in either direction; for an i-motif, at most 1.54.

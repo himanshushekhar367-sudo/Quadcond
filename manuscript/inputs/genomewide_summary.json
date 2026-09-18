@@ -1,0 +1,532 @@
+{
+  "score_column": "AVI_SCORE",
+  "n_snv": 2707107,
+  "kinds": {
+    "G4": {
+      "top1pct_threshold_from_controls": 1.221217515468594,
+      "classes": {
+        "motif_lost": {
+          "n": 62605,
+          "median_abs_avi": 0.0449757874011993,
+          "frac_top1pct": 0.0015174506828528073,
+          "OR_vs_control": 0.1502870651806822,
+          "p_OR_vs_control": 4.062591543272345e-84,
+          "cliffs_delta_vs_control": -0.06660250999999995,
+          "p_mwu_vs_control": 3.887401075460065e-94,
+          "cliffs_delta_vs_neutral": 0.02277790249999989,
+          "p_mwu_vs_neutral": 5.421014981483177e-09
+        },
+        "destabilising": {
+          "n": 7838,
+          "median_abs_avi": 0.04749941080808635,
+          "frac_top1pct": 0.0007655014034192396,
+          "OR_vs_control": 0.07575757575757576,
+          "p_OR_vs_control": 8.282411409588761e-24,
+          "cliffs_delta_vs_control": -0.05601375350854809,
+          "p_mwu_vs_control": 6.650371889601637e-16,
+          "cliffs_delta_vs_neutral": 0.03683077315641747,
+          "p_mwu_vs_neutral": 3.086632960641912e-08
+        },
+        "moderate": {
+          "n": 20049,
+          "median_abs_avi": 0.0455899834632873,
+          "frac_top1pct": 0.0006982891914808719,
+          "OR_vs_control": 0.06910129495604914,
+          "p_OR_vs_control": 2.8206302142995733e-53,
+          "cliffs_delta_vs_control": -0.08585171749999998,
+          "p_mwu_vs_control": 6.703652949225529e-68,
+          "cliffs_delta_vs_neutral": 0.005232597500000047,
+          "p_mwu_vs_neutral": 0.05166758962721886
+        },
+        "neutral": {
+          "n": 52454,
+          "median_abs_avi": 0.04333946667611595,
+          "frac_top1pct": 0.0016204674572005949,
+          "OR_vs_control": 0.16050632159398795,
+          "p_OR_vs_control": 3.805655285273776e-73,
+          "cliffs_delta_vs_control": -0.09830553500000005,
+          "p_mwu_vs_control": 2.1302050444523745e-139
+        },
+        "stabilising": {
+          "n": 14992,
+          "median_abs_avi": 0.0440720282495021,
+          "frac_top1pct": 0.0010005336179295624,
+          "OR_vs_control": 0.09904075137432952,
+          "p_OR_vs_control": 5.7250599656037e-38,
+          "cliffs_delta_vs_control": -0.10011624533084307,
+          "p_mwu_vs_control": 3.6724361091429523e-73,
+          "cliffs_delta_vs_neutral": -0.003525486926360677,
+          "p_mwu_vs_neutral": 0.4683577792294533
+        },
+        "flank": {
+          "n": 717000,
+          "median_abs_avi": 0.0444497019052505,
+          "frac_top1pct": 0.008124128312412831,
+          "OR_vs_control": 0.809966292090945,
+          "p_OR_vs_control": 4.3002959603652656e-05,
+          "cliffs_delta_vs_control": -0.06969902750000001,
+          "p_mwu_vs_control": 1.5488288239931007e-115,
+          "cliffs_delta_vs_neutral": 0.016824352500000028,
+          "p_mwu_vs_neutral": 3.2806316471140896e-22
+        },
+        "control": {
+          "n": 43152,
+          "median_abs_avi": 0.0524345710873603,
+          "frac_top1pct": 0.010011123470522803
+        }
+      },
+      "adjusted_rank_model": {
+        "reference_class": "flank",
+        "note": "outcome is |AVI| percentile rank within chromosome; a coefficient is a shift in mean percentile against the reference class, clustered by motif",
+        "terms": {
+          "motif_lost": {
+            "delta_pctile": -0.005908949654785059,
+            "ci": [
+              -0.014273993972458422,
+              0.002456094662888305
+            ],
+            "p": 0.16620816428957863
+          },
+          "destabilising": {
+            "delta_pctile": -0.0017641620384267064,
+            "ci": [
+              -0.015215873573134628,
+              0.011687549496281216
+            ],
+            "p": 0.7971440998735857
+          },
+          "moderate": {
+            "delta_pctile": -0.017018462595651648,
+            "ci": [
+              -0.026996325822689064,
+              -0.007040599368614231
+            ],
+            "p": 0.0008289056240351624
+          },
+          "neutral": {
+            "delta_pctile": -0.012308233082512143,
+            "ci": [
+              -0.020377344421349898,
+              -0.00423912174367439
+            ],
+            "p": 0.002793114572466867
+          },
+          "stabilising": {
+            "delta_pctile": -0.007856481708643927,
+            "ci": [
+              -0.01670978242141509,
+              0.0009968190041272362
+            ],
+            "p": 0.08198448432262417
+          },
+          "control": {
+            "delta_pctile": 0.04418000655639357,
+            "ci": [
+              0.027172632869012912,
+              0.06118738024377423
+            ],
+            "p": 3.554426192506706e-07
+          }
+        }
+      },
+      "adjusted_logit": {
+        "motif_lost": {
+          "OR": 0.15172567055370936,
+          "ci": [
+            0.07383788355383168,
+            0.3117732794736658
+          ],
+          "p": 2.8712467783019114e-07
+        },
+        "destabilising": {
+          "OR": 0.07756201621952827,
+          "ci": [
+            0.017982832828151017,
+            0.33453385334377894
+          ],
+          "p": 0.0006073954933378634
+        },
+        "moderate": {
+          "OR": 0.0683605981543726,
+          "ci": [
+            0.028222307225512472,
+            0.16558431395003548
+          ],
+          "p": 2.7826241505347844e-09
+        },
+        "neutral": {
+          "OR": 0.15984956766926067,
+          "ci": [
+            0.08530919134036435,
+            0.2995208825987263
+          ],
+          "p": 1.0478309134215805e-08
+        },
+        "stabilising": {
+          "OR": 0.10209249843109411,
+          "ci": [
+            0.0438219884238839,
+            0.23784585343512774
+          ],
+          "p": 1.2357869494162694e-07
+        },
+        "flank": {
+          "OR": 0.8123151116442507,
+          "ci": [
+            0.48635010837080006,
+            1.356750680730862
+          ],
+          "p": 0.4270571909824782
+        }
+      },
+      "covariate_balance": {
+        "motif_lost": {
+          "n": 62605,
+          "mean_gc": 0.761,
+          "frac_cpg": 0.0332
+        },
+        "destabilising": {
+          "n": 7838,
+          "mean_gc": 0.7809,
+          "frac_cpg": 0.0538
+        },
+        "moderate": {
+          "n": 20049,
+          "mean_gc": 0.7821,
+          "frac_cpg": 0.0663
+        },
+        "neutral": {
+          "n": 52454,
+          "mean_gc": 0.7606,
+          "frac_cpg": 0.0798
+        },
+        "stabilising": {
+          "n": 14992,
+          "mean_gc": 0.7568,
+          "frac_cpg": 0.0641
+        },
+        "flank": {
+          "n": 717000,
+          "mean_gc": 0.769,
+          "frac_cpg": 0.0587
+        },
+        "control": {
+          "n": 43152,
+          "mean_gc": 0.703,
+          "frac_cpg": 0.1136
+        }
+      },
+      "top1_note": "`frac_top1pct` for the control class is 1% by construction: the threshold IS its 99th percentile. Read the other classes against that, and prefer the rank model and the within-locus tests.",
+      "within_motif_lost_vs_retained": {
+        "n_motifs": 2182,
+        "median_diff": -0.0038255826136695,
+        "frac_motifs_lost_higher": 0.4390467461044913,
+        "p_wilcoxon": 4.83026538408367e-07
+      },
+      "within_locus_lost_vs_flank": {
+        "n_motifs": 1195,
+        "median_diff": -0.008375495138995277,
+        "frac_motifs_lost_higher": 0.3707112970711297,
+        "p_wilcoxon": 5.867955703396167e-20
+      },
+      "within_locus_motif_vs_flank": {
+        "n_motifs": 1195,
+        "median_diff": -0.007848748376580054,
+        "frac_motifs_higher": 0.37154811715481173,
+        "p_wilcoxon": 6.095834162172968e-30
+      },
+      "dose_response_spearman_minus_delta_vs_abs_avi": {
+        "rho": 0.018035079769173703,
+        "p": 2.563543710220134e-08
+      },
+      "per_chromosome_OR_motif_lost_vs_control": {
+        "chr1": 1.2378962034134449,
+        "chr10": NaN,
+        "chr11": 0.3045912653975364,
+        "chr12": 0.06286266924564797,
+        "chr13": 0.0,
+        "chr14": 0.0,
+        "chr15": 0.020653902798232694,
+        "chr16": 0.0,
+        "chr17": 0.8275942479595803,
+        "chr18": 0.04202373104812129,
+        "chr19": 0.16936133895974587,
+        "chr2": 0.0347555728284707,
+        "chr20": NaN,
+        "chr21": Infinity,
+        "chr22": 0.0,
+        "chr3": 0.2565009124087591,
+        "chr4": Infinity,
+        "chr5": 0.0,
+        "chr6": 0.5606327734324913,
+        "chr7": 0.0,
+        "chr8": Infinity,
+        "chr9": 0.09635514018691589,
+        "chrX": 0.08336441626258859
+      }
+    },
+    "iM": {
+      "top1pct_threshold_from_controls": 1.1896197414398175,
+      "classes": {
+        "motif_lost": {
+          "n": 78882,
+          "median_abs_avi": 0.0438126772642135,
+          "frac_top1pct": 0.0019776374838366166,
+          "OR_vs_control": 0.19604939979311167,
+          "p_OR_vs_control": 2.11771586381888e-122,
+          "cliffs_delta_vs_control": -0.017595872500000054,
+          "p_mwu_vs_control": 2.1006205972237865e-16,
+          "cliffs_delta_vs_neutral": 0.016720372500000025,
+          "p_mwu_vs_neutral": 1.6822878326572032e-07
+        },
+        "destabilising": {
+          "n": 7179,
+          "median_abs_avi": 0.0510213114321231,
+          "frac_top1pct": 0.001950132330408135,
+          "OR_vs_control": 0.19331739999783057,
+          "p_OR_vs_control": 3.8300999219725834e-16,
+          "cliffs_delta_vs_control": 0.030729098760273077,
+          "p_mwu_vs_control": 2.146397930381952e-06,
+          "cliffs_delta_vs_neutral": 0.06029261735617775,
+          "p_mwu_vs_neutral": 1.0643455980887239e-23
+        },
+        "moderate": {
+          "n": 38493,
+          "median_abs_avi": 0.0459863655269146,
+          "frac_top1pct": 0.0011690437222352116,
+          "OR_vs_control": 0.11579714845710072,
+          "p_OR_vs_control": 2.6167973305631958e-92,
+          "cliffs_delta_vs_control": -0.007873437500000025,
+          "p_mwu_vs_control": 0.003404853090252454,
+          "cliffs_delta_vs_neutral": 0.027217607499999907,
+          "p_mwu_vs_neutral": 5.324544715517292e-15
+        },
+        "neutral": {
+          "n": 150921,
+          "median_abs_avi": 0.0431109257042408,
+          "frac_top1pct": 0.0018420233102086523,
+          "OR_vs_control": 0.18258073227701005,
+          "p_OR_vs_control": 3.989320933300885e-197,
+          "cliffs_delta_vs_control": -0.03243744500000001,
+          "p_mwu_vs_control": 2.616630160477817e-57
+        },
+        "stabilising": {
+          "n": 26127,
+          "median_abs_avi": 0.0454268045723438,
+          "frac_top1pct": 0.0016458070195583113,
+          "OR_vs_control": 0.16309977751093063,
+          "p_OR_vs_control": 1.9675341138428965e-56,
+          "cliffs_delta_vs_control": -0.013256387500000022,
+          "p_mwu_vs_control": 0.000129897769143744,
+          "cliffs_delta_vs_neutral": 0.021706117499999955,
+          "p_mwu_vs_neutral": 1.2569400399241053e-07
+        },
+        "flank": {
+          "n": 1352400,
+          "median_abs_avi": 0.0449740588665008,
+          "frac_top1pct": 0.008404318249038745,
+          "OR_vs_control": 0.8385461462364823,
+          "p_OR_vs_control": 2.593870734010349e-09,
+          "cliffs_delta_vs_control": -0.0013379049999999726,
+          "p_mwu_vs_control": 0.0014555035435590434,
+          "cliffs_delta_vs_neutral": 0.028743577500000006,
+          "p_mwu_vs_neutral": 1.475148041421311e-75
+        },
+        "control": {
+          "n": 135015,
+          "median_abs_avi": 0.0457350127398967,
+          "frac_top1pct": 0.010006295596785543
+        }
+      },
+      "adjusted_rank_model": {
+        "reference_class": "flank",
+        "note": "outcome is |AVI| percentile rank within chromosome; a coefficient is a shift in mean percentile against the reference class, clustered by motif",
+        "terms": {
+          "motif_lost": {
+            "delta_pctile": -0.009693476459165743,
+            "ci": [
+              -0.0154497030404974,
+              -0.003937249877834088
+            ],
+            "p": 0.0009648649099985138
+          },
+          "destabilising": {
+            "delta_pctile": 0.0006614181876742524,
+            "ci": [
+              -0.017108752975407614,
+              0.018431589350756117
+            ],
+            "p": 0.9418449276316311
+          },
+          "moderate": {
+            "delta_pctile": -0.010600882042701704,
+            "ci": [
+              -0.018394466064951938,
+              -0.002807298020451472
+            ],
+            "p": 0.007676988863632973
+          },
+          "neutral": {
+            "delta_pctile": -0.014751997651317107,
+            "ci": [
+              -0.01982954824692592,
+              -0.009674447055708295
+            ],
+            "p": 1.2383796671052427e-08
+          },
+          "stabilising": {
+            "delta_pctile": -0.012993432222756675,
+            "ci": [
+              -0.019698499478561494,
+              -0.006288364966951856
+            ],
+            "p": 0.00014579693584143935
+          },
+          "control": {
+            "delta_pctile": 0.013771463963312549,
+            "ci": [
+              0.0033441837254353825,
+              0.024198744201189715
+            ],
+            "p": 0.009637995730448637
+          }
+        }
+      },
+      "adjusted_logit": {
+        "motif_lost": {
+          "OR": 0.15225761621122355,
+          "ci": [
+            0.08615943329790837,
+            0.26906376709985885
+          ],
+          "p": 9.229979961066871e-11
+        },
+        "destabilising": {
+          "OR": 0.11444934981236701,
+          "ci": [
+            0.03344122917257487,
+            0.39169175286223484
+          ],
+          "p": 0.0005542402147835488
+        },
+        "moderate": {
+          "OR": 0.08033704172786478,
+          "ci": [
+            0.04347124746449407,
+            0.14846687523416804
+          ],
+          "p": 8.464026255367556e-16
+        },
+        "neutral": {
+          "OR": 0.14231655475938734,
+          "ci": [
+            0.09299090361729041,
+            0.21780626890064683
+          ],
+          "p": 2.714254429462931e-19
+        },
+        "stabilising": {
+          "OR": 0.1103727715867092,
+          "ci": [
+            0.0597481546908812,
+            0.2038916309760296
+          ],
+          "p": 1.946750006415466e-12
+        },
+        "flank": {
+          "OR": 0.6452026611362839,
+          "ci": [
+            0.4560036558872044,
+            0.9129016150701952
+          ],
+          "p": 0.013339138145827338
+        }
+      },
+      "covariate_balance": {
+        "motif_lost": {
+          "n": 78882,
+          "mean_gc": 0.719,
+          "frac_cpg": 0.0309
+        },
+        "destabilising": {
+          "n": 7179,
+          "mean_gc": 0.7672,
+          "frac_cpg": 0.0646
+        },
+        "moderate": {
+          "n": 38493,
+          "mean_gc": 0.7356,
+          "frac_cpg": 0.057
+        },
+        "neutral": {
+          "n": 150921,
+          "mean_gc": 0.7133,
+          "frac_cpg": 0.0569
+        },
+        "stabilising": {
+          "n": 26127,
+          "mean_gc": 0.73,
+          "frac_cpg": 0.0888
+        },
+        "flank": {
+          "n": 1352400,
+          "mean_gc": 0.7149,
+          "frac_cpg": 0.0517
+        },
+        "control": {
+          "n": 135015,
+          "mean_gc": 0.6617,
+          "frac_cpg": 0.0837
+        }
+      },
+      "top1_note": "`frac_top1pct` for the control class is 1% by construction: the threshold IS its 99th percentile. Read the other classes against that, and prefer the rank model and the within-locus tests.",
+      "within_motif_lost_vs_retained": {
+        "n_motifs": 3170,
+        "median_diff": -0.006260120364622129,
+        "frac_motifs_lost_higher": 0.3996845425867508,
+        "p_wilcoxon": 5.172494090860932e-19
+      },
+      "within_locus_lost_vs_flank": {
+        "n_motifs": 2254,
+        "median_diff": -0.009263094766131505,
+        "frac_motifs_lost_higher": 0.3615794143744454,
+        "p_wilcoxon": 3.872037916528491e-34
+      },
+      "within_locus_motif_vs_flank": {
+        "n_motifs": 2254,
+        "median_diff": -0.0068439227707789395,
+        "frac_motifs_higher": 0.373114463176575,
+        "p_wilcoxon": 4.35830975054833e-48
+      },
+      "dose_response_spearman_minus_delta_vs_abs_avi": {
+        "rho": 0.012886965667155057,
+        "p": 1.1869817159698242e-09
+      },
+      "per_chromosome_OR_motif_lost_vs_control": {
+        "chr1": 0.06371667127963834,
+        "chr10": 0.0,
+        "chr11": 0.7514500414297551,
+        "chr12": 0.048290919917626726,
+        "chr13": NaN,
+        "chr14": 0.0,
+        "chr15": 0.049710739312292904,
+        "chr16": 0.09402621152087778,
+        "chr17": 0.3240664180110547,
+        "chr18": Infinity,
+        "chr19": 0.3398674991139344,
+        "chr2": 0.06162702906757267,
+        "chr20": 0.26131283568648894,
+        "chr21": 0.7038352529699089,
+        "chr22": 0.0,
+        "chr3": 0.5170508503841837,
+        "chr4": 0.22081787118345153,
+        "chr5": 0.0,
+        "chr6": 0.6422468675610341,
+        "chr7": 0.2297710271848203,
+        "chr8": 0.13769771528998243,
+        "chr9": 0.15451233183856503,
+        "chrX": 0.0
+      }
+    }
+  }
+}

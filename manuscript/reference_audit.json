@@ -1,0 +1,109 @@
+{
+  "order": [
+    "biffi",
+    "zeraati",
+    "hansel",
+    "im_switch",
+    "polyamine",
+    "cations",
+    "qgrs",
+    "g4hunter",
+    "pqsfinder",
+    "grinder",
+    "quadb",
+    "deepg4",
+    "g4boost",
+    "g4stab",
+    "im_web",
+    "im_method",
+    "g4shape",
+    "onquadro",
+    "g4ldb",
+    "duvma",
+    "g4killer",
+    "applicability",
+    "shuffle",
+    "zanin",
+    "imab_critique",
+    "imab_response",
+    "cuttag",
+    "cuttag_response",
+    "xgb",
+    "modelcards",
+    "calibration",
+    "isotonic",
+    "alphagenome_atlas"
+  ],
+  "count": 33,
+  "retrieval_date": "2026-09-10",
+  "basis": "Publisher/PubMed metadata retrieved through Europe PMC; XGBoost Crossref and primary ACM/arXiv record; the v0.4.9 additions from the scite metadata store, because Europe PMC was unreachable from the machine that assembled them.",
+  "provenance_by_key": {
+    "biffi": "Europe PMC (resultType=core)",
+    "zeraati": "Europe PMC (resultType=core)",
+    "hansel": "scite metadata store, retrieved 2026-09-10",
+    "im_switch": "scite metadata store, retrieved 2026-09-10",
+    "polyamine": "scite metadata store, retrieved 2026-09-10",
+    "cations": "scite metadata store, retrieved 2026-09-10",
+    "qgrs": "Europe PMC (resultType=core)",
+    "g4hunter": "Europe PMC (resultType=core)",
+    "pqsfinder": "Europe PMC (resultType=core)",
+    "grinder": "Europe PMC (resultType=core)",
+    "quadb": "scite metadata store, retrieved 2026-09-10",
+    "deepg4": "scite metadata store, retrieved 2026-09-10",
+    "g4boost": "scite metadata store, retrieved 2026-09-10",
+    "g4stab": "Europe PMC (resultType=core)",
+    "im_web": "Europe PMC (resultType=core)",
+    "im_method": "Europe PMC (resultType=core)",
+    "g4shape": "Europe PMC (resultType=core)",
+    "onquadro": "scite metadata store, retrieved 2026-09-10",
+    "g4ldb": "scite metadata store, retrieved 2026-09-10",
+    "duvma": "Europe PMC (resultType=core)",
+    "g4killer": "Europe PMC (resultType=core)",
+    "applicability": "scite metadata store, retrieved 2026-09-10",
+    "shuffle": "scite metadata store, retrieved 2026-09-10",
+    "zanin": "Europe PMC (resultType=core)",
+    "imab_critique": "Europe PMC (resultType=core)",
+    "imab_response": "Europe PMC (resultType=core)",
+    "cuttag": "Europe PMC (resultType=core)",
+    "cuttag_response": "Europe PMC (resultType=core)",
+    "xgb": "Europe PMC (resultType=core)",
+    "modelcards": "scite metadata store, retrieved 2026-09-10",
+    "calibration": "scite metadata store, retrieved 2026-09-10",
+    "isotonic": "scite metadata store, retrieved 2026-09-10",
+    "alphagenome_atlas": "publisher resource page, retrieved 2026-09-12"
+  },
+  "locators_to_complete_before_submission": [
+    {
+      "key": "onquadro",
+      "doi": "10.1093/nar/gkab1118",
+      "note": "Volume and pages not carried by the retrieved record; complete before submission."
+    },
+    {
+      "key": "g4ldb",
+      "doi": "10.1093/nar/gkab952",
+      "note": "Volume and pages not carried by the retrieved record; complete before submission."
+    },
+    {
+      "key": "shuffle",
+      "doi": "10.1093/oxfordjournals.molbev.a040370",
+      "note": "Volume and pages not carried by the retrieved record; complete before submission. The DOI in the original fetch list (10.1093/oxfordjournals.molbev.a040361) resolves to Easteal (1985), 'Generation time and the rate of molecular evolution', which is a different paper; the correct DOI is recorded here."
+    },
+    {
+      "key": "calibration",
+      "doi": "10.1145/1102351.1102430",
+      "note": "Page range not carried by the retrieved record; complete before submission."
+    },
+    {
+      "key": "isotonic",
+      "doi": "10.1145/775047.775151",
+      "note": "Page range not carried by the retrieved record; complete before submission."
+    },
+    {
+      "key": "alphagenome_atlas",
+      "doi": "",
+      "note": "Resource announcement and downloads page, not a journal article. Replace with the peer-reviewed citation when the Atlas paper appears; the data-availability text the authors circulated refers to a final publication."
+    }
+  ],
+  "all_citations_resolved": true,
+  "uncited_records": []
+}

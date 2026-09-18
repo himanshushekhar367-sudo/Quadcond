@@ -1,0 +1,165 @@
+{
+  "n_snv": 2707107,
+  "kinds": {
+    "G4": {
+      "n_flank": 717000,
+      "cpg_in_flank": {
+        "n_cpg": 42117,
+        "n_non_cpg": 674883,
+        "median_abs_avi_cpg": 0.0742103233933448,
+        "median_abs_avi_non_cpg": 0.0432112030684948,
+        "cliffs_delta": 0.18987733500000004,
+        "p_mwu": 0.0,
+        "adjusted": {
+          "delta_pctile": 0.09665370331448758,
+          "ci": [
+            0.08445688192515727,
+            0.1088505247038179
+          ],
+          "p": 2.1158250909447363e-54
+        }
+      },
+      "subst_in_flank": {
+        "reference": "C>A",
+        "terms": {
+          "C>G": {
+            "delta_pctile": 0.0070596066266848416,
+            "ci": [
+              0.005830058395775993,
+              0.00828915485759369
+            ],
+            "p": 2.228812880727783e-29
+          },
+          "C>T": {
+            "delta_pctile": -0.006461571997252739,
+            "ci": [
+              -0.00772409342592872,
+              -0.005199050568576758
+            ],
+            "p": 1.1129704844751938e-23
+          },
+          "T>A": {
+            "delta_pctile": -0.029112181267686995,
+            "ci": [
+              -0.035606720677689746,
+              -0.022617641857684244
+            ],
+            "p": 1.5544662733982288e-18
+          },
+          "T>C": {
+            "delta_pctile": -0.032524374417146784,
+            "ci": [
+              -0.03873241113270227,
+              -0.0263163377015913
+            ],
+            "p": 9.78136757529642e-25
+          },
+          "T>G": {
+            "delta_pctile": -0.027508473550867652,
+            "ci": [
+              -0.03371342818675626,
+              -0.021303518914979044
+            ],
+            "p": 3.652462874327211e-18
+          }
+        },
+        "p_joint": 7.154600188936032e-86
+      },
+      "variance_explained_r2": {
+        "cpg_plus_subst": 0.006890428444600527,
+        "motif_class": 0.000675582378716455,
+        "both": 0.007445374386437442
+      }
+    },
+    "iM": {
+      "n_flank": 1352400,
+      "cpg_in_flank": {
+        "n_cpg": 69942,
+        "n_non_cpg": 1282458,
+        "median_abs_avi_cpg": 0.07655767723917956,
+        "median_abs_avi_non_cpg": 0.04385343752801415,
+        "cliffs_delta": 0.20256515250000007,
+        "p_mwu": 0.0,
+        "adjusted": {
+          "delta_pctile": 0.10111210879547007,
+          "ci": [
+            0.0914460848630876,
+            0.11077813272785254
+          ],
+          "p": 2.0519338037573344e-93
+        }
+      },
+      "subst_in_flank": {
+        "reference": "C>A",
+        "terms": {
+          "C>G": {
+            "delta_pctile": 0.004244879226130857,
+            "ci": [
+              0.003434394951721604,
+              0.00505536350054011
+            ],
+            "p": 1.0107605237334634e-24
+          },
+          "C>T": {
+            "delta_pctile": -0.007495232547660886,
+            "ci": [
+              -0.008326207267039292,
+              -0.006664257828282481
+            ],
+            "p": 6.140927836507431e-70
+          },
+          "T>A": {
+            "delta_pctile": -0.017458623322402972,
+            "ci": [
+              -0.02183856895038539,
+              -0.013078677694420551
+            ],
+            "p": 5.606995622952044e-15
+          },
+          "T>C": {
+            "delta_pctile": -0.024837540601455,
+            "ci": [
+              -0.029039012521801837,
+              -0.02063606868110816
+            ],
+            "p": 4.820034994985142e-31
+          },
+          "T>G": {
+            "delta_pctile": -0.020377619983960937,
+            "ci": [
+              -0.024575104261432196,
+              -0.016180135706489678
+            ],
+            "p": 1.8157206679643593e-21
+          }
+        },
+        "p_joint": 1.3457525800475364e-183
+      },
+      "variance_explained_r2": {
+        "cpg_plus_subst": 0.0065017999173869745,
+        "motif_class": 0.0002213318484075577,
+        "both": 0.006759043676501708
+      }
+    }
+  },
+  "equivalence": {
+    "G4": {
+      "motif_lost_vs_flank_delta_pctile": -0.005908949654785059,
+      "ci": [
+        -0.014273993972458422,
+        0.002456094662888305
+      ],
+      "largest_effect_compatible_pctile_points": 1.427,
+      "reading": "adjusted for CpG and substitution type and clustered by motif, destroying the motif shifts the |AVI| percentile by at most 1.43 percentile points in either direction"
+    },
+    "iM": {
+      "motif_lost_vs_flank_delta_pctile": -0.009693476459165743,
+      "ci": [
+        -0.0154497030404974,
+        -0.003937249877834088
+      ],
+      "largest_effect_compatible_pctile_points": 1.545,
+      "reading": "adjusted for CpG and substitution type and clustered by motif, destroying the motif shifts the |AVI| percentile by at most 1.54 percentile points in either direction"
+    }
+  }
+}

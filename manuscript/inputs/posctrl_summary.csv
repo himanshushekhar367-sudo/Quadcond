@@ -1,0 +1,8 @@
+control,length,n_substitutions,n_with_delta,max_abs_delta_Tm,n_abs_delta_ge_5C,n_motif_lost,most_destabilising
+MYC Pu27,27,81,81,7.15,10,0,-7.154
+KIT c-kit1,22,66,30,5.58,3,36,-1.767
+KIT c-kit2,21,63,30,9.0,1,33,-2.995
+VEGFA Pu22,23,69,45,9.38,7,24,-9.377
+BCL2 Pu39,39,117,105,6.76,9,12,-6.756
+hTERT hT21,22,66,36,7.4,4,30,-3.289
+chr22 negative-control window,61,183,0,,0,0,

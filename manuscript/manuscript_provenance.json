@@ -1,0 +1,14 @@
+{
+  "software_revision": "0.5.1",
+  "frozen_model_version": "0.4.7",
+  "model_artifact_sha256": "204b4608c964793107ec5a384581b316c4bd0aacb20791aeb5561df9187a57db",
+  "dataset_fingerprint": "4c5cca5a98e1259452824cc3f5aaad151a11671a4391b99f5abaa67e716d061b",
+  "inputs": {
+    "quadcond_model.json": "1d80bf10b29c8a9d6f20aa4f13903471c240a0e722f144941db4e3a1617fbc37",
+    "quadcond_model_seqonly.json": "335e94453b3874df136acd9677a1a516f87e7171bafa4888fe07b2b6ab0dd909"
+  },
+  "method": "Copy retained metadata and plot it; no model fitting or performance recomputation.",
+  "body_word_count_before_tables": 6423,
+  "external_validation_claimed": false,
+  "public_deployment_verified": false
+}

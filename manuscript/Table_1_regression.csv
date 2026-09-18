@@ -1,0 +1,5 @@
+﻿Target,n,Groups,R²,RMSE,MAE,Coverage
+G4 melting temperature,"2,274",400 sequence,0.670,7.756 °C,5.579 °C,0.889
+i-motif transitional pH,160,85 sequence,0.592,0.349 pH units,0.255 pH units,0.900
+"i-motif transitional pH, condition model",558,10 condition,0.835,0.189 pH units,0.140 pH units,0.880
+"i-motif melting temperature, condition model",379,10 condition,0.853,6.459 °C,4.777 °C,0.904
