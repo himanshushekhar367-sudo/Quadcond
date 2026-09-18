@@ -43,6 +43,29 @@ def pick_motifs(base: Path, chrom: str, n: int, strategy: str, seed: int) -> pd.
     return m[m.id.isin(set(ids))].reset_index(drop=True)
 
 
+TRANSIENT = ("deadline exceeded", "unavailable", "stream removed", "resource_exhausted")
+
+
+def _query(src, chrom, s1, e1, retries, wait):
+    """One window, with retries for the transient RPC failures only.
+
+    Deadline-exceeded is a property of the connection, not of the locus, so
+    giving up on the first one throws away windows for no reason. A response the
+    adapter cannot read is not transient and is raised immediately.
+    """
+    from quadcond import alphagenome as ag
+    last = None
+    for attempt in range(retries + 1):
+        try:
+            return src.records_for_interval(chrom, s1, e1)
+        except ag.AtlasUnavailable as exc:
+            last = exc
+            if not any(t in str(exc).lower() for t in TRANSIENT) or attempt == retries:
+                raise
+            time.sleep(wait * (attempt + 1))
+    raise last
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--chroms", nargs="*", default=["chr22"])
@@ -58,6 +81,10 @@ def main():
                          "made these queries fail")
     ap.add_argument("--max-message-mb", type=int, default=256,
                     help="gRPC receive limit for the Atlas channel")
+    ap.add_argument("--retries", type=int, default=2,
+                    help="retries per window after a transient RPC failure (deadline exceeded, "
+                         "unavailable); a schema error is not retried")
+    ap.add_argument("--retry-wait", type=float, default=2.0, help="seconds before a retry")
     a = ap.parse_args()
     from quadcond import alphagenome as ag
     src = ag.LiveAtlas.from_api_key(
@@ -84,7 +111,7 @@ def main():
                     wins.append(("control", int(r.ctrl_start) + 1, int(r.ctrl_end)))
                 for tag, s1, e1 in wins:
                     try:
-                        recs = src.records_for_interval(chrom, s1, e1)
+                        recs = _query(src, chrom, s1, e1, a.retries, a.retry_wait)
                     except ag.AtlasUnavailable as exc:
                         failed += 1
                         if failed <= 3:

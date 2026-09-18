@@ -584,47 +584,79 @@ def _records_from_anndata(frames: Mapping[str, Any],
                           source: str) -> dict[VariantKey, AtlasRecord]:
     """Collapse the client's per-scorer AnnData objects into one record per variant.
 
-    Each scorer returns its own matrix over (variant x track). A single number
-    per variant per scorer is what the quadrant needs, and the aggregate used is
+    Two obs schemas are handled, because the client uses both. The live Atlas
+    returns a single ``variant`` column holding an object with ``chromosome``,
+    ``position``, ``reference_bases`` and ``alternate_bases``; other paths return
+    those as four separate columns. The first version of this function knew only
+    about the second, and its guard was a `continue` -- so a perfectly good
+    response parsed to zero records and read downstream as "no regulatory effect
+    at this locus", which is the one thing this module exists not to do. A
+    response that carries rows but yields no records now raises.
+
+    Each scorer returns its own matrix over (variant x track). The aggregate is
     the largest absolute value across tracks -- the strongest effect in any cell
-    type or tissue. That is a deliberate choice and a lossy one: a variant with
-    one large effect in one tissue and a variant with moderate effects
-    everywhere reduce to similar numbers here. The per-track matrices are not
-    discarded by the service, only by this summary; a caller who needs
-    cell-type resolution should query the client directly.
+    type or tissue. That is deliberate and lossy: a variant with one large
+    effect in one tissue and a variant with moderate effects everywhere reduce
+    to similar numbers. The per-track matrices are not discarded by the service,
+    only by this summary.
     """
     out: dict[VariantKey, AtlasRecord] = {}
+    seen_rows = 0
     for scorer, adata in (frames or {}).items():
         obs = getattr(adata, "obs", None)
-        if obs is None:
+        if obs is None or not len(obs):
             continue
+        seen_rows += len(obs)
         try:
             import numpy as _np
-            matrix = _np.asarray(adata.X, dtype=float)
+            x = adata.X
+            matrix = _np.asarray(x.toarray() if hasattr(x, "toarray") else x, dtype=float)
+            if matrix.ndim == 1:
+                matrix = matrix.reshape(-1, 1)
             per_variant = _np.nanmax(_np.abs(matrix), axis=1)
         except Exception:                                     # noqa: BLE001
             continue
         cols = {c.lower(): c for c in obs.columns}
-        need = ("chromosome", "position", "reference_bases", "alternate_bases")
-        if not all(any(n in c for c in cols) for n in ("chrom", "position", "ref", "alt")):
-            continue
-        def pick(prefix, fallback):
+
+        def _key_from_variant(v) -> VariantKey | None:
+            try:
+                return VariantKey(v.chromosome, int(v.position),
+                                  str(v.reference_bases), str(v.alternate_bases)).normalised()
+            except Exception:                                 # noqa: BLE001
+                return None
+
+        def _pick(prefix: str) -> str | None:
             for low, real in cols.items():
                 if low.startswith(prefix):
                     return real
-            return fallback
-        c_chrom = pick("chrom", need[0])
-        c_pos = pick("position", need[1])
-        c_ref = pick("ref", need[2])
-        c_alt = pick("alt", need[3])
+            return None
+
+        variant_col = cols.get("variant")
+        c_chrom, c_pos = _pick("chrom"), _pick("position")
+        c_ref, c_alt = _pick("ref"), _pick("alt")
+        if variant_col is None and not all((c_chrom, c_pos, c_ref, c_alt)):
+            continue
         for i, (_, row) in enumerate(obs.iterrows()):
-            try:
-                key = VariantKey(row[c_chrom], int(row[c_pos]),
-                                 str(row[c_ref]), str(row[c_alt])).normalised()
-            except Exception:                                 # noqa: BLE001
+            if variant_col is not None:
+                key = _key_from_variant(row[variant_col])
+            else:
+                try:
+                    key = VariantKey(row[c_chrom], int(row[c_pos]),
+                                     str(row[c_ref]), str(row[c_alt])).normalised()
+                except Exception:                             # noqa: BLE001
+                    key = None
+            if key is None or i >= len(per_variant):
+                continue
+            value = float(per_variant[i])
+            if value != value:                                # NaN: no score, not zero
                 continue
             rec = out.setdefault(key, AtlasRecord(key, {}, source))
-            rec.scores[str(scorer)] = float(per_variant[i])
+            rec.scores[str(scorer)] = value
+    if seen_rows and not out:
+        raise AtlasUnavailable(
+            f"the Atlas client returned {seen_rows} row(s) this adapter could not read "
+            f"(obs columns: {sorted(cols) if 'cols' in dir() else 'unknown'}). Refusing to "
+            "report an empty regulatory axis, which would read as 'no effect here'.")
     return out
 
 
