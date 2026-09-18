@@ -148,3 +148,78 @@ The honest negative result is worth as much: if motif-destroying SNVs carry no
 more predicted regulatory effect than their motif-retaining neighbours, the 2x2
 prioritisation in the workbench has no basis at genome scale, and the paper
 should say so.
+
+## Result of the sampled pilot (150 motifs per chromosome, chr1-22 + chrX)
+
+109,125 AVI records from the live Atlas API, 0 failed queries, joined to
+2,707,107 scored SNVs. `gw_out/stats/summary.json` and
+`gw_out/stats/sensitivity.json` hold the numbers below.
+
+**The primary within-locus test is significant in the direction opposite to the
+hypothesis.** Motif-destroying SNVs score *lower* on |AVI| than SNVs in the
+flanking window of the same locus: G4 median difference -0.0084, higher in
+37.1 % of 1,195 loci, p = 5.9e-20; iM -0.0093, 36.2 % of 2,254 loci,
+p = 3.9e-34.
+
+**That is not about motif loss.** `within_locus_motif_vs_flank`, which pools
+every motif SNV rather than only the destroying ones, gives 37.2 % and 37.3 %
+-- indistinguishable. The whole motif interval sits below its own flanks, and
+destroying the motif adds nothing on top of being inside it.
+
+**Sequence composition explains it.** Motif-destroying positions are
+CpG-depleted (G4 3.3 %, iM 3.1 %, against 5.9 % and 5.2 % in the flanks),
+because a G-run contains no CG dinucleotide. Adjusting for CpG, substitution
+type, GC and chromosome, and clustering by motif, the G4 contrast collapses to
+-0.0059 percentile [-0.0143, +0.0025], p = 0.17; iM stays at -0.0097
+[-0.0154, -0.0039], about one percentile point out of a hundred on 301,000
+SNVs. Dose-response between predicted destabilisation and |AVI| is Spearman
+0.018 (G4) and 0.013 (iM).
+
+**The readout is not flat.** `gw_05_sensitivity.py`, using flank rows only, on
+the same percentile scale: a SNV at a CpG shifts |AVI| by +0.097 percentile
+(G4) and +0.101 (iM), Cliff's delta 0.19-0.20, median |AVI| 0.074 against
+0.043. Substitution type separates too (joint p = 7e-86 and 1e-183). CpG and
+substitution type explain 0.69 % and 0.65 % of the |AVI| rank; motif class
+explains 0.068 % and 0.022 %, and adds 0.056 % and 0.026 % over composition
+alone. The feature that is known to matter moves the readout roughly sixteen
+times further than the largest effect motif destruction is compatible with.
+
+**Equivalence bound.** Destroying a G4 shifts the |AVI| percentile by at most
+1.43 points in either direction; for an i-motif, at most 1.54.
+
+**What the distant control was doing.** The GC-matched control 2-20 kb away
+sits *above* the flank (+0.044 percentile, p = 3.6e-7 for G4), at GC 0.703
+against 0.769 and CpG 11.4 % against 5.9 %. Every number computed against it --
+the whole of `gw_out/stats_noflank/` -- is reading that confound. Use the flank.
+
+`per_chromosome_OR_motif_lost_vs_control` contains zeros, infinities and NaNs:
+it is a tail statistic on a handful of events per chromosome. It is noise, not
+heterogeneity, and should not be reported.
+
+### What this licenses saying, and what it does not
+
+The claim the data support is about the model, not about biology: **AlphaGenome's
+variant-effect predictions carry no signal about G4 or i-motif structural
+disruption beyond what local sequence composition already explains.** This
+design cannot separate "G4 loss has no regulatory consequence" from
+"AlphaGenome has no representation of G4 folding", and the second is at least
+as likely, since nothing in its training objective asks it to model a
+non-canonical secondary structure.
+
+That is still a useful result for the workbench. The 2x2 triage assumes the
+structural and regulatory axes are non-redundant; a near-zero incremental R^2
+and a 1.4-percentile equivalence bound are direct evidence that they are. The
+axes should be read as independent lines of evidence, and AVI should not be
+used as a proxy for structure-mediated regulatory effect.
+
+Testing the biology needs a readout that is not another sequence model:
+fine-mapped eQTL credible sets, MPRA measurements over G4 variants, or
+allele-specific G4 ChIP. Motif-destroying SNVs against same-locus flank SNVs,
+same paired design, measured outcome.
+
+### Scope
+
+This is a sample: 150 motifs per chromosome, motif window plus 100 bp flanks,
+one AVI scorer (AVI_SCORE). Record `--max-motifs`, `--flank` and `--strategy`
+in any methods section. The full genome-wide set needs the AVI Tabix bundle
+(`gw_03_avi.py`), not the live API.
