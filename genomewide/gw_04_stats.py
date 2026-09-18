@@ -78,8 +78,33 @@ def main():
         if not (sp.exists() and vp.exists()):
             print(f"{chrom}: missing structural or avi output, skipped")
             continue
-        s = pd.read_csv(sp, sep="\t", dtype={"delta": str})
-        v = pd.read_csv(vp, sep="\t")
+        try:
+            v = pd.read_csv(vp, sep="\t")
+        except Exception as exc:                              # noqa: BLE001
+            print(f"{chrom}: AVI table unreadable ({exc}); skipped")
+            continue
+        # The structural table is every SNV in every motif on the chromosome --
+        # millions of rows -- while the AVI table is the sampled or bundled
+        # subset actually joined. Reading the whole structural file to throw
+        # nearly all of it away is what made this step run out of patience (and
+        # memory) on chr1; it is streamed and filtered instead.
+        wanted = set(v.pos.astype(int))
+        parts, kept, seen = [], 0, 0
+        try:
+            for chunk in pd.read_csv(sp, sep="\t", dtype={"delta": str}, chunksize=2_000_000):
+                seen += len(chunk)
+                part = chunk[chunk.pos.isin(wanted)]
+                if len(part):
+                    parts.append(part)
+                    kept += len(part)
+        except Exception as exc:                              # noqa: BLE001
+            print(f"{chrom}: structural table unreadable after {seen:,} rows ({exc}); skipped")
+            continue
+        if not parts:
+            print(f"{chrom}: no structural row matches an AVI position; skipped")
+            continue
+        s = pd.concat(parts, ignore_index=True)
+        print(f"{chrom}: {kept:,} of {seen:,} structural rows at AVI positions", flush=True)
         motifs = pd.read_csv(base / "motifs" / f"{chrom}.tsv.gz", sep="\t", usecols=["id", "gc", "ctrl_gc"])
         col = a.score or next((c for c in v.columns[6:] if "avi" in c.lower()), v.columns[6])
         v["abs_avi"] = pd.to_numeric(v[col], errors="coerce").abs()
@@ -90,12 +115,18 @@ def main():
             k = s.kind == kind
             s.loc[k, "cls"] = classify(s[k], kind)
         s = s.merge(motifs[["id", "gc"]], left_on="motif_id", right_on="id", how="left").drop(columns="id")
+        f = v[v.set == "flank"].merge(motifs[["id", "gc"]], left_on="motif_id", right_on="id", how="left")
+        kinds0 = pd.read_csv(base / "motifs" / f"{chrom}.tsv.gz", sep="\t",
+                             usecols=["id", "kind"]).set_index("id").kind
+        f = pd.DataFrame({"chrom": chrom, "pos": f.pos, "ref": f.ref, "alt": f.alt,
+                          "motif_id": f.motif_id, "kind": f.motif_id.map(kinds0),
+                          "cls": "flank", "abs_avi": f.abs_avi, "gc": f.gc})
         c = v[v.set == "control"].merge(motifs[["id", "ctrl_gc"]], left_on="motif_id", right_on="id", how="left")
         kinds = pd.read_csv(base / "motifs" / f"{chrom}.tsv.gz", sep="\t", usecols=["id", "kind"]).set_index("id").kind
         c = pd.DataFrame({"chrom": chrom, "pos": c.pos, "ref": c.ref, "alt": c.alt, "motif_id": c.motif_id,
                           "kind": c.motif_id.map(kinds), "cls": "control", "abs_avi": c.abs_avi,
                           "gc": c.ctrl_gc})
-        both = pd.concat([s[["chrom", "pos", "ref", "alt", "motif_id", "kind", "cls", "abs_avi", "gc", "delta"]], c])
+        both = pd.concat([s[["chrom", "pos", "ref", "alt", "motif_id", "kind", "cls", "abs_avi", "gc", "delta"]], f, c])
         seq = read_chrom(a.fasta, chrom)
         # CpG context: the reference base is the C or the G of a CpG (pos is 1-based).
         both["cpg"] = [int(seq[p - 2:p] == "CG" or seq[p - 1:p + 1] == "CG") for p in both.pos]
@@ -114,7 +145,7 @@ def main():
     else:
         D.to_csv(sd / "snv_table.tsv.gz", sep="\t", index=False)
     report = {"score_column": col, "n_snv": int(len(D)), "kinds": {}}
-    order = ["motif_lost", "destabilising", "moderate", "neutral", "stabilising", "control"]
+    order = ["motif_lost", "destabilising", "moderate", "neutral", "stabilising", "flank", "control"]
     for kind in ("G4", "iM"):
         K = D[D.kind == kind]
         ctrl = K[K.cls == "control"].abs_avi.values
@@ -140,11 +171,47 @@ def main():
                     r["cliffs_delta_vs_neutral"] = cliffs_delta(x.abs_avi.values, neutral)
                     r["p_mwu_vs_neutral"] = float(stats.mannwhitneyu(x.abs_avi, neutral).pvalue)
             rep["classes"][cl] = r
-        # 3. adjusted model
+        # 3. adjusted models.
+        #
+        # The rank model is the primary one. Top-1% membership is rare among motif
+        # SNVs (tens of events), and a logistic fit on that separates: the first
+        # run of this returned an odds ratio of 1e-8 with a convergence warning,
+        # which is a fitting artefact and not a finding. A rank-transformed
+        # outcome uses the whole distribution and cannot separate.
         try:
             import statsmodels.formula.api as smf
             M = K[K.cls.isin(order)].copy()
-            M["cls"] = pd.Categorical(M.cls, categories=["control"] + [o for o in order if o != "control"])
+            present = [o for o in order if (M.cls == o).any()]
+            base_cls = "flank" if (M.cls == "flank").sum() > 100 else "control"
+            if base_cls not in present:
+                base_cls = present[-1]
+            # Only classes that HAVE rows. Declaring a category with no rows gives
+            # patsy an all-zero dummy column, and that -- not the data -- is what
+            # made the design matrix rank-deficient.
+            M["cls"] = pd.Categorical(M.cls, categories=[base_cls] + [o for o in present if o != base_cls])
+            M["avi_rank"] = M.groupby("chrom").abs_avi.rank(pct=True)
+            fit_r = smf.ols("avi_rank ~ C(cls) + C(subst) + cpg + gc + C(chrom)", data=M).fit(
+                cov_type="cluster", cov_kwds={"groups": pd.factorize(M.motif_id)[0]})
+            rep["adjusted_rank_model"] = {
+                "reference_class": base_cls,
+                "note": "outcome is |AVI| percentile rank within chromosome; a coefficient is a "
+                        "shift in mean percentile against the reference class, clustered by motif",
+                "terms": {n.replace("C(cls)[T.", "").rstrip("]"):
+                          {"delta_pctile": float(b), "ci": [float(lo), float(hi)], "p": float(p)}
+                          for n, b, (lo, hi), p in zip(fit_r.params.index, fit_r.params,
+                                                       fit_r.conf_int().values, fit_r.pvalues)
+                          if n.startswith("C(cls)")}}
+        except Exception as exc:                              # noqa: BLE001
+            rep["adjusted_rank_model"] = f"not fitted: {exc}"
+        try:
+            events = int(K.top1.sum())
+            if events < 50:
+                raise ValueError(f"only {events} top-1% events in this kind; a logistic fit on "
+                                 "that many separates rather than estimates")
+            import statsmodels.formula.api as smf
+            M = K[K.cls.isin(order)].copy()
+            present = [o for o in order if (M.cls == o).any()]
+            M["cls"] = pd.Categorical(M.cls, categories=["control"] + [o for o in present if o != "control"])
             fit = smf.logit("top1 ~ C(cls) + C(subst) + cpg + gc + C(chrom)", data=M).fit(
                 disp=0, cov_type="cluster", cov_kwds={"groups": pd.factorize(M.motif_id)[0]})
             rep["adjusted_logit"] = {
@@ -155,6 +222,19 @@ def main():
                 if n.startswith("C(cls)")}
         except Exception as exc:  # noqa: BLE001
             rep["adjusted_logit"] = f"not fitted: {exc}"
+        # What the classes differ on besides structure. The distant control is
+        # matched on GC per motif, but a motif whose GC cannot be matched within
+        # 2-20 kb gets no control at all, so the control set is drawn from the
+        # easier, lower-GC loci -- a selection effect that no adjustment in the
+        # model can see. Reported so it is not invisible.
+        rep["covariate_balance"] = {
+            cl: {"n": int((K.cls == cl).sum()),
+                 "mean_gc": round(float(K.gc[K.cls == cl].mean()), 4),
+                 "frac_cpg": round(float(K.cpg[K.cls == cl].mean()), 4)}
+            for cl in order if (K.cls == cl).any()}
+        rep["top1_note"] = ("`frac_top1pct` for the control class is 1% by construction: the "
+                            "threshold IS its 99th percentile. Read the other classes against "
+                            "that, and prefer the rank model and the within-locus tests.")
         # 4. within-motif paired test
         W = K[K.cls != "control"].copy()
         W["lost"] = W.cls.eq("motif_lost")
@@ -165,6 +245,33 @@ def main():
             rep["within_motif_lost_vs_retained"] = {
                 "n_motifs": int(len(g)), "median_diff": float((g[True] - g[False]).median()),
                 "frac_motifs_lost_higher": float((g[True] > g[False]).mean()), "p_wilcoxon": float(w.pvalue)}
+        # 4b. motif-destroying SNVs vs the flanks of the same window. The distant
+        # control window is matched on GC but not on what the locus does, and its
+        # |AVI| tail runs well above the motif's; the flank holds promoter,
+        # chromatin and conservation fixed by construction.
+        FL = K[K.cls == "flank"]
+        if len(FL) > 100:
+            lost_m = K[K.cls == "motif_lost"].groupby("motif_id").abs_avi.mean()
+            fl_m = FL.groupby("motif_id").abs_avi.mean()
+            pair = pd.concat([lost_m.rename("lost"), fl_m.rename("flank")], axis=1).dropna()
+            if len(pair) > 20:
+                w = stats.wilcoxon(pair.lost, pair.flank)
+                rep["within_locus_lost_vs_flank"] = {
+                    "n_motifs": int(len(pair)),
+                    "median_diff": float((pair.lost - pair.flank).median()),
+                    "frac_motifs_lost_higher": float((pair.lost > pair.flank).mean()),
+                    "p_wilcoxon": float(w.pvalue)}
+            ret_m = K[K.cls.isin(["destabilising", "moderate", "neutral", "stabilising"])] \
+                .groupby("motif_id").abs_avi.mean()
+            pair2 = pd.concat([ret_m.rename("motif"), fl_m.rename("flank")], axis=1).dropna()
+            if len(pair2) > 20:
+                w2 = stats.wilcoxon(pair2.motif, pair2.flank)
+                rep["within_locus_motif_vs_flank"] = {
+                    "n_motifs": int(len(pair2)),
+                    "median_diff": float((pair2.motif - pair2.flank).median()),
+                    "frac_motifs_higher": float((pair2.motif > pair2.flank).mean()),
+                    "p_wilcoxon": float(w2.pvalue)}
+
         # 5. dose-response
         R = K[K.cls.isin(["destabilising", "moderate", "neutral", "stabilising"])]
         dd = pd.to_numeric(R.delta, errors="coerce")

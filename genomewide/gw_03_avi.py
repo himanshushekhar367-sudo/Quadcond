@@ -56,6 +56,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--avi", required=True, help="AVI .tsv.gz (with .tbi/.csi), or a pattern with {chrom}")
     ap.add_argument("--chroms", nargs="*", default=CHROMS)
+    ap.add_argument("--flank", type=int, default=100,
+                    help="nt each side of a motif, written as set=flank: the within-locus control")
     a = ap.parse_args()
     base = out_dir()
     od = base / "avi"
@@ -76,12 +78,17 @@ def main():
         with gzip.open(tmp, "wt") as fh:
             fh.write("set\tmotif_id\tchrom\tpos\tref\talt\t" + "\t".join(tb.scores) + "\n")
             for r in m.itertuples(index=False):
-                wins = [("motif", int(r.start) + 1, int(r.end))]
+                m1, m2 = int(r.start) + 1, int(r.end)
+                wins = [("motif", max(1, m1 - a.flank), m2 + a.flank, (m1, m2))]
                 if pd.notna(r.ctrl_start) and str(r.ctrl_start) != "":
-                    wins.append(("control", int(r.ctrl_start) + 1, int(r.ctrl_end)))
-                for tag, s1, e1 in wins:
+                    wins.append(("control", int(r.ctrl_start) + 1, int(r.ctrl_end), None))
+                for tag, s1, e1, bounds in wins:
                     for pos, ref, alt, vals in tb.fetch(chrom, s1, e1):
-                        fh.write(f"{tag}\t{r.id}\t{chrom}\t{pos}\t{ref}\t{alt}\t" + "\t".join(vals) + "\n")
+                        row_tag = tag
+                        if bounds is not None:
+                            row_tag = "motif" if bounds[0] <= pos <= bounds[1] else "flank"
+                        fh.write(f"{row_tag}\t{r.id}\t{chrom}\t{pos}\t{ref}\t{alt}\t"
+                                 + "\t".join(vals) + "\n")
                         n += 1
         tmp.rename(dest)
         print(f"{chrom}: {n} AVI records written", flush=True)

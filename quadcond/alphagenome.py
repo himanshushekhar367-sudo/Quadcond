@@ -478,6 +478,29 @@ class TabixAtlas(AtlasSource):
         return out
 
 
+def _wait_ready(grpc, channel, timeout, attempts: int = 3) -> None:
+    """Wait for the channel, with retries.
+
+    A single 30 s readiness wait fails on a slow or briefly unreachable network
+    and takes the whole run with it before one query has been sent. The wait is
+    retried with a growing budget instead.
+    """
+    import time as _time
+    last = None
+    for i in range(attempts):
+        try:
+            grpc.channel_ready_future(channel).result((timeout or 30) * (i + 1))
+            return
+        except Exception as exc:                              # noqa: BLE001
+            last = exc
+            if i + 1 < attempts:
+                _time.sleep(2 * (i + 1))
+    raise TimeoutError(
+        f"the Atlas endpoint did not become reachable after {attempts} attempts "
+        f"({type(last).__name__}). Check the network, then retry; nothing was queried."
+    ) from last
+
+
 def _large_message_client(_atlas, key: str, timeout, address, limit_bytes: int):
     """The Atlas client, with gRPC's receive limit raised.
 
@@ -501,7 +524,7 @@ def _large_message_client(_atlas, key: str, timeout, address, limit_bytes: int):
             options=(("grpc.service_config", cfg),
                      ("grpc.max_receive_message_length", limit_bytes),
                      ("grpc.max_send_message_length", limit_bytes)))
-        grpc.channel_ready_future(channel).result(timeout)
+        _wait_ready(grpc, channel, timeout)
         stub = _atlas.atlas_service_pb2_grpc.AtlasServiceStub(channel=channel)
         return _atlas.AtlasClient(stub, metadata=[("x-goog-api-key", key)])
     except AttributeError:
@@ -555,7 +578,8 @@ class LiveAtlas(AtlasSource):
             # from sandboxes without outbound DNS -- and a connection failure
             # must not be mistaken for "this locus has no regulatory effect".
             raise AtlasUnavailable(
-                f"could not reach the AlphaGenome Atlas service: {exc}") from exc
+                "could not reach the AlphaGenome Atlas service: "
+                f"{type(exc).__name__}: {exc}") from exc
         return cls(client, scorers or DEFAULT_SCORERS,
                    address or "dns:///gdmscience.googleapis.com:443")
 

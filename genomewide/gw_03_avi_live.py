@@ -20,6 +20,7 @@ from __future__ import annotations
 import argparse
 import gzip
 import sys
+import threading
 import time
 from pathlib import Path
 
@@ -43,10 +44,42 @@ def pick_motifs(base: Path, chrom: str, n: int, strategy: str, seed: int) -> pd.
     return m[m.id.isin(set(ids))].reset_index(drop=True)
 
 
-TRANSIENT = ("deadline exceeded", "unavailable", "stream removed", "resource_exhausted")
+TRANSIENT = ("deadline exceeded", "unavailable", "stream removed", "resource_exhausted",
+             "timed out")
 
 
-def _query(src, chrom, s1, e1, retries, wait):
+class _Timeout(Exception):
+    pass
+
+
+def _call_with_watchdog(fn, seconds: float):
+    """Run `fn` on a daemon thread and give up on it after `seconds`.
+
+    The client exposes a channel-readiness timeout but no per-call deadline, and
+    a hung ListDenseVariantScores otherwise blocks the whole run for ever -- an
+    overnight job was found stopped on one window with nothing written for
+    seventeen minutes. The thread is abandoned rather than killed (Python cannot
+    kill a thread); it is a daemon, so it cannot keep the process alive.
+    """
+    box: dict = {}
+
+    def run():
+        try:
+            box["value"] = fn()
+        except BaseException as exc:                          # noqa: BLE001
+            box["error"] = exc
+
+    t = threading.Thread(target=run, daemon=True)
+    t.start()
+    t.join(seconds)
+    if t.is_alive():
+        raise _Timeout(f"no response after {seconds:g}s; window abandoned")
+    if "error" in box:
+        raise box["error"]
+    return box["value"]
+
+
+def _query(src, chrom, s1, e1, retries, wait, query_timeout):
     """One window, with retries for the transient RPC failures only.
 
     Deadline-exceeded is a property of the connection, not of the locus, so
@@ -57,13 +90,16 @@ def _query(src, chrom, s1, e1, retries, wait):
     last = None
     for attempt in range(retries + 1):
         try:
-            return src.records_for_interval(chrom, s1, e1)
-        except ag.AtlasUnavailable as exc:
+            return _call_with_watchdog(
+                lambda: src.records_for_interval(chrom, s1, e1), query_timeout)
+        except (ag.AtlasUnavailable, _Timeout) as exc:
             last = exc
-            if not any(t in str(exc).lower() for t in TRANSIENT) or attempt == retries:
-                raise
+            transient = isinstance(exc, _Timeout) or any(
+                t in str(exc).lower() for t in TRANSIENT)
+            if not transient or attempt == retries:
+                raise ag.AtlasUnavailable(str(exc)) from exc
             time.sleep(wait * (attempt + 1))
-    raise last
+    raise ag.AtlasUnavailable(str(last))
 
 
 def main():
@@ -72,6 +108,10 @@ def main():
     ap.add_argument("--max-motifs", type=int, default=500, help="per chromosome")
     ap.add_argument("--strategy", choices=["random", "top"], default="random")
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--flank", type=int, default=100,
+                    help="nt of flanking sequence queried on each side of a motif. Those SNVs are "
+                         "written as set=flank and are the within-locus control: same promoter, "
+                         "same chromatin, same conservation, no motif")
     ap.add_argument("--sleep", type=float, default=0.0, help="seconds between queries")
     ap.add_argument("--api-key", help="defaults to $ALPHAGENOME_API_KEY")
     ap.add_argument("--scorers", default="AVI_SCORE",
@@ -85,6 +125,10 @@ def main():
                     help="retries per window after a transient RPC failure (deadline exceeded, "
                          "unavailable); a schema error is not retried")
     ap.add_argument("--retry-wait", type=float, default=2.0, help="seconds before a retry")
+    ap.add_argument("--query-timeout", type=float, default=120.0,
+                    help="abandon a window whose query has not answered in this many seconds; "
+                         "the client has no per-call deadline and a hung call otherwise stalls "
+                         "the whole run")
     a = ap.parse_args()
     from quadcond import alphagenome as ag
     src = ag.LiveAtlas.from_api_key(
@@ -96,8 +140,19 @@ def main():
     for chrom in a.chroms:
         dest = od / f"{chrom}.tsv.gz"
         if dest.exists():
-            print(f"{chrom}: exists, skipped")
-            continue
+            # A 39-byte file is an empty gzip: a previous run opened the output,
+            # wrote nothing and left it behind. Treating that as "done" silently
+            # drops the chromosome from the analysis, which is how chr7 went
+            # missing from a 14-chromosome run.
+            try:
+                with gzip.open(dest, "rt") as fh:
+                    usable = sum(1 for _, _ in zip(fh, range(2))) >= 2
+            except OSError:
+                usable = False
+            if usable:
+                print(f"{chrom}: exists, skipped")
+                continue
+            print(f"{chrom}: existing output is empty or unreadable; re-querying")
         m = pick_motifs(base, chrom, a.max_motifs, a.strategy, a.seed)
         print(f"{chrom}: {len(m)} motifs selected ({a.strategy}); "
               f"{2 * len(m)} interval queries", flush=True)
@@ -106,12 +161,16 @@ def main():
         with gzip.open(tmp, "wt") as fh:
             header_written = False
             for j, r in enumerate(m.itertuples(index=False)):
-                wins = [("motif", int(r.start) + 1, int(r.end))]
+                m1, m2 = int(r.start) + 1, int(r.end)
+                # One query covers the motif AND its immediate flanks: same cost,
+                # and the flank is the control that holds the locus fixed.
+                wins = [("motif", max(1, m1 - a.flank), m2 + a.flank, (m1, m2))]
                 if str(r.ctrl_start) not in ("", "nan"):
-                    wins.append(("control", int(r.ctrl_start) + 1, int(r.ctrl_end)))
-                for tag, s1, e1 in wins:
+                    wins.append(("control", int(r.ctrl_start) + 1, int(r.ctrl_end), None))
+                for tag, s1, e1, bounds in wins:
                     try:
-                        recs = _query(src, chrom, s1, e1, a.retries, a.retry_wait)
+                        recs = _query(src, chrom, s1, e1, a.retries, a.retry_wait,
+                                      a.query_timeout)
                     except ag.AtlasUnavailable as exc:
                         failed += 1
                         if failed <= 3:
@@ -125,12 +184,15 @@ def main():
                                              "writing a table with silent holes")
                         continue
                     for key, rec in recs.items():
+                        row_tag = tag
+                        if bounds is not None:
+                            row_tag = "motif" if bounds[0] <= key.position <= bounds[1] else "flank"
                         if not header_written:
                             scorers = sorted(rec.scores)
                             fh.write("set\tmotif_id\tchrom\tpos\tref\talt\t" + "\t".join(scorers) + "\n")
                             header_written = True
                         vals = [f"{rec.scores.get(s, '')}" for s in scorers]
-                        fh.write(f"{tag}\t{r.id}\t{chrom}\t{key.position}\t{key.reference}\t"
+                        fh.write(f"{row_tag}\t{r.id}\t{chrom}\t{key.position}\t{key.reference}\t"
                                  f"{key.alternate}\t" + "\t".join(vals) + "\n")
                         n += 1
                     if a.sleep:
@@ -138,7 +200,10 @@ def main():
                 if j % 25 == 0:
                     print(f"  {chrom}: {j + 1}/{len(m)} motifs, {n} records", flush=True)
             if not header_written:
-                raise SystemExit("no records returned; nothing written")
+                print(f"{chrom}: no records returned; nothing written", flush=True)
+        if not header_written:
+            tmp.unlink(missing_ok=True)      # never leave an empty gzip behind
+            continue
         tmp.rename(dest)
         print(f"{chrom}: {n} AVI records from the live API ({failed} failed queries)", flush=True)
     print("NOTE: this is a sampled pilot, not the genome-wide set. The statistics "

@@ -51,3 +51,7 @@ Thumbs.db
 
 # Genome-wide run output (per-chromosome tables, tens of GB)
 gw_out/
+
+# Local run logs and downloaded data assets
+*.log
+data/
