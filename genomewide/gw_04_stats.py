@@ -211,15 +211,25 @@ def main():
             import statsmodels.formula.api as smf
             M = K[K.cls.isin(order)].copy()
             present = [o for o in order if (M.cls == o).any()]
-            M["cls"] = pd.Categorical(M.cls, categories=["control"] + [o for o in present if o != "control"])
+            # Same reference class as the rank model above. The two were reported
+            # against different baselines in the first version, which made the
+            # odds ratios and the percentile shifts look like they disagreed.
+            logit_base = "flank" if (M.cls == "flank").sum() > 100 else "control"
+            if logit_base not in present:
+                logit_base = present[-1]
+            M["cls"] = pd.Categorical(M.cls, categories=[logit_base] + [o for o in present if o != logit_base])
             fit = smf.logit("top1 ~ C(cls) + C(subst) + cpg + gc + C(chrom)", data=M).fit(
                 disp=0, cov_type="cluster", cov_kwds={"groups": pd.factorize(M.motif_id)[0]})
             rep["adjusted_logit"] = {
-                n.replace("C(cls)[T.", "").rstrip("]"): {"OR": float(np.exp(b)),
-                 "ci": [float(np.exp(lo)), float(np.exp(hi))], "p": float(p)}
-                for n, b, (lo, hi), p in zip(fit.params.index, fit.params,
-                                             fit.conf_int().values, fit.pvalues)
-                if n.startswith("C(cls)")}
+                "reference_class": logit_base,
+                "note": "outcome is membership of the top 1% of |AVI| as defined by the distant "
+                        "control distribution; rare among motif SNVs, so read the rank model first",
+                "terms": {
+                    n.replace("C(cls)[T.", "").rstrip("]"): {"OR": float(np.exp(b)),
+                     "ci": [float(np.exp(lo)), float(np.exp(hi))], "p": float(p)}
+                    for n, b, (lo, hi), p in zip(fit.params.index, fit.params,
+                                                 fit.conf_int().values, fit.pvalues)
+                    if n.startswith("C(cls)")}}
         except Exception as exc:  # noqa: BLE001
             rep["adjusted_logit"] = f"not fitted: {exc}"
         # What the classes differ on besides structure. The distant control is
