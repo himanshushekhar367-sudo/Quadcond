@@ -11,11 +11,17 @@ answers "does this work on data nobody could have tuned it to".
 
     ..\..\.venv\Scripts\python.exe run_panel.py panels\<panel>.tsv
 
-Use the checkout's own `.venv`, not the ambient shell. It is a Python 3.11
-environment built from `requirements-model.txt` (numpy, scipy, scikit-learn and
-xgboost pinned to the versions the artifact was saved under) with `quadcond`
-installed editable. The model artifact will not load anywhere else, and a
-conda `base` or a WSL shell that happens to have pandas is not the same thing.
+or, from WSL, the `qcgw` conda environment, which carries the same
+xgboost 3.2.0 and an editable quadcond 0.5.1:
+
+    conda activate qcgw
+    python run_panel.py panels/<panel>.tsv
+
+What matters is the environment, not the shell. It is a Python 3.11
+The artifact was saved under the versions pinned in
+`requirements-model.txt` (numpy 2.4.4, scipy 1.17.1, scikit-learn 1.8.0,
+xgboost 3.2.0), and it needs an environment that has them with `quadcond`
+installed. Conda `base`, or a shell that happens to have pandas, is not that.
 `run_panel.py` says so rather than reporting a bare missing-module error.
 
 Before extracting real sequences, check the harness runs:
