@@ -12,7 +12,11 @@ The observations in here are invented. That is why this lives in a temp
 directory and never in panels/: a file of made-up measurements sitting beside
 real ones is an accident waiting to be cited.
 
-    python selftest.py --model ../../artifacts/quadcond_model.joblib
+    ..\..\.venv\Scripts\python.exe selftest.py        (Windows, the model environment)
+    python selftest.py                                  (any environment that can import quadcond)
+
+It scores with whichever interpreter started it, so running it with the wrong
+one fails the same way a real panel would -- which is the point.
 """
 from __future__ import annotations
 
@@ -58,11 +62,6 @@ def main():
             lines.append(f"{sid}\t{seq}\tDNA\t5\t132\t1.5\t7.4\t25\t20\t{folded}\t{topo}\t\t-\t-")
         panel.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
-        # Scored into the temp dir too, so results/ never sees invented numbers.
-        env_root = Path(td) / "run"
-        env_root.mkdir()
-        for name in ("run_panel.py",):
-            (env_root / name).write_text((ROOT / name).read_text(encoding="utf-8"), encoding="utf-8")
         out = subprocess.run([sys.executable, str(ROOT / "run_panel.py"), str(panel),
                               "--model", a.model],
                              capture_output=True, text=True, cwd=str(ROOT))

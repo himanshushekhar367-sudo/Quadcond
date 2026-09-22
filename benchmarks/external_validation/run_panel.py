@@ -104,8 +104,27 @@ def main():
             "Extract the sequences and measurements from the source listed in the file,\n"
             "fill the rows, and run this again. Nothing is scored from an empty panel.")
 
-    from quadcond import Condition
-    from quadcond.models.predict import Predictor
+    try:
+        from quadcond import Condition
+        from quadcond.models.predict import Predictor
+    except ModuleNotFoundError as exc:
+        # "No module named 'numpy'" is true and useless: it names the missing
+        # package rather than the actual mistake, which is nearly always that
+        # this is running in the wrong interpreter. The model environment is the
+        # checkout's own .venv, built from requirements-model.txt, and the
+        # artifact will not load anywhere else.
+        raise SystemExit(
+            f"cannot import QuadCond: {exc}.\n"
+            "This needs the model environment, not the ambient one. In this checkout that is\n"
+            "  .venv  (Python 3.11, numpy/scipy/scikit-learn/xgboost pinned in "
+            "requirements-model.txt,\n"
+            "         with quadcond installed editable)\n\n"
+            "Windows PowerShell:\n"
+            "  cd <repo>\\benchmarks\\external_validation\n"
+            "  ..\\..\\.venv\\Scripts\\python.exe run_panel.py panels\\<panel>.tsv\n\n"
+            "If you would rather run it from WSL or conda, create an environment there with\n"
+            "  pip install -e . -r requirements-model.txt\n"
+            "and check that xgboost imports before scoring anything.") from exc
 
     pred = Predictor.load(a.model, a.atlas if Path(a.atlas).exists() else None)
     frozen = meta.get("model_artifact_sha256_at_freeze", "")

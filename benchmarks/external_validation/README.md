@@ -9,7 +9,18 @@ A panel here is a set of measurements published *after* the model artifact was
 frozen, scored by that artifact with no refitting. It is the only evidence that
 answers "does this work on data nobody could have tuned it to".
 
-    python run_panel.py panels/<panel>.tsv
+    ..\..\.venv\Scripts\python.exe run_panel.py panels\<panel>.tsv
+
+Use the checkout's own `.venv`, not the ambient shell. It is a Python 3.11
+environment built from `requirements-model.txt` (numpy, scipy, scikit-learn and
+xgboost pinned to the versions the artifact was saved under) with `quadcond`
+installed editable. The model artifact will not load anywhere else, and a
+conda `base` or a WSL shell that happens to have pandas is not the same thing.
+`run_panel.py` says so rather than reporting a bare missing-module error.
+
+Before extracting real sequences, check the harness runs:
+
+    ..\..\.venv\Scripts\python.exe selftest.py
 
 `run_panel.py` refuses to score a panel that has no publication date in its
 provenance block, and refuses to score one whose declared model hash does not
