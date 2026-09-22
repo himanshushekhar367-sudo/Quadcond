@@ -1,0 +1,20 @@
+# panel: fam230_kcl_titration
+# title: FAM230E and FAM230F cfDNA fragments and G-disrupted mutants across a K+ titration
+# source_doi: 10.1039/D6SC04173F
+# source_url: https://pubs.rsc.org/sc/article/doi/10.1039/d6sc04173f
+# measurements_published: 2026-09-03
+# model_artifact_sha256_at_freeze: 493640193ad70974d35582c55b4a721095bfcba50edc6827d9636d2f7b7be0c7
+# why_this_panel: a K+ titration at 0, 5, 10, 25, 50 and 100 mM on two parent sequences plus
+#   G-disrupted mutants, all at 10 mM Tris-HCl pH 7.4, 5 uM DNA, 26 C, with CD melting from
+#   20-90 C. Two parents is far too few to say anything about folding accuracy, but the titration
+#   is an out-of-sample test of the one capability no competing tool has: whether predicted
+#   stability moves correctly with cation concentration on sequences and from a laboratory that
+#   had nothing to do with the training data. Report it as a condition-response panel and as
+#   nothing else.
+# extraction_status: PENDING -- fill one row per (sequence, KCl concentration). FAM230F has a
+#   parallel-compatible CD spectrum and an apparent Tm near 51 C; FAM230E has a mixed spectrum
+#   with no clean single transition, so leave its observed_tm_c empty rather than fitting a
+#   number the authors did not report. The mutants are the internal negative control.
+# read_out_as: within-sequence rank correlation between predicted Tm and K+ concentration, and
+#   the predicted parent-minus-mutant difference. Not an accuracy claim on two sequences.
+sequence_id	sequence	molecule	buffer_k_mm	buffer_na_mm	buffer_mg_mm	ph	temperature_c	strand_conc_um	observed_folded	observed_topology	observed_tm_c	source_table	notes

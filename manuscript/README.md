@@ -22,7 +22,23 @@ an analysis is rerun, copy its result file here deliberately and rerun both
 scripts; nothing updates silently.
 
 Still outstanding before submission: the public server URL, the archived release
-DOI, the corresponding-author contact line, funding, CRediT roles, the conflict
-declaration, and bibliography entries for the tools marked CITATION TO ADD
-(G4detector, G4mismatch, G4SNVHunter). The previous draft for v0.4.9 is kept
-unchanged under `release-v0.4.9/manuscript/`.
+DOI, the corresponding-author contact line, funding, CRediT roles and the
+conflict declaration.
+
+Three citations remain marked CITATION TO ADD in the text, each for a different
+reason:
+
+- **G4detector** -- journal and DOI verified (IEEE/ACM Trans. Comput. Biol.
+  Bioinform., `10.1109/TCBB.2021.3073595`), author list not confirmed. Crossref,
+  PubMed and Europe PMC all rate-limited the lookup, and IEEE returned 403.
+  Pull the author list from the article page and add the record to
+  `verified_references.json` in the same shape as the others.
+- **Peptide-directed RNA i-motif folding** (`10.1039/D6SC01203E`) -- cited in the
+  limitations for the point that a binding partner shifted folding without
+  shifting Tm. Not yet verified against the publisher record.
+
+`g4mismatch` and `g4snvhunter` are done: both records were read from the
+publisher's own citation block and are in `verified_references.json`.
+
+The previous draft for v0.4.9 is kept unchanged under
+`release-v0.4.9/manuscript/`.

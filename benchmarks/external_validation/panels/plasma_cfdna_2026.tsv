@@ -1,0 +1,19 @@
+# panel: plasma_cfdna_2026
+# title: G-rich loci recovered from human blood plasma cfDNA, characterised individually by CD
+# source_doi: 10.64898/2026.09.05.747829
+# source_url: https://www.biorxiv.org/content/10.64898/2026.09.05.747829v1
+# measurements_published: 2026-09-10
+# model_artifact_sha256_at_freeze: 493640193ad70974d35582c55b4a721095bfcba50edc6827d9636d2f7b7be0c7
+# why_this_panel: the buffer is a near-physiological mixed-cation composition (132 mM Na+, 5 mM K+,
+#   1.5 mM Mg2+, 10 mM sodium phosphate, pH 7.4, 25 C, 20 uM DNA). That region of condition space is
+#   thin in G4STAB and G4ShapePredictor, which are the collections behind the g4_tm and g4_topology
+#   heads, so this tests the condition axis where the training data is weakest rather than where it
+#   is densest. The measurements were posted after the model artifact above was frozen.
+# extraction_status: PENDING -- the 50 synthesised oligonucleotides and their CD calls are reported
+#   in the preprint's supplementary material. Fill one row per oligonucleotide from the supplement.
+#   Record the CD call as observed_folded 1/0 and the assigned topology verbatim; leave
+#   observed_topology empty rather than guessing where the spectrum is described as mixed.
+# do_not: do not add the 8,316 cfDNA-enriched genomic intervals here. They are a fragmentomic
+#   proxy, not a folding measurement, and mixing them into this file would turn an external
+#   biophysical panel into a genomic-association set with no label to say so.
+sequence_id	sequence	molecule	buffer_k_mm	buffer_na_mm	buffer_mg_mm	ph	temperature_c	strand_conc_um	observed_folded	observed_topology	observed_tm_c	source_table	notes
