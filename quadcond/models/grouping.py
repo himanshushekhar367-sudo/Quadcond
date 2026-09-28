@@ -68,7 +68,27 @@ def _greedy_clusters(sequences, threshold: float, k: int) -> np.ndarray:
     if not seqs:
         return np.zeros(0, dtype=int)
     M = kmer_matrix(seqs, k=k)
-    order = np.argsort([-len(clean(s)) for s in seqs])
+    # Traversal order is decided by sequence content, not by the order rows
+    # happened to arrive in.
+    #
+    # This used to be `np.argsort([-len(clean(s)) for s in seqs])`. NumPy's
+    # default sort is quicksort, which is not stable, and in the G4 melting
+    # collection 2,210 of 2,274 sequences share a length with another -- so tied
+    # rows came out in an arbitrary order. Because the pass below is greedy and
+    # seeds a new group from whichever tied sequence it reaches first, the same
+    # sequences in a different order produced a different number of groups
+    # (measured: 1,201 / 1,202 / 1,203 across shuffles of one input). That is how
+    # a cross-validation partition stops being reproducible, and it is why the
+    # folds behind the shipped v0.5.1 heads cannot be replayed exactly. See
+    # benchmarks/fold_provenance/.
+    #
+    # Sorting on (-length, sequence) makes the traversal a pure function of the
+    # sequence multiset: a stable sort alone would only fix run-to-run variation
+    # for one fixed input order, which is weaker than what a published partition
+    # needs. Sequences identical in both keys are interchangeable here -- their
+    # k-mer similarity is 1.0, so they join the same group regardless of order.
+    keys = [(-len(clean(s)), clean(s)) for s in seqs]
+    order = np.array(sorted(range(len(seqs)), key=keys.__getitem__), dtype=int)
     groups = -np.ones(len(seqs), dtype=int)
     centroids: list[int] = []
     for i in order:

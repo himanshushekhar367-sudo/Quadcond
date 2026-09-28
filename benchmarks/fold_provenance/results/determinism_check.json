@@ -1,0 +1,22 @@
+{
+  "checked_on": "2026-09-28",
+  "atlas": "atlas_core.db",
+  "n_sequences": 2274,
+  "distinct_lengths": 64,
+  "rows_sharing_a_length_with_another": 2210,
+  "threshold": 0.9,
+  "groups_same_input_run_1": 1198,
+  "groups_same_input_run_2": 1198,
+  "deterministic_within_process": true,
+  "groups_after_shuffling": [
+    1198,
+    1198,
+    1198
+  ],
+  "order_dependent": false,
+  "reading": [
+    "Deterministic on identical input, so a fixed row order is enough to make it repeatable.",
+    "Shuffling does not change the group count, so order-dependence is not the mechanism and the difference against the training record has another cause. Look next at whether the atlas rows themselves changed, or the clustering code did.",
+    "2210 of 2274 sequences share a length with at least one other, which is the population that an unstable sort can reorder."
+  ]
+}

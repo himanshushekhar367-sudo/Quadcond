@@ -55,3 +55,6 @@ gw_out/
 # Local run logs and downloaded data assets
 *.log
 data/
+
+# Panel scoring output; panels and provenance are tracked, results are regenerable
+benchmarks/external_validation/results/

@@ -70,20 +70,28 @@ def main():
             raise SystemExit("harness failed on the synthetic panel; fix that before extracting "
                              "real sequences")
         csv_path = ROOT / "results" / "selftest_synthetic.csv"
-        rows = list(csv.DictReader(csv_path.open(encoding="utf-8")))
-        assert len(rows) == len(SEQS), f"expected {len(SEQS)} rows, got {len(rows)}"
-        cols = set(rows[0])
-        need = {"sequence_id", "sequence", "condition", "condition_imputed"}
-        missing = need - cols
-        assert not missing, f"output is missing {missing}"
-        assert any(c.startswith("g4_fold__") for c in cols), "no g4_fold output at all"
-        # Conditions must reach the model: nothing the panel supplied may be imputed.
-        for r in rows:
-            assert not r["condition_imputed"], (
-                f"{r['sequence_id']}: the harness imputed {r['condition_imputed']} even though the "
-                "panel supplied it -- the buffer is not reaching the model")
-        for p in (csv_path, ROOT / "results" / "selftest_synthetic_summary.json"):
-            p.unlink(missing_ok=True)
+        json_path = ROOT / "results" / "selftest_synthetic_summary.json"
+        # Cleanup goes in a finally. It used to sit after the assertions, so a
+        # failing check left a file of invented measurements in results/ beside
+        # the real ones -- which is the exact accident this script exists to
+        # avoid, and it happened: two selftest_synthetic files survived from a
+        # run on 22 September.
+        try:
+            rows = list(csv.DictReader(csv_path.open(encoding="utf-8")))
+            assert len(rows) == len(SEQS), f"expected {len(SEQS)} rows, got {len(rows)}"
+            cols = set(rows[0])
+            need = {"sequence_id", "sequence", "condition", "condition_imputed"}
+            missing = need - cols
+            assert not missing, f"output is missing {missing}"
+            assert any(c.startswith("g4_fold__") for c in cols), "no g4_fold output at all"
+            # Conditions must reach the model: nothing the panel supplied may be imputed.
+            for r in rows:
+                assert not r["condition_imputed"], (
+                    f"{r['sequence_id']}: the harness imputed {r['condition_imputed']} even "
+                    "though the panel supplied it -- the buffer is not reaching the model")
+        finally:
+            for leftover in (csv_path, json_path):
+                leftover.unlink(missing_ok=True)
     print(f"harness OK: {len(SEQS)} sequences scored, conditions passed through, "
           "temporary outputs removed")
 

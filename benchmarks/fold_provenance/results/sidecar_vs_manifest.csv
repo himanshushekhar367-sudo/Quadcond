@@ -1,0 +1,8 @@
+head,group_by,rows_sidecar,rows_replay,groups_sidecar,groups_replay,cluster_threshold,seed,rows_match,groups_match,reproduced
+g4_fold,sequence,6744,6744,1619,1624,0.9,0,True,False,False
+g4_topology,sequence,1005,1005,617,618,0.9,0,True,False,False
+g4_tm,sequence,2274,2274,400,407,0.9,0,True,False,False
+im_fold,sequence,320,320,175,171,0.9,0,True,False,False
+im_pht,sequence,160,160,85,85,0.9,0,True,True,True
+im_pht_condition,condition,558,558,10,10,0.9,0,True,True,True
+im_tm_condition,condition,379,379,10,10,0.9,0,True,True,True

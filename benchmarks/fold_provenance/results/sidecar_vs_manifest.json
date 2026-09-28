@@ -1,0 +1,123 @@
+{
+  "compared_on": "2026-09-28",
+  "sidecar": "/sessions/rcw-01bpyymfw9uelurz3uthvkaa/mnt/Quadcond/quadcond-repo/manuscript/inputs/quadcond_model.json",
+  "manifest": "/sessions/rcw-01bpyymfw9uelurz3uthvkaa/mnt/Quadcond/quadcond-repo/benchmarks/published_tools/results/fold_assignments_meta.json",
+  "manifest_assignment_provenance": "reconstructed",
+  "manifest_rows_fingerprint": "e2feb90f3216912b162a3d2df6bf656c34d5e0a13123c1abe1293c3502b14283",
+  "heads_compared": 7,
+  "heads_reproduced": 3,
+  "heads_not_reproduced": [
+    "g4_fold",
+    "g4_topology",
+    "g4_tm",
+    "im_fold"
+  ],
+  "by_grouping_variable": {
+    "sequence": {
+      "heads": 5,
+      "reproduced": 1
+    },
+    "condition": {
+      "heads": 2,
+      "reproduced": 2
+    }
+  },
+  "rows": [
+    {
+      "head": "g4_fold",
+      "group_by": "sequence",
+      "rows_sidecar": 6744,
+      "rows_replay": 6744,
+      "groups_sidecar": 1619,
+      "groups_replay": 1624,
+      "cluster_threshold": 0.9,
+      "seed": 0,
+      "rows_match": true,
+      "groups_match": false,
+      "reproduced": false
+    },
+    {
+      "head": "g4_topology",
+      "group_by": "sequence",
+      "rows_sidecar": 1005,
+      "rows_replay": 1005,
+      "groups_sidecar": 617,
+      "groups_replay": 618,
+      "cluster_threshold": 0.9,
+      "seed": 0,
+      "rows_match": true,
+      "groups_match": false,
+      "reproduced": false
+    },
+    {
+      "head": "g4_tm",
+      "group_by": "sequence",
+      "rows_sidecar": 2274,
+      "rows_replay": 2274,
+      "groups_sidecar": 400,
+      "groups_replay": 407,
+      "cluster_threshold": 0.9,
+      "seed": 0,
+      "rows_match": true,
+      "groups_match": false,
+      "reproduced": false
+    },
+    {
+      "head": "im_fold",
+      "group_by": "sequence",
+      "rows_sidecar": 320,
+      "rows_replay": 320,
+      "groups_sidecar": 175,
+      "groups_replay": 171,
+      "cluster_threshold": 0.9,
+      "seed": 0,
+      "rows_match": true,
+      "groups_match": false,
+      "reproduced": false
+    },
+    {
+      "head": "im_pht",
+      "group_by": "sequence",
+      "rows_sidecar": 160,
+      "rows_replay": 160,
+      "groups_sidecar": 85,
+      "groups_replay": 85,
+      "cluster_threshold": 0.9,
+      "seed": 0,
+      "rows_match": true,
+      "groups_match": true,
+      "reproduced": true
+    },
+    {
+      "head": "im_pht_condition",
+      "group_by": "condition",
+      "rows_sidecar": 558,
+      "rows_replay": 558,
+      "groups_sidecar": 10,
+      "groups_replay": 10,
+      "cluster_threshold": 0.9,
+      "seed": 0,
+      "rows_match": true,
+      "groups_match": true,
+      "reproduced": true
+    },
+    {
+      "head": "im_tm_condition",
+      "group_by": "condition",
+      "rows_sidecar": 379,
+      "rows_replay": 379,
+      "groups_sidecar": 10,
+      "groups_replay": 10,
+      "cluster_threshold": 0.9,
+      "seed": 0,
+      "rows_match": true,
+      "groups_match": true,
+      "reproduced": true
+    }
+  ],
+  "reading": [
+    "Row counts match for every head, so the rows being read are the right rows. The disagreement is in the grouping, not in the data.",
+    "_greedy_clusters orders sequences with np.argsort over negative lengths, and NumPy's default sort is not stable. Sequences sharing a length are permuted differently between runs, and a greedy pass then selects different centroids. check_determinism.py tests that mechanism directly.",
+    "The manifest reports assignment_provenance='reconstructed', which is the correct label: it must not be used to clear a head of leakage, and metrics computed under it are not the shipped artifact's historical out-of-fold figures."
+  ]
+}
