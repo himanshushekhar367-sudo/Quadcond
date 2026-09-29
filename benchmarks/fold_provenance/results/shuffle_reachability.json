@@ -1,0 +1,135 @@
+{
+  "question": "Does row order alone account for the gap between the shipped sidecar's group counts and the replayed ones?",
+  "atlas": "atlas_core.db",
+  "atlas_is_subset": true,
+  "shuffles_per_head": 15,
+  "seed": 0,
+  "cluster_threshold": 0.9,
+  "prefix_revision": "828523e",
+  "heads": {
+    "g4_fold": {
+      "n_sequences": 6744,
+      "clustering_regime": "minibatch_kmeans_above_exact_max",
+      "groups_recorded_in_sidecar": 1619,
+      "groups_as_queried_prefix_code": 1624,
+      "groups_under_fixed_code": 1624,
+      "gap_recorded_vs_as_queried": 5,
+      "shuffles_run": 3,
+      "shuffle_range_is_lower_bound": true,
+      "shuffle_min": 1607,
+      "shuffle_max": 1636,
+      "shuffle_mean": 1620.0,
+      "shuffle_distinct_values": [
+        1607,
+        1617,
+        1636
+      ],
+      "recorded_reachable_by_row_order_alone": true,
+      "distance_to_reachable_range": 0
+    },
+    "g4_topology": {
+      "n_sequences": 1005,
+      "clustering_regime": "greedy",
+      "groups_recorded_in_sidecar": 617,
+      "groups_as_queried_prefix_code": 618,
+      "groups_under_fixed_code": 616,
+      "gap_recorded_vs_as_queried": 1,
+      "shuffles_run": 25,
+      "shuffle_range_is_lower_bound": false,
+      "shuffle_min": 614,
+      "shuffle_max": 621,
+      "shuffle_mean": 617.76,
+      "shuffle_distinct_values": [
+        614,
+        615,
+        616,
+        617,
+        618,
+        619,
+        620,
+        621
+      ],
+      "recorded_reachable_by_row_order_alone": true,
+      "distance_to_reachable_range": 0
+    },
+    "g4_tm": {
+      "n_sequences": 2274,
+      "clustering_regime": "greedy",
+      "groups_recorded_in_sidecar": 400,
+      "groups_as_queried_prefix_code": 407,
+      "groups_under_fixed_code": 407,
+      "gap_recorded_vs_as_queried": 7,
+      "shuffles_run": 15,
+      "shuffle_range_is_lower_bound": false,
+      "shuffle_min": 399,
+      "shuffle_max": 414,
+      "shuffle_mean": 407.93,
+      "shuffle_distinct_values": [
+        399,
+        400,
+        405,
+        407,
+        408,
+        409,
+        410,
+        411,
+        412,
+        414
+      ],
+      "recorded_reachable_by_row_order_alone": true,
+      "distance_to_reachable_range": 0
+    },
+    "im_fold": {
+      "n_sequences": 320,
+      "clustering_regime": "greedy",
+      "groups_recorded_in_sidecar": 175,
+      "groups_as_queried_prefix_code": 171,
+      "groups_under_fixed_code": 174,
+      "gap_recorded_vs_as_queried": -4,
+      "shuffles_run": 300,
+      "shuffle_range_is_lower_bound": false,
+      "shuffle_min": 168,
+      "shuffle_max": 174,
+      "shuffle_mean": 171.65,
+      "shuffle_distinct_values": [
+        168,
+        169,
+        170,
+        171,
+        172,
+        173,
+        174
+      ],
+      "recorded_reachable_by_row_order_alone": false,
+      "distance_to_reachable_range": 1
+    },
+    "im_pht": {
+      "n_sequences": 160,
+      "clustering_regime": "greedy",
+      "groups_recorded_in_sidecar": 85,
+      "groups_as_queried_prefix_code": 85,
+      "groups_under_fixed_code": 85,
+      "gap_recorded_vs_as_queried": 0,
+      "shuffles_run": 300,
+      "shuffle_range_is_lower_bound": false,
+      "shuffle_min": 83,
+      "shuffle_max": 86,
+      "shuffle_mean": 84.64,
+      "shuffle_distinct_values": [
+        83,
+        84,
+        85,
+        86
+      ],
+      "recorded_reachable_by_row_order_alone": true,
+      "distance_to_reachable_range": 0
+    }
+  },
+  "answer": "NOT for every head. At least one recorded count lies outside the range row order reaches, so something beyond ordering differs for that head.",
+  "why_the_earlier_estimate_misled": "Sensitivity to row order is a property of each head's sequence set -- how many lengths tie and how near the threshold those ties sit -- not a constant of the codebase. A spread of 1-2 groups measured on one collection cannot bound the spread on another, and g4_tm's own spread is an order of magnitude wider.",
+  "unexplained_heads": [
+    "im_fold"
+  ],
+  "on_any_unexplained_head": "A recorded count outside the reachable range means the rows, the threshold or something else differed at training -- not merely their order. The row COUNT matching does not establish that the rows match: atlas_core.db is a subset of atlas.db, and a head can draw the same number of rows from each while drawing different ones. Resolving that needs the full atlas, which is unpublished.",
+  "what_this_does_not_say": "It does not say the fixed code reproduces the sidecar, and it should not: the fix deliberately yields a different, order-invariant partition, so it cannot reproduce a partition produced by the order-dependent code. Reproducing the historical folds requires the pre-fix code AND the training row order; the published v0.5.1 partition is not recoverable from the current tree, which is the case for recording assignments at training time rather than replaying them."
+}

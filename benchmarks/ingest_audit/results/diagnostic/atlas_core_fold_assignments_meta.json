@@ -1,0 +1,78 @@
+{
+  "manifest_version": 1,
+  "rows_fingerprint": "e2feb90f3216912b162a3d2df6bf656c34d5e0a13123c1abe1293c3502b14283",
+  "heads": {
+    "g4_fold": {
+      "n_folds": 5,
+      "n_groups": 1624,
+      "n_rows": 6744,
+      "unassigned_rows": 0,
+      "group_by": "sequence",
+      "cluster_threshold": 0.9,
+      "seed": 0
+    },
+    "g4_topology": {
+      "n_folds": 5,
+      "n_groups": 618,
+      "n_rows": 1005,
+      "unassigned_rows": 0,
+      "group_by": "sequence",
+      "cluster_threshold": 0.9,
+      "seed": 0
+    },
+    "g4_tm": {
+      "n_folds": 5,
+      "n_groups": 407,
+      "n_rows": 2274,
+      "unassigned_rows": 0,
+      "group_by": "sequence",
+      "cluster_threshold": 0.9,
+      "seed": 0
+    },
+    "im_fold": {
+      "n_folds": 5,
+      "n_groups": 171,
+      "n_rows": 320,
+      "unassigned_rows": 0,
+      "group_by": "sequence",
+      "cluster_threshold": 0.9,
+      "seed": 0
+    },
+    "im_pht": {
+      "n_folds": 5,
+      "n_groups": 85,
+      "n_rows": 160,
+      "unassigned_rows": 0,
+      "group_by": "sequence",
+      "cluster_threshold": 0.9,
+      "seed": 0
+    },
+    "im_pht_condition": {
+      "n_folds": 5,
+      "n_groups": 10,
+      "n_rows": 558,
+      "unassigned_rows": 0,
+      "group_by": "condition",
+      "cluster_threshold": 0.9,
+      "seed": 0
+    },
+    "im_tm_condition": {
+      "n_folds": 5,
+      "n_groups": 10,
+      "n_rows": 379,
+      "unassigned_rows": 0,
+      "group_by": "condition",
+      "cluster_threshold": 0.9,
+      "seed": 0
+    }
+  },
+  "skipped_heads": {
+    "g4_tm_distilled": "needs the predicted tier",
+    "im_fold_genomic": "no rows",
+    "g4_fold_genomic": "no rows",
+    "locus_peak_overlap_state": "no rows",
+    "im_architecture": "no rows"
+  },
+  "total_assignments": 11440,
+  "caveat": "Records the split this code produces on these rows. If the atlas has changed since a head was trained, rows_fingerprint will not match that head's and this manifest must not be used to clear it."
+}

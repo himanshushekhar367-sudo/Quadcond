@@ -362,6 +362,50 @@ def _grouped_conformal(
     }
 
 
+def build_folds(
+    seqs,
+    conds,
+    X,
+    y,
+    spec: TaskSpec,
+    *,
+    cluster_threshold: float = 0.90,
+    n_folds: int = 5,
+    seed: int = 0,
+):
+    """Build the grouping and the cross-validation split for one head.
+
+    Extracted from :func:`train_head` verbatim so that the fold manifest is
+    produced by *the same code that trains*, not by a reimplementation of it.
+    A manifest written by a second implementation would drift the first time
+    either side changed, and a leakage audit reading a drifted manifest is
+    worse than one reading none: it reports a clean bill from the wrong folds.
+
+    Deterministic in ``(seqs, conds, X, y, spec, cluster_threshold, n_folds,
+    seed)``, which is what lets the manifest be reconstructed for an already
+    trained head without retraining it.
+
+    Returns ``(groups, split, folds)``.
+    """
+    if spec.group_by == "condition":
+        groups = _condition_groups(conds)
+    else:
+        groups = cluster_sequences(seqs, threshold=cluster_threshold)
+    n_groups = len(np.unique(groups))
+    folds = min(n_folds, max(2, n_groups))
+
+    if spec.task == "multiclass" or spec.task == "binary":
+        # StratifiedGroupKFold needs each class present; fall back if not
+        try:
+            splitter = StratifiedGroupKFold(n_splits=folds, shuffle=True, random_state=seed)
+            split = list(splitter.split(X, y, groups))
+        except ValueError:
+            split = list(GroupKFold(n_splits=folds).split(X, y, groups))
+    else:
+        split = list(GroupKFold(n_splits=folds).split(X, y, groups))
+    return groups, split, folds
+
+
 def train_head(
     rows,
     spec: TaskSpec,
@@ -381,22 +425,10 @@ def train_head(
             print(f"  [skip] {spec.name}: only {len(y)} labelled rows (need {spec.min_rows})")
         return None
 
-    if spec.group_by == "condition":
-        groups = _condition_groups(conds)
-    else:
-        groups = cluster_sequences(seqs, threshold=cluster_threshold)
+    groups, split, folds = build_folds(
+        seqs, conds, X, y, spec,
+        cluster_threshold=cluster_threshold, n_folds=n_folds, seed=seed)
     n_groups = len(np.unique(groups))
-    folds = min(n_folds, max(2, n_groups))
-
-    if spec.task == "multiclass" or spec.task == "binary":
-        # StratifiedGroupKFold needs each class present; fall back if not
-        try:
-            splitter = StratifiedGroupKFold(n_splits=folds, shuffle=True, random_state=seed)
-            split = list(splitter.split(X, y, groups))
-        except ValueError:
-            split = list(GroupKFold(n_splits=folds).split(X, y, groups))
-    else:
-        split = list(GroupKFold(n_splits=folds).split(X, y, groups))
 
     n_classes = len(spec.classes) if spec.task == "multiclass" else 2
     if spec.task == "regression":

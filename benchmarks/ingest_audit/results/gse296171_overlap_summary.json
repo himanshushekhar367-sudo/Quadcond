@@ -1,0 +1,374 @@
+{
+  "dataset": "GSE296171 / Martyr et al., Nucleic Acids Research 54(16), 2026",
+  "doi": "10.1093/nar/gkag821",
+  "geo_accession": "GSE296171",
+  "figshare": "10.6084/m9.figshare.33132299",
+  "licence": "CC BY-NC",
+  "workbook": "/sessions/rcw-01h2uddlukflmstet2expxhf/mnt/Quadcond/gkag821_supplemental_files/stG4_STable_2_ProcessedData.xlsx",
+  "atlas_compared_against": "atlas_core.db",
+  "atlas_is_full": false,
+  "overlap_is_lower_bound": true,
+  "input_integrity": {
+    "rows": 6000,
+    "rows_expected": 6000,
+    "mutation_rows": 1889,
+    "mutation_rows_expected": 1889,
+    "sequences_parsed_as_rna": 6000,
+    "sequences_unparsable": 0,
+    "distinct_sequences": 6000,
+    "duplicate_sequences": 0,
+    "length_min": 11,
+    "length_max": 90,
+    "pool_composition": {
+      "stG4": 3213,
+      "neg_AAA": 216,
+      "neg_ns": 709,
+      "nsG4_Mut": 1833,
+      "pUG": 29
+    },
+    "pool_composition_expected": {
+      "stG4": 3213,
+      "nsG4_Mut": 1833,
+      "neg_ns": 709,
+      "neg_AAA": 216,
+      "pUG": 29
+    },
+    "required_score_columns_missing": [],
+    "missing_values_by_score_column": {
+      "RT Stop Score in KCl (G in KCl/7dG in KCl)": 0,
+      "RT Stop Score in LiCl (G in LiCl/7dG in LiCl)": 0,
+      "RT Stop Score in KCl + PDS (G in KCl + PDS/7dG in KCl + PDS)": 0
+    },
+    "status": "PASS",
+    "failures": []
+  },
+  "directionality": {
+    "hypothesis": "more negative RT-stop score = more folded",
+    "evidence": {
+      "median_kcl_negative_control_neg_AAA": 1.42439002121787,
+      "median_kcl_natural_g4_nsG4_Mut": -3.53246481165928,
+      "median_kcl_by_min_g_tract_synthetic_only": {
+        "2": 0.567412138953788,
+        "3": -0.552349462743657,
+        "4": -2.83794362051817
+      },
+      "g_tract_monotone_toward_negative": true,
+      "median_pds_shift_on_natural_g4": -1.4219838120244999,
+      "median_licl_natural_g4": -1.05841639584749,
+      "licl_signal_collapses_vs_kcl": true
+    },
+    "tests": {
+      "non-folding AAA control is less negative than natural G4": true,
+      "longer minimum G-tract shifts score negative": true,
+      "pyridostatin shifts natural G4 further negative": true,
+      "K+ produces a stronger signal than Li+": true
+    },
+    "independent_tests_passed": 4,
+    "independent_tests_total": 4,
+    "status": "PASS",
+    "failures": [],
+    "note": "Direction is established from controls and condition shifts only. No atlas label is consulted, so this check is independent of the cross-molecule concordance reported separately."
+  },
+  "dna_rna_overlap": {
+    "atlas_file": "atlas_core.db",
+    "atlas_opened_readonly": true,
+    "distinct_sequences_overlapping": 64,
+    "atlas_rows_touched": 216,
+    "overlap_by_atlas_source": {
+      "g4stab_experimental_tm::biophysical": 198,
+      "g4sp_topology::biophysical": 16,
+      "shuffled::g4sp_topology::catalog": 1,
+      "shuffled::g4stab_experimental_tm::catalog": 1
+    },
+    "matched_tm_pairs": 55,
+    "cross_molecule_concordance": {
+      "spearman_rho": -0.6557,
+      "pearson_r": -0.6343,
+      "rho_95pct_ci": [
+        -0.7845,
+        -0.4726
+      ],
+      "n": 55,
+      "interpretation": "ASSOCIATION ONLY. This is a cross-molecule, cross-assay concordance between DNA melting temperature and an RNA reverse-transcriptase stop ratio measured in a different buffer. It does NOT establish that the RT-stop score measures thermodynamic stability, and must not be reported as if it did. Causal or thermodynamic interpretation belongs in the validation report, not in this audit."
+    },
+    "status": "INFO",
+    "note": "Overlap is not itself a failure. It becomes one at the leakage gate if any of these sequences is also a benchmark evaluation sequence."
+  },
+  "leakage": {
+    "fold_manifest": null,
+    "fold_assignments_established": false,
+    "benchmark_overlap": {
+      "tool_scores_all": {
+        "benchmark_sequences": 14300,
+        "also_in_candidate": 64,
+        "fraction_of_benchmark_covered": 0.004476,
+        "example_collisions": [
+          "GGGAAAGGGTTTGGGTTTGGG",
+          "GGGAGGGAGGGAGGG",
+          "GGGAGGGAGGGTGGG",
+          "GGGAGGGTGGGTGGG",
+          "GGGAGGGTTTGGGAGGG",
+          "GGGAGGGTTTGGGTGGG",
+          "GGGCGGGCGGGCGGG",
+          "GGGGAGGGGTGGGGAGGGG",
+          "GGGGCCGGGGCCGGGGCCGGGG",
+          "GGGGTGGGGTGGGGTGGGG"
+        ]
+      },
+      "pairs_g4_tm": {
+        "benchmark_sequences": 295,
+        "also_in_candidate": 13,
+        "fraction_of_benchmark_covered": 0.044068,
+        "example_collisions": [
+          "GGGAGGGAGGGTGGG",
+          "GGGAGGGTGGGTGGG",
+          "GGGAGGGTTTGGGAGGG",
+          "GGGAGGGTTTGGGTGGG",
+          "GGGTGGGTGGGTGGG",
+          "GGGTGGGTTTGGGAGGG",
+          "GGGTGGGTTTGGGTGGG",
+          "GGGTTTGGGAAAGGGTTTGGG",
+          "GGGTTTGGGTTTGGGTTTGGG",
+          "GGGTTTTTGGGAGGGTTTTTGGG"
+        ]
+      }
+    },
+    "prohibited_overlap_sequences": 77,
+    "sequences_in_both_atlas_and_benchmark": 64,
+    "status": "FAIL",
+    "failures": [
+      "Fold manifest is STALE (claimed: 'reconstructed').",
+      "rows_fingerprint e2feb90f3216912b... matches no shipped model",
+      "split code has changed since the manifest was written (ed2823a3b7e789ff... -> 162c18a77b33b2e4...)",
+      "A stale manifest still names every head and still looks complete. Most often it was built against data/atlas_core.db instead of the full data/atlas.db, or the split code changed after it was written. Rebuild it against the atlas the model was trained on, with the current code."
+    ],
+    "required_action": "Train/validation/held-out membership cannot be established from any committed artifact, so no sequence in this dataset may be declared training-eligible by this audit. Either serialise the fold assignment used for the frozen benchmark and rerun, or quarantine every sequence listed in gse296171_dna_rna_overlap.csv from training and rerun the benchmark with them excluded."
+  },
+  "scaffolds": {
+    "distinct_group_keys": 4173,
+    "parent_scaffolds": 6,
+    "parent_scaffold_names": [
+      "parent:ARHGEF12",
+      "parent:EWSR1",
+      "parent:HNRNPA2B1",
+      "parent:PABPN1",
+      "parent:U2AF2",
+      "parent:VEGFA"
+    ],
+    "sequences_per_parent_scaffold": {
+      "parent:ARHGEF12": 332,
+      "parent:EWSR1": 271,
+      "parent:HNRNPA2B1": 271,
+      "parent:PABPN1": 271,
+      "parent:U2AF2": 341,
+      "parent:VEGFA": 347
+    },
+    "assignment_basis_counts": {
+      "synthetic_combinatorial_no_parent": 3213,
+      "control_neg_AAA": 216,
+      "control_neg_ns": 709,
+      "mutant_of_parent (AAAmut)": 245,
+      "mutant_of_parent (1mut)": 1588,
+      "control_pUG": 29
+    },
+    "unassigned_sequences": 0,
+    "unassigned_examples": [],
+    "strong_folders_total": 1603,
+    "strong_folders_from_parent_scaffolds": 1013,
+    "strong_folder_concentration": 0.6319,
+    "effective_independent_n_strong_regime": 5,
+    "status": "PASS",
+    "failures": [],
+    "note": "Synthetic combinatorial designs have no parent scaffold and are given one group each. That is correct for provenance but NOT sufficient for cross-validation: they are combinatorial variants of a shared design grammar and still need sequence-similarity clustering (quadcond.models.grouping.cluster_sequences) before use as folds."
+  },
+  "splits": {
+    "n_splits": 5,
+    "seed": 0,
+    "rows_considered": 6000,
+    "random_sequence_level_split": {
+      "per_fold": [
+        {
+          "fold": 0,
+          "test_n": 1200,
+          "test_rows_with_scaffold_sibling_in_train": 380,
+          "fraction_contaminated": 0.3167,
+          "strong_folders_in_test": 320,
+          "strong_folders_contaminated": 219
+        },
+        {
+          "fold": 1,
+          "test_n": 1200,
+          "test_rows_with_scaffold_sibling_in_train": 331,
+          "fraction_contaminated": 0.2758,
+          "strong_folders_in_test": 303,
+          "strong_folders_contaminated": 178
+        },
+        {
+          "fold": 2,
+          "test_n": 1200,
+          "test_rows_with_scaffold_sibling_in_train": 353,
+          "fraction_contaminated": 0.2942,
+          "strong_folders_in_test": 316,
+          "strong_folders_contaminated": 199
+        },
+        {
+          "fold": 3,
+          "test_n": 1200,
+          "test_rows_with_scaffold_sibling_in_train": 401,
+          "fraction_contaminated": 0.3342,
+          "strong_folders_in_test": 327,
+          "strong_folders_contaminated": 209
+        },
+        {
+          "fold": 4,
+          "test_n": 1200,
+          "test_rows_with_scaffold_sibling_in_train": 368,
+          "fraction_contaminated": 0.3067,
+          "strong_folders_in_test": 337,
+          "strong_folders_contaminated": 208
+        }
+      ],
+      "total_test_rows_with_scaffold_sibling_in_train": 1833,
+      "fraction_of_all_rows": 0.3055,
+      "strong_folders_contaminated": 1013
+    },
+    "parent_scaffold_grouped_split": {
+      "per_fold": [
+        {
+          "fold": 0,
+          "test_n": 1200,
+          "test_rows_with_scaffold_sibling_in_train": 0,
+          "fraction_contaminated": 0.0,
+          "strong_folders_in_test": 477,
+          "strong_folders_contaminated": 0
+        },
+        {
+          "fold": 1,
+          "test_n": 1200,
+          "test_rows_with_scaffold_sibling_in_train": 0,
+          "fraction_contaminated": 0.0,
+          "strong_folders_in_test": 460,
+          "strong_folders_contaminated": 0
+        },
+        {
+          "fold": 2,
+          "test_n": 1200,
+          "test_rows_with_scaffold_sibling_in_train": 0,
+          "fraction_contaminated": 0.0,
+          "strong_folders_in_test": 453,
+          "strong_folders_contaminated": 0
+        },
+        {
+          "fold": 3,
+          "test_n": 1200,
+          "test_rows_with_scaffold_sibling_in_train": 0,
+          "fraction_contaminated": 0.0,
+          "strong_folders_in_test": 89,
+          "strong_folders_contaminated": 0
+        },
+        {
+          "fold": 4,
+          "test_n": 1200,
+          "test_rows_with_scaffold_sibling_in_train": 0,
+          "fraction_contaminated": 0.0,
+          "strong_folders_in_test": 124,
+          "strong_folders_contaminated": 0
+        }
+      ],
+      "total_test_rows_with_scaffold_sibling_in_train": 0,
+      "fraction_of_all_rows": 0.0,
+      "strong_folders_contaminated": 0
+    },
+    "leakage_removed_by_grouping": 1833,
+    "status": "PASS",
+    "failures": [],
+    "note": "No estimator was fitted and no held-out label was read. These are structural counts, so they cannot be inflated by model selection. The performance consequence of the difference must be measured by the training pipeline, not asserted here."
+  },
+  "schema_readiness": {
+    "schema_version": 4,
+    "existing_label_classes": [
+      "biophysical",
+      "catalog",
+      "genomic_proxy",
+      "synthetic"
+    ],
+    "nucleic_acid_column_present": true,
+    "required_fields": [
+      {
+        "field": "rt_stop_score",
+        "type": "REAL",
+        "present": false,
+        "blocking": true,
+        "why": "The measurement is a continuous log-ratio folding propensity. The schema's label columns are folded (integer), tm, dg and ph_t; none of them is this. An adapter may threshold into `folded` using the authors' own cut-off and keep the score as a QC flag, which is valid but discards the gradation that makes the dataset valuable."
+      }
+    ],
+    "conditionally_required_fields": [
+      {
+        "field": "ligand",
+        "type": "TEXT",
+        "present": false,
+        "required_only_if": "the +PDS arms are ingested",
+        "why": "PDS rows sit at the same condition as their ligand-free twin with a different label -- the contradiction a condition-aware model must never be shown. An adapter that excludes them needs no ligand field."
+      },
+      {
+        "field": "ligand_conc",
+        "type": "REAL",
+        "present": false,
+        "required_only_if": "the +PDS arms are ingested",
+        "why": "A ligand identity without its concentration is not a condition."
+      }
+    ],
+    "missing_fields": [
+      "rt_stop_score"
+    ],
+    "label_class_verdict": "biophysical is correct for an in-buffer structural measurement; RT-stop does not need a label class of its own. Carry the readout on the row (measurement=enzymatic_proxy_rt_stop) so the distinction survives.",
+    "applicability_domain_fence_required": {
+      "reason": "pH 8.3 and ~2.7 mM total Mg2+ at 40 C is a condition region no other atlas row occupies. Pooling it with CD and UV melting near pH 7 at low Mg2+ would silently extend every head's claimed domain.",
+      "enforced_by": "quadcond.claims, not the schema",
+      "blocking_here": false
+    },
+    "primary_arm_conditions": {
+      "nominal_stock": {
+        "monovalent_mM": 100.0,
+        "mg_mM": 15.0
+      },
+      "in_reaction": {
+        "monovalent_mM": 95.45,
+        "mg_mM_total": 2.73,
+        "tris_mM": 45.45
+      },
+      "k_arm": "monovalent is K+; the in-house 5X substitutes the salt, so the LiCl arm carries no potassium",
+      "ph": 8.3,
+      "ph_caveat": "set on the Tris stock at room temperature; Tris at 40 C sits roughly 0.4 units lower",
+      "temperature_C": 40.0,
+      "strand_conc": null,
+      "strand_conc_note": "not reported for a 6,000-member pool; must be imputed",
+      "reported_in": "derived from the preprint methods' pipetting volumes (10.1101/2025.04.29.651304) plus the SI Figure S1 legend for the 40 C arm. NOT read from any data table, and not yet checked against the published methods."
+    },
+    "status": "BLOCKED",
+    "note": "This check reports only. It does not modify schema.py, and the schema must stay frozen until the overlap manifest is reviewed."
+  },
+  "nothing_was_modified": {
+    "atlas": "opened read-only",
+    "model_weights": "not opened",
+    "frozen_benchmark_results": "read only",
+    "schema": "read only, not modified"
+  },
+  "gates": {
+    "input_integrity": "PASS",
+    "directionality": "PASS",
+    "leakage": "FAIL",
+    "scaffolds": "PASS",
+    "splits": "PASS",
+    "schema_readiness": "BLOCKED"
+  },
+  "audit_status": "BLOCKED",
+  "verdict": [
+    "FAIL CLOSED: no committed artifact records train/validation/held-out membership, so this audit cannot certify any sequence as training-eligible. Serialise the fold assignment behind the frozen benchmark, or quarantine the overlap manifest from training and rerun the benchmark without it.",
+    "LEAKAGE: 77 candidate sequences are also benchmark evaluation sequences. Ingesting them as training data makes the published comparison partly in-sample.",
+    "63.2% of strong folders come from 6 parent scaffolds. Describe this dataset by its scaffold count, not by its row count, and group folds on the scaffold.",
+    "A random split leaks 1833 test rows to their own scaffold; grouping removes 1833.",
+    "SCHEMA BLOCKED: ingestion requires rt_stop_score. The schema stays frozen until the overlap manifest is reviewed.",
+    "The DNA/RNA correlation is a cross-molecule concordance, not evidence that RT-stop measures thermodynamic stability. Keep that distinction in the validation report."
+  ]
+}

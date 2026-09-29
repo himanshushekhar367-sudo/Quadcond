@@ -1,0 +1,23 @@
+{
+  "frozen_at_utc": "20260928T104752Z",
+  "why": "Baseline BLOCKED report preserved before any pipeline change, so a later rerun can be compared against it.",
+  "audit_status_at_freeze": "BLOCKED",
+  "files": {
+    "20260928T104752Z_gse296171_dna_rna_overlap.csv": {
+      "bytes": 51436,
+      "sha256": "b2782c043edcabb93948f574a181e0c84f01152c1e5b51abedfc9bfab8257fe3"
+    },
+    "20260928T104752Z_gse296171_overlap_summary.json": {
+      "bytes": 14018,
+      "sha256": "4751204de62ce624e9d4e6defe3d4675c3170207640168327379863d80312f92"
+    },
+    "20260928T104752Z_gse296171_scaffold_groups.csv": {
+      "bytes": 1205434,
+      "sha256": "4cceb018cb24a0bc3397126c2dc6563901ed91179fe8cd6a30f258cbf60f24d1"
+    },
+    "20260928T104752Z_gse296171_split_audit.json": {
+      "bytes": 3146,
+      "sha256": "8b6246b05e18cf013eace552bb28ebbbc6fa4ed4f671f0d68c84d8fd2a9a9c23"
+    }
+  }
+}
