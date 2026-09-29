@@ -63,6 +63,10 @@ class Asset:
     # used only to validate a fresh download.
     checksum_stable: bool = True
     content_fingerprint: str | None = None
+    #: Which :func:`atlas_fingerprint` definition ``content_fingerprint`` was
+    #: computed under. Absent in manifests written before the molecule was
+    #: included, so it defaults to 1 and those entries keep verifying.
+    fingerprint_version: int = 1
     #: What this artifact stamps inside itself, which is not the release it
     #: ships in. 0.5.0 of this package ships a model trained under 0.4.6; one
     #: number for both would have to be wrong about one of them.
@@ -134,17 +138,63 @@ def search_paths(asset: Asset) -> list[Path]:
     ]
 
 
-def atlas_fingerprint(path: str | Path) -> str:
-    """The stable identity of an atlas: SHA-256 over its ordered rows."""
+#: Columns hashed by each fingerprint version.
+#:
+#: v1 omits ``nucleic_acid``. That was harmless while every row was DNA, and
+#: stops being harmless the moment the atlas holds both: ``motifs.clean`` maps
+#: U to T, so an RNA row and a DNA row that differ only in molecule produce an
+#: identical tuple here. Two atlases with different DNA/RNA composition would
+#: then carry the same identity, and the fingerprint's whole job is to make
+#: "same atlas" checkable.
+#:
+#: v1 is kept verbatim rather than corrected in place because the published
+#: v0.5.1 assets record v1 fingerprints, and ``atlas.db``'s recorded identity
+#: cannot be recomputed under a new definition while that file is unpublished.
+#: Silently redefining the hash would turn every existing manifest entry into a
+#: mismatch and break ``quadcond assets fetch`` for anyone already on v0.5.1.
+_FP_COLUMNS_V1 = (
+    "sequence", "seq_hash", "kind", "k", "na", "li_nh4", "mg", "ph",
+    "temperature", "folded", "topology", "tm", "dg", "ph_t", "evidence_tier",
+    "label_class", "source", "source_id", "condition_imputed",
+)
+_FP_COLUMNS_V2 = _FP_COLUMNS_V1 + ("nucleic_acid",)
+
+FINGERPRINT_COLUMNS = {1: _FP_COLUMNS_V1, 2: _FP_COLUMNS_V2}
+
+#: Version used for newly computed fingerprints. Existing manifest entries
+#: carry their own ``fingerprint_version`` and are verified under it.
+FINGERPRINT_VERSION = 2
+
+
+def atlas_fingerprint(path: str | Path, *, version: int = FINGERPRINT_VERSION) -> str:
+    """The stable identity of an atlas: SHA-256 over its ordered rows.
+
+    ``version`` selects the column set. Pass the version the manifest recorded
+    when verifying an existing asset; leave it at the default when establishing
+    the identity of a new one.
+    """
     import sqlite3
+
+    try:
+        cols = FINGERPRINT_COLUMNS[version]
+    except KeyError:
+        raise AssetError(
+            f"unknown atlas fingerprint version {version!r}; "
+            f"known versions are {sorted(FINGERPRINT_COLUMNS)}") from None
 
     con = sqlite3.connect(f"file:{Path(path)}?mode=ro", uri=True)
     try:
+        if version >= 2:
+            # A NULL nucleic_acid predates the column's default and means DNA.
+            # Reading it as NULL would give a pre-column atlas a different
+            # identity from an identical one written afterwards.
+            select = ", ".join(
+                "COALESCE(nucleic_acid, 'DNA')" if c == "nucleic_acid" else c
+                for c in cols)
+        else:
+            select = ", ".join(cols)
         rows = con.execute(
-            "SELECT sequence, seq_hash, kind, k, na, li_nh4, mg, ph, temperature, "
-            "folded, topology, tm, dg, ph_t, evidence_tier, label_class, source, "
-            "source_id, condition_imputed FROM records "
-            "ORDER BY source, source_id, seq_hash"
+            f"SELECT {select} FROM records ORDER BY source, source_id, seq_hash"
         ).fetchall()
     finally:
         con.close()
@@ -163,7 +213,7 @@ def verify(path: str | Path, asset: Asset) -> None:
     if not asset.checksum_stable:
         if not asset.content_fingerprint:
             return
-        got = atlas_fingerprint(path)
+        got = atlas_fingerprint(path, version=asset.fingerprint_version)
         if got != asset.content_fingerprint:
             raise AssetError(
                 f"{path} is not the {asset.name} this build expects.\n"
@@ -303,7 +353,7 @@ def fetch(name: str | None = None, *, dest: Path | None = None,
                 )
         elif a.content_fingerprint:
             try:
-                seen = atlas_fingerprint(tmp)
+                seen = atlas_fingerprint(tmp, version=a.fingerprint_version)
             except Exception as exc:                       # noqa: BLE001
                 tmp.unlink(missing_ok=True)
                 raise AssetError(
