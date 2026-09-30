@@ -8,7 +8,7 @@
     "quadcond_model_seqonly.json": "335e94453b3874df136acd9677a1a516f87e7171bafa4888fe07b2b6ab0dd909"
   },
   "method": "Copy retained metadata and plot it; no model fitting or performance recomputation.",
-  "body_word_count_before_tables": 6596,
+  "body_word_count_before_tables": 6878,
   "external_validation_claimed": false,
   "public_deployment_verified": false
 }
