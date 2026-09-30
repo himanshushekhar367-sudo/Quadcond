@@ -1,0 +1,9 @@
+source,atlas_core_n,rebuild_n,content_comparison
+duvma_im_stability_landscape,937,937,identical
+g4stab_experimental_tm,2367,2367,identical
+im_pht_biophysical,160,160,identical
+g4sp_topology,1005,0,core only - G4 Dataset.xlsx not on disk
+shuffled::g4sp_topology,1005,0,core only - derives from g4sp_topology
+shuffled::duvma_im_stability_landscape,937,937,"same count, DIFFERENT content"
+shuffled::g4stab_experimental_tm,2367,2367,"same count, DIFFERENT content"
+shuffled::im_pht_biophysical,160,160,"same count, DIFFERENT content"

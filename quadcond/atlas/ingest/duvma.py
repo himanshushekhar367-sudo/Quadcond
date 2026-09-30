@@ -117,17 +117,45 @@ def _parse_grid(text: str, spec: dict) -> list[tuple[float, float, float]]:
     n_cols = len(ionic)
     out: list[tuple[float, float, float]] = []
 
+    pending_row: float | None = None
+
     for raw_line in text.split("\n"):
         line = raw_line.strip()
         if not line or line.lower().startswith(("table", "all ", "a indicates")):
             continue
         if spec.get("multirow"):
-            # C9 melting: "<pH> iM v1 ... v10", then "iM1 ...", "iM0 ...".
-            # Only the main iM transition is ingested.
-            m = re.match(r"^(\d+\.\d+)\s+iM\s+(.*)$", line)
-            if not m:
+            # C9 melting (table S9) is three sub-rows per pH -- the main iM
+            # transition, then iM1 and iM0 -- and only the main one is ingested.
+            #
+            # Two layouts have to be accepted, because the extractor decides
+            # which one appears and the choice is not ours. Older pypdf emitted
+            #
+            #     5.40 iM a a 80.37 79.33 ...
+            #
+            # and pypdf 6.19.0 splits it across lines:
+            #
+            #     5.40
+            #     iM a a 80.37 79.33 ...
+            #     iM1 a a a ...
+            #
+            # Matching only the first form is how this table silently parsed to
+            # zero rows on a rebuild, costing 115 melting temperatures -- a third
+            # of what `im_tm_condition` was trained on -- with no error raised.
+            # See docs/REBUILD_THE_ATLAS.md.
+            bare = re.match(r"^(\d+\.\d+)$", line)
+            if bare:
+                pending_row = float(bare.group(1))
                 continue
-            row_val, rest = float(m.group(1)), m.group(2)
+            m = re.match(r"^(\d+\.\d+)\s+iM\s+(.*)$", line)
+            if m:
+                row_val, rest = float(m.group(1)), m.group(2)
+            else:
+                # `iM\s` and not `iM1`/`iM0`: the sub-transitions are not ingested.
+                m = re.match(r"^iM\s+(.*)$", line)
+                if not m or pending_row is None:
+                    continue
+                row_val, rest = pending_row, m.group(1)
+                pending_row = None
         else:
             m = re.match(r"^(\d+(?:\.\d+)?)\s+(.*)$", line)
             if not m:

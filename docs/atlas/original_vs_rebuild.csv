@@ -1,0 +1,19 @@
+source,orig_n,rebuild_n,orig_tm,rebuild_tm,orig_pht,rebuild_pht,status
+g4stab_webdb_predicted,254761,256595,254761,256595,0,0,short by -1834 rows / -1834 Tm / 0 pH_T
+gse220882_hek293t_locus_state,35314,35314,0,0,0,0,exact
+shuffled::gse220882_hek293t_locus_state,35314,35314,0,0,0,0,exact
+complementary_strand_im_candidates,12000,12000,0,0,0,0,exact
+im_architecture_negatives,12000,12000,0,0,0,0,exact
+im_architecture_positives,12000,12000,0,0,0,0,exact
+gse220882_hek293t_im_cutandtag,8482,8482,0,0,0,0,exact
+shuffled::gse220882_hek293t_im_cutandtag,7725,7725,0,0,0,0,exact
+gse220882_hek293t_g4_cutandtag,6706,6706,0,0,0,0,exact
+shuffled::gse220882_hek293t_g4_cutandtag,5135,5135,0,0,0,0,exact
+g4stab_experimental_tm,2367,2367,2274,2274,0,0,exact
+shuffled::g4stab_experimental_tm,2367,2367,0,0,0,0,exact
+g4sp_topology,1005,1005,0,0,0,0,exact
+shuffled::g4sp_topology,1005,1005,0,0,0,0,exact
+duvma_im_stability_landscape,937,937,379,379,558,558,exact
+shuffled::duvma_im_stability_landscape,937,937,0,0,0,0,exact
+im_pht_biophysical,160,160,0,0,160,160,exact
+shuffled::im_pht_biophysical,160,160,0,0,0,0,exact

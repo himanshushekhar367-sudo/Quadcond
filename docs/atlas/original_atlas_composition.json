@@ -1,0 +1,54 @@
+{
+  "what_this_is": "the per-source composition of the atlas the shipped v0.5.1 models were trained on, read out of the frozen model sidecar. The atlas file itself does not exist on this machine or in any archive here, and was never published -- this is the specification a rebuild has to be checked against.",
+  "recorded_n_records": 398375,
+  "recorded_path_at_build": "data/atlas.db",
+  "dataset_fingerprint_sha256": "4c5cca5a98e1259452824cc3f5aaad151a11671a4391b99f5abaa67e716d061b",
+  "n_sources": 18,
+  "by_tier": {
+    "predicted": 254761,
+    "experimental": 54971,
+    "derived": 88643
+  },
+  "largest_sources": [
+    {
+      "source": "g4stab_webdb_predicted",
+      "n": 254761,
+      "tier": "predicted"
+    },
+    {
+      "source": "gse220882_hek293t_locus_state",
+      "n": 35314,
+      "tier": "experimental"
+    },
+    {
+      "source": "shuffled::gse220882_hek293t_locus_state",
+      "n": 35314,
+      "tier": "derived"
+    },
+    {
+      "source": "complementary_strand_im_candidates",
+      "n": 12000,
+      "tier": "derived"
+    },
+    {
+      "source": "im_architecture_negatives",
+      "n": 12000,
+      "tier": "derived"
+    },
+    {
+      "source": "im_architecture_positives",
+      "n": 12000,
+      "tier": "derived"
+    },
+    {
+      "source": "gse220882_hek293t_im_cutandtag",
+      "n": 8482,
+      "tier": "experimental"
+    },
+    {
+      "source": "shuffled::gse220882_hek293t_im_cutandtag",
+      "n": 7725,
+      "tier": "derived"
+    }
+  ]
+}
