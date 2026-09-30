@@ -17,6 +17,29 @@ SCN = {(r['split'], r['negatives'], r['tool']): float(r['auroc'])
 GW = json.loads((ROOT / 'inputs' / 'genomewide_summary.json').read_text(encoding='utf-8'))
 SENS = json.loads((ROOT / 'inputs' / 'genomewide_sensitivity.json').read_text(encoding='utf-8'))
 POS = list(csv.DictReader((ROOT / 'inputs' / 'posctrl_summary.csv').open(encoding='utf-8')))
+MAIN = json.loads((ROOT / 'inputs' / 'quadcond_model.json').read_text(encoding='utf-8'))
+ABL = json.loads((ROOT / 'inputs' / 'quadcond_model_seqonly.json').read_text(encoding='utf-8'))
+PROV = json.loads((ROOT / 'manuscript_provenance.json').read_text(encoding='utf-8'))
+
+
+def head(card, name):
+    h = card['heads']
+    return h[name] if isinstance(h, dict) else next(x for x in h if x['name'] == name)
+
+
+def met(name, key, card=MAIN):
+    """A metric as the model card records it.
+
+    Until this existed the checks below reached only the benchmark CSVs and the
+    genome-wide JSONs, so a retrained model could change every head metric in
+    the paper and the verifier would still report zero problems. That is what
+    happened on 30 September: g4_tm moved 0.670 -> 0.692 and this script passed.
+    """
+    return float(head(card, name)['metrics'][key])
+
+
+def grp(name, key, card=MAIN):
+    return int(head(card, name)['training_meta'][key])
 
 
 def bench(task_sub, tool, metric):
@@ -63,10 +86,37 @@ CHECKS = [
     ('462 substitutions were evaluated', sum(int(r['n_with_delta']) + int(r['n_motif_lost']) for r in POS if r['control'] != 'chr22 negative-control window'), 0),
     ('of which 135 abolished', sum(int(r['n_motif_lost']) for r in POS), 0),
     ('183 substitutions', int(next(r for r in POS if r['control'].startswith('chr22'))['n_substitutions']), 0),
+
+    # --- model-card claims -------------------------------------------------
+    # The frozen sidecars, not the benchmark CSVs. These are the numbers a
+    # retrain moves, and they were unguarded until now.
+    ('R² of 0.670', met('g4_tm', 'r2'), 3),
+    ('RMSE) of 7.76 °C', met('g4_tm', 'rmse'), 2),
+    ('mean absolute error of 5.58 °C', met('g4_tm', 'mae'), 2),
+    ('2,274 records fall into 400 sequence groups', grp('g4_tm', 'n_rows'), 0),
+    ('R² of 0.592', met('im_pht', 'r2'), 3),
+    ('RMSE of 0.349 pH units', met('im_pht', 'rmse'), 3),
+    ('mean absolute error of 0.255 over 160 records in 85 groups', met('im_pht', 'mae'), 3),
+    # --- ablation deltas ---------------------------------------------------
+    ('0.835 to 0.625 for transitional pH', met('im_pht_condition', 'r2'), 3),
+    ('0.853 to 0.063 for melting temperature', met('im_tm_condition', 'r2'), 3),
+    ('0.592 to 0.590', met('im_pht', 'r2', ABL), 3),
+    # --- provenance --------------------------------------------------------
+    # A card from a different training run must not be able to sit in inputs/
+    # while the prose keeps quoting the old one.
+    ('__provenance__', 0.0 if MAIN['dataset_fingerprint_sha256'] == PROV['dataset_fingerprint'] else 1.0, 0),
 ]
 
 fails = []
 for claim, value, dp in CHECKS:
+    if claim == '__provenance__':
+        if value:
+            fails.append(
+                'PROVENANCE: inputs/quadcond_model.json is from training run '
+                f"{MAIN['dataset_fingerprint_sha256'][:16]}..., but "
+                f"manuscript_provenance.json pins {PROV['dataset_fingerprint'][:16]}.... "
+                'The manuscript and the model card describe different runs.')
+        continue
     if claim not in TXT:
         fails.append(f'NOT IN TEXT: {claim!r}')
         continue
