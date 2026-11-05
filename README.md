@@ -4,6 +4,10 @@ Condition-aware prediction of G-quadruplex and i-motif propensity, with a
 browser workbench and an optional join to AlphaGenome regulatory scores —
 served by a single process.
 
+**Project site:** <https://himanshushekhar367-sudo.github.io/Quadcond/> — what each
+head may claim, the condition evidence, and the API reference. A hosted instance of
+the service itself is pending; until then it runs locally in one command.
+
 The repository holds three parts that ship together:
 
 | Part | What it is |

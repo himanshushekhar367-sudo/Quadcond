@@ -1,0 +1,855 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>QuadCond / AENNA-3D</title>
+  <meta name="description" content="QuadCond / AENNA-3D: condition-aware prediction of G-quadruplex and i-motif propensity, with per-head claim limits, explicit refusal outside the applicability domain, and an exact join to AlphaGenome variant scores.">
+  <meta name="author" content="Auroni Deep, Himanshu Shekhar, Shilpi Minocha, Vivekanandan Perumal, Saran Kumar">
+  <meta name="theme-color" content="#FAFBFB" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0C1113" media="(prefers-color-scheme: dark)">
+  <link rel="canonical" href="https://himanshushekhar367-sudo.github.io/Quadcond/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="QuadCond / AENNA-3D">
+  <meta property="og:description" content="QuadCond / AENNA-3D: condition-aware prediction of G-quadruplex and i-motif propensity, with per-head claim limits, explicit refusal outside the applicability domain, and an exact join to AlphaGenome variant scores.">
+  <meta property="og:url" content="https://himanshushekhar367-sudo.github.io/Quadcond/">
+  <meta name="twitter:card" content="summary">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+  <style>
+    :root { color-scheme: light;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px); }
+    body { margin: 0; font: 14px system-ui, -apple-system, sans-serif; }
+    img { max-width: 100%; }
+    [hidden] { display: none !important; }
+  </style>
+  <style>
+/* Layout: one scrolling column, 1120px measure; running text held to 68ch,
+   data tables allowed full width in their own scroll containers.
+   Two structure colours carry identity throughout: teal = G4, amber = i-motif. */
+:root {
+  --bg:        #FAFBFB;
+  --surface:   #FFFFFF;
+  --surface-2: #F1F4F5;
+  --ink:       #0F1719;
+  --ink-2:     #45545B;
+  --ink-3:     #6F8188;
+  --rule:      #DCE3E5;
+  --rule-2:    #EAEFF0;
+  --g4:        #0A8F9C;
+  --im:        #B35F02;
+  --flag:      #9A2C2C;
+  --ok:        #2F6B3C;
+  --font-display: "Newsreader", "Iowan Old Style", Georgia, serif;
+  --font-body: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --measure: 68ch;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:        #0C1113;
+    --surface:   #131A1D;
+    --surface-2: #192225;
+    --ink:       #E9EFF1;
+    --ink-2:     #A4B3B9;
+    --ink-3:     #76888F;
+    --rule:      #243235;
+    --rule-2:    #1C2528;
+    --g4:        #12A6B4;
+    --im:        #B8821F;
+    --flag:      #D98585;
+    --ok:        #74B183;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg:        #0C1113;
+  --surface:   #131A1D;
+  --surface-2: #192225;
+  --ink:       #E9EFF1;
+  --ink-2:     #A4B3B9;
+  --ink-3:     #76888F;
+  --rule:      #243235;
+  --rule-2:    #1C2528;
+  --g4:        #12A6B4;
+  --im:        #B8821F;
+  --flag:      #D98585;
+  --ok:        #74B183;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  z-index: 10;
+  background: var(--bg);
+}
+.wrap {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+p, li { max-width: var(--measure); }
+a { color: var(--g4); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--g4); outline-offset: 2px; border-radius: 2px; }
+code, .mono { font-family: var(--font-mono); font-variant-ligatures: none; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* ---------- masthead ---------- */
+.masthead { border-bottom: 1px solid var(--rule); background: var(--surface); }
+.masthead .wrap { padding-block: 22px 20px; }
+.brandrow { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 16px; }
+.wordmark {
+  font-family: var(--font-display);
+  font-size: clamp(27px, 5.2vw, 38px);
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  line-height: 1.05;
+  margin: 0;
+}
+.wordmark .slash { color: var(--ink-3); font-weight: 400; padding: 0 0.12em; }
+.ver {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--g4);
+  border: 1px solid var(--g4);
+  border-radius: 3px;
+  padding: 2px 7px;
+  white-space: nowrap;
+}
+.metarow {
+  display: flex; flex-wrap: wrap; gap: 6px 20px;
+  margin-top: 14px;
+  font-family: var(--font-mono); font-size: 12.5px; color: var(--ink-3);
+}
+.metarow b { color: var(--ink-2); font-weight: 500; }
+
+/* ---------- sticky nav ---------- */
+nav.toc {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 9;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: saturate(1.4) blur(8px);
+  border-bottom: 1px solid var(--rule);
+}
+nav.toc .wrap { padding-block: 0; }
+nav.toc ul {
+  display: flex; gap: 0 22px; list-style: none; margin: 0; padding: 0;
+  overflow-x: auto; scrollbar-width: none;
+}
+nav.toc ul::-webkit-scrollbar { display: none; }
+nav.toc a {
+  display: block; padding: 11px 0;
+  font-size: 13px; letter-spacing: 0.01em;
+  color: var(--ink-2); text-decoration: none; white-space: nowrap;
+  border-bottom: 2px solid transparent;
+}
+nav.toc a:hover { color: var(--ink); border-bottom-color: var(--rule); }
+
+/* ---------- sections ---------- */
+section { border-bottom: 1px solid var(--rule-2); }
+section .wrap { padding-block: 44px; }
+h2 {
+  font-family: var(--font-display);
+  font-size: clamp(21px, 3.4vw, 27px);
+  font-weight: 500; letter-spacing: -0.01em;
+  margin: 0 0 6px; text-wrap: balance;
+}
+h3 {
+  font-size: 15px; font-weight: 600; letter-spacing: 0.01em;
+  margin: 30px 0 8px;
+}
+.eyebrow {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3);
+  margin: 0 0 12px;
+}
+.lede { font-size: 17.5px; color: var(--ink-2); margin: 0 0 4px; }
+p { margin: 14px 0; }
+
+/* ---------- hero ---------- */
+.hero .wrap { padding-block: 50px 42px; }
+.hero-grid {
+  display: grid; gap: 30px 46px; align-items: start;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+}
+@media (max-width: 880px) { .hero-grid { grid-template-columns: minmax(0, 1fr); } }
+.thesis {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 3.8vw, 31px);
+  font-weight: 400; line-height: 1.3; letter-spacing: -0.012em;
+  margin: 0; max-width: 34ch; text-wrap: balance;
+}
+.thesis em { font-style: italic; color: var(--g4); }
+.limit {
+  margin-top: 20px; padding-left: 15px;
+  border-left: 2px solid var(--im);
+  font-size: 16px; color: var(--ink-2); max-width: 58ch;
+}
+.notice {
+  margin-top: 4px; padding: 14px 17px;
+  background: var(--surface-2); border: 1px solid var(--rule);
+  border-radius: 4px; font-size: 14.5px; color: var(--ink-2);
+  max-width: 62ch;
+}
+.notice b { color: var(--ink); font-weight: 600; }
+
+/* ---------- stat strip ---------- */
+.stats {
+  display: grid; gap: 1px;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  background: var(--rule);
+  border: 1px solid var(--rule);
+  border-radius: 4px; overflow: hidden;
+  margin-top: 34px;
+}
+.stat { background: var(--surface); padding: 16px 17px 15px; min-width: 0; }
+.stat .v {
+  font-family: var(--font-mono); font-variant-numeric: tabular-nums;
+  font-size: 25px; font-weight: 500; letter-spacing: -0.02em;
+  line-height: 1.1; color: var(--ink);
+}
+.stat .k {
+  margin-top: 7px; font-size: 13px; line-height: 1.45; color: var(--ink-2);
+}
+.stat .n { margin-top: 5px; font-size: 11.5px; color: var(--ink-3); font-family: var(--font-mono); }
+
+/* ---------- figure ---------- */
+figure { margin: 26px 0 0; }
+.figbox {
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 4px; padding: 18px 16px 14px;
+  overflow-x: auto;
+}
+.figbox svg { display: block; min-width: 520px; width: 100%; height: auto; }
+figcaption {
+  margin-top: 11px; font-size: 13px; line-height: 1.5; color: var(--ink-3);
+  max-width: 72ch;
+}
+.fig-t { font-family: var(--font-mono); font-size: 11.5px; fill: var(--ink-3); }
+.fig-l { font-size: 12.5px; fill: var(--ink-2); font-family: var(--font-body); }
+.fig-v { font-family: var(--font-mono); font-size: 12px; font-weight: 500; fill: var(--ink); }
+
+/* ---------- tables ---------- */
+.tscroll { overflow-x: auto; margin-top: 18px; border: 1px solid var(--rule); border-radius: 4px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; background: var(--surface); }
+caption { text-align: left; font-size: 13px; color: var(--ink-3); padding: 0 0 8px; }
+th, td { text-align: left; padding: 9px 13px; border-bottom: 1px solid var(--rule-2); vertical-align: top; }
+thead th {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3);
+  background: var(--surface-2); border-bottom: 1px solid var(--rule); white-space: nowrap;
+}
+tbody tr:last-child td { border-bottom: 0; }
+td.mono, th.mono { font-family: var(--font-mono); font-size: 13px; white-space: nowrap; }
+td .metric { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 13px; white-space: nowrap; }
+td p { margin: 0; max-width: 56ch; }
+.rowgroup td {
+  background: var(--surface-2); font-family: var(--font-mono); font-size: 11px;
+  font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2);
+  padding: 7px 13px;
+}
+
+/* structure chips */
+.chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+  letter-spacing: 0.03em; white-space: nowrap;
+  color: var(--ink-2);
+}
+.chip::before { content: ""; width: 8px; height: 8px; border-radius: 2px; background: currentColor; }
+.chip.g4 { color: var(--g4); }
+.chip.im { color: var(--im); }
+.tag {
+  display: inline-block; font-family: var(--font-mono); font-size: 10.5px;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  padding: 2px 6px; border-radius: 3px; white-space: nowrap;
+  border: 1px solid var(--rule); color: var(--ink-3); background: var(--bg);
+}
+.tag.anchored { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 45%, var(--rule)); }
+.tag.proxy    { color: var(--im); border-color: color-mix(in srgb, var(--im) 45%, var(--rule)); }
+.tag.aux      { color: var(--ink-3); }
+
+/* ---------- cards ---------- */
+.parts {
+  display: grid; gap: 14px; margin-top: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(255px, 1fr));
+}
+.part {
+  background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 4px; padding: 16px 17px; min-width: 0;
+}
+.part h4 {
+  margin: 0 0 7px; font-family: var(--font-mono); font-size: 13px; font-weight: 600;
+  color: var(--g4); letter-spacing: 0;
+}
+.part p { margin: 0; font-size: 14px; color: var(--ink-2); max-width: none; }
+
+/* ---------- code ---------- */
+.code { position: relative; margin-top: 16px; min-width: 0; }
+.code pre {
+  margin: 0; padding: 15px 17px; overflow-x: auto;
+  background: var(--surface); border: 1px solid var(--rule); border-radius: 4px;
+  font-family: var(--font-mono); font-size: 13px; line-height: 1.75;
+  color: var(--ink);
+}
+.code pre .c { color: var(--ink-3); }
+.copy {
+  position: absolute; top: 8px; right: 8px;
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.04em;
+  padding: 4px 9px; border-radius: 3px; cursor: pointer;
+  background: var(--surface-2); color: var(--ink-3);
+  border: 1px solid var(--rule);
+}
+.copy:hover { color: var(--ink); border-color: var(--ink-3); }
+.steps { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; margin-top: 4px; }
+.steps > * { min-width: 0; }
+.tscroll, .figbox { min-width: 0; }
+.step-h {
+  display: flex; align-items: baseline; gap: 9px;
+  font-size: 14px; font-weight: 600; margin-top: 18px;
+}
+.step-h .i {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+  color: var(--ink-3); border: 1px solid var(--rule); border-radius: 3px;
+  padding: 1px 6px;
+}
+.step-h + p { margin-top: 6px; font-size: 14.5px; }
+
+/* ---------- refusal list ---------- */
+.refusals { list-style: none; padding: 0; margin: 20px 0 0; display: grid; gap: 14px; max-width: 74ch; }
+.refusals li {
+  padding-left: 17px; border-left: 2px solid var(--rule);
+  font-size: 14.5px; color: var(--ink-2); max-width: none;
+}
+.refusals li b { color: var(--ink); font-weight: 600; }
+.refusals li.wd { border-left-color: var(--flag); }
+
+/* ---------- footer ---------- */
+footer { border-top: 1px solid var(--rule); background: var(--surface); }
+footer .wrap { padding-block: 34px 40px; }
+.authors { font-size: 14.5px; color: var(--ink-2); max-width: 70ch; }
+.authors b { color: var(--ink); font-weight: 500; }
+.foot-meta {
+  margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--rule-2);
+  display: flex; flex-wrap: wrap; gap: 8px 24px;
+  font-family: var(--font-mono); font-size: 12px; color: var(--ink-3);
+}
+.srlink { text-decoration: none; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+@media (max-width: 560px) {
+  section .wrap { padding-block: 34px; }
+  .stat .v { font-size: 22px; }
+}
+</style>
+</head>
+<body>
+<header class="masthead">
+  <div class="wrap">
+    <div class="brandrow">
+      <h1 class="wordmark">QuadCond<span class="slash">/</span>AENNA-3D</h1>
+      <span class="ver">v0.5.1</span>
+    </div>
+    <div class="metarow">
+      <span><b>MIT</b> licence</span>
+      <span>Python <b>&ge;&nbsp;3.11</b></span>
+      <span><b>12</b> prediction heads</span>
+      <span><a class="srlink" href="https://github.com/himanshushekhar367-sudo/Quadcond">github.com/himanshushekhar367-sudo/Quadcond</a></span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Sections">
+  <div class="wrap">
+    <ul>
+      <li><a href="#what">What it is</a></li>
+      <li><a href="#evidence">Condition evidence</a></li>
+      <li><a href="#install">Install &amp; run</a></li>
+      <li><a href="#heads">The twelve heads</a></li>
+      <li><a href="#refusals">Refusals</a></li>
+      <li><a href="#api">HTTP API</a></li>
+      <li><a href="#cli">Command line</a></li>
+      <li><a href="#alphagenome">AlphaGenome</a></li>
+      <li><a href="#benchmarks">Benchmarks</a></li>
+      <li><a href="#cite">Cite</a></li>
+    </ul>
+  </div>
+</nav>
+
+<section class="hero" id="what">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <p class="thesis">Condition-aware prediction of G-quadruplex and i-motif propensity, with <em>what each head may claim</em> written into the software.</p>
+        <p class="limit">QuadCond demonstrates reproducible condition effects on measured stability while keeping genomic proxies, derived labels and direct biophysical evidence scientifically separate. It is not yet a validated general folding predictor for either structure.</p>
+      </div>
+      <div class="notice">
+        <b>No public instance yet.</b> A hosted deployment at IIT Delhi is pending. Until then the service runs locally: one process serves both the HTTP API and the AENNA-3D browser workbench on a single port, and <code>quadcond assets fetch</code> verifies every model file by SHA-256 before installing it.
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="v">+0.416</div>
+        <div class="k">R&sup2; that solution conditions add to G-quadruplex melting temperature</div>
+        <div class="n">2,274 measurements · 261 buffers</div>
+      </div>
+      <div class="stat">
+        <div class="v">+13.6&nbsp;°C</div>
+        <div class="k">Out-of-fold &Delta;Tm between K&#8314; and Na&#8314; buffers; measured value +12.9&nbsp;°C</div>
+        <div class="n">411 pairs · 151 sequences</div>
+      </div>
+      <div class="stat">
+        <div class="v">94%</div>
+        <div class="k">Sign agreement on sequences whose whole similarity cluster was held out</div>
+        <div class="n">95% CI [90%, 98%]</div>
+      </div>
+      <div class="stat">
+        <div class="v">7 / 3 / 2</div>
+        <div class="k">Heads that are biophysically anchored, genomic proxies, derived or predicted</div>
+        <div class="n">each with a stated claim limit</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="evidence">
+  <div class="wrap">
+    <p class="eyebrow">The result the project rests on</p>
+    <h2>The model separates potassium from sodium on sequences it has never seen</h2>
+    <p class="lede">An R&sup2; of 0.670 would look the same whether a head reads <em>which</em> cation is present or only how much monovalent salt there is. So the atlas was searched for sequences measured both K&#8314;-only and Na&#8314;-only at comparable concentration and pH.</p>
+
+    <figure>
+      <div class="figbox">
+        <svg viewBox="0 0 620 200" role="img" aria-labelledby="figtitle figdesc">
+          <title id="figtitle">Mean ΔTm between potassium and sodium buffers: measured, out-of-fold and in-sample</title>
+          <desc id="figdesc">The measured difference is +12.9 °C. The out-of-fold estimate is +13.6 °C with a 95% interval of 12.0 to 18.4 °C. The in-sample estimate is +13.5 °C with a wider interval of 11.0 to 21.6 °C.</desc>
+
+          <!-- gridlines -->
+          <g stroke="var(--rule-2)" stroke-width="1">
+            <line x1="92" y1="30" x2="92" y2="156"></line>
+            <line x1="272" y1="30" x2="272" y2="156"></line>
+            <line x1="452" y1="30" x2="452" y2="156"></line>
+          </g>
+          <!-- measured reference -->
+          <line x1="196.4" y1="30" x2="196.4" y2="156" stroke="var(--ink-3)" stroke-width="1" stroke-dasharray="3 3" opacity="0.85"></line>
+
+          <!-- axis -->
+          <line x1="92" y1="156" x2="560" y2="156" stroke="var(--rule)" stroke-width="1"></line>
+          <g class="fig-t" text-anchor="middle">
+            <text x="92" y="173">10</text>
+            <text x="272" y="173">15</text>
+            <text x="452" y="173">20</text>
+          </g>
+          <text class="fig-t" x="92" y="192" text-anchor="start">mean &#916;Tm(K&#8314; &minus; Na&#8314;), °C</text>
+
+          <!-- row 1: measured -->
+          <g>
+            <title>Measured: +12.9 °C across 411 matched pairs</title>
+            <text class="fig-l" x="84" y="50" text-anchor="end">measured</text>
+            <circle cx="196.4" cy="46" r="4.5" fill="var(--ink)" stroke="var(--surface)" stroke-width="2"></circle>
+            <text class="fig-v" x="210" y="50">+12.9 °C</text>
+          </g>
+
+          <!-- row 2: out-of-fold -->
+          <g>
+            <title>Out-of-fold: +13.6 °C, 95% interval 12.0 to 18.4 °C</title>
+            <text class="fig-l" x="84" y="90" text-anchor="end" style="fill:var(--ink)">out-of-fold</text>
+            <line x1="164" y1="86" x2="394.4" y2="86" stroke="var(--g4)" stroke-width="3" stroke-linecap="round" opacity="0.38"></line>
+            <line x1="164" y1="79" x2="164" y2="93" stroke="var(--g4)" stroke-width="2"></line>
+            <line x1="394.4" y1="79" x2="394.4" y2="93" stroke="var(--g4)" stroke-width="2"></line>
+            <circle cx="221.6" cy="86" r="5.5" fill="var(--g4)" stroke="var(--surface)" stroke-width="2"></circle>
+            <text class="fig-v" x="406" y="90" style="fill:var(--g4)">+13.6 °C</text>
+          </g>
+
+          <!-- row 3: in-sample -->
+          <g>
+            <title>In-sample: +13.5 °C, 95% interval 11.0 to 21.6 °C</title>
+            <text class="fig-l" x="84" y="130" text-anchor="end">in-sample</text>
+            <line x1="128" y1="126" x2="509.6" y2="126" stroke="var(--ink-3)" stroke-width="3" stroke-linecap="round" opacity="0.35"></line>
+            <line x1="128" y1="119" x2="128" y2="133" stroke="var(--ink-3)" stroke-width="2"></line>
+            <line x1="509.6" y1="119" x2="509.6" y2="133" stroke="var(--ink-3)" stroke-width="2"></line>
+            <circle cx="218" cy="126" r="4.5" fill="var(--ink-3)" stroke="var(--surface)" stroke-width="2"></circle>
+            <text class="fig-v" x="521" y="130" style="fill:var(--ink-2)">+13.5 °C</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>411 matched K&#8314;/Na&#8314; pairs over 151 sequences. Each pair is scored by a refit of <code>g4_tm</code> from the fold that held its whole sequence-similarity cluster out, so no pair is predicted by a model that saw it. Intervals are 95% percentile bootstrap <em>over sequence-similarity clusters</em>, not over pairs: hTelo 22AG alone contributes 187 of the 411, so a pair-level interval would be several times too tight. Dashed line marks the measured value.</figcaption>
+    </figure>
+
+    <div class="tscroll">
+      <table>
+        <thead>
+          <tr><th>Statistic</th><th>Measured</th><th>Out-of-fold</th><th>In-sample</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>mean &Delta;Tm(K&minus;Na)</td><td class="metric">+12.9 °C</td><td class="metric">+13.6 °C [12.0, 18.4]</td><td class="metric">+13.5 °C [11.0, 21.6]</td></tr>
+          <tr><td>sign agreement</td><td class="metric">&mdash;</td><td class="metric">94% [90%, 98%]</td><td class="metric">95% [91%, 98%]</td></tr>
+          <tr><td>Pearson r</td><td class="metric">&mdash;</td><td class="metric">0.652 [0.48, 0.81]</td><td class="metric">0.875 [0.76, 0.96]</td></tr>
+          <tr><td>MAE of &Delta;Tm</td><td class="metric">&mdash;</td><td class="metric">5.3 °C</td><td class="metric">3.1 °C</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>The held-out interval on sign agreement excludes chance: the head gets the direction right, at close to the right magnitude, on a sequence it has never been shown. Memorisation is visible and quantified rather than hidden — it buys <span class="metric">+0.223</span> of Pearson r and 1.5% of sign agreement. An earlier release reported the in-sample column alone, which was a mechanistic consistency check described as verification.</p>
+
+    <h3>What this does not license</h3>
+    <p>Accuracy on an individual construct cannot be read off that aggregate. Eight of the 151 sequences carry published values that disagree with <em>each other</em> by more than 10 °C at the same nominal buffer; hTelo 22AG alone spans &minus;4.7 to +32.1 °C across its matched pairs. Nor is the titration curve physically shaped: a K&#8314; ladder from 0 to 200 mM gives a 32&ndash;45 °C span with four non-monotonic steps out of 32 on a four-construct panel. Read endpoints, not slopes.</p>
+  </div>
+</section>
+
+<section id="install">
+  <div class="wrap">
+    <p class="eyebrow">Install and run</p>
+    <h2>One process, one port</h2>
+    <p class="lede"><code>quadcond serve</code> serves the API and the built workbench together, so a deployment is one process and one URL.</p>
+
+    <div class="steps">
+      <div>
+        <div class="step-h"><span class="i">1</span> Install the package</div>
+        <p>Python 3.11 or newer. The pinned scientific stack (scikit-learn 1.8.0, xgboost 3.2.0) is what the released model files were built with; loading them under other versions is allowed but reported in every run's provenance block.</p>
+        <div class="code">
+          <button class="copy" type="button">copy</button>
+          <pre><code>git clone https://github.com/himanshushekhar367-sudo/Quadcond.git
+cd Quadcond
+python -m pip install -e .</code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="step-h"><span class="i">2</span> Fetch the verified assets</div>
+        <p>Model and atlas files are not in git — they are binary artefacts of a training run, checked by SHA-256 against <code>quadcond/assets_manifest.json</code>. Nothing is downloaded implicitly and no asset is installed unverified.</p>
+        <div class="code">
+          <button class="copy" type="button">copy</button>
+          <pre><code>quadcond assets status   <span class="c"># where each asset is expected, and whether it verifies</span>
+quadcond assets fetch    <span class="c"># download and verify the recorded assets</span>
+quadcond assets path     <span class="c"># resolved model and atlas paths</span></code></pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="step-h"><span class="i">3</span> Build the workbench and serve</div>
+        <p>The startup banner says whether it found a built workbench, so you know before opening a browser whether <code>/</code> will be the application or the health document. With no build present the service is API-only.</p>
+        <div class="code">
+          <button class="copy" type="button">copy</button>
+          <pre><code>npm --prefix web install
+npm --prefix web run build      <span class="c"># writes web/dist</span>
+quadcond serve --port 8765      <span class="c"># then open http://localhost:8765/</span></code></pre>
+        </div>
+        <p><code>--host 0.0.0.0</code> accepts connections from other machines. There are no accounts and no sessions, so do that only on a network you trust.</p>
+      </div>
+
+      <div>
+        <div class="step-h"><span class="i">4</span> Check it came up ready</div>
+        <p><code>/health</code> and <code>/ready</code> are deliberately different questions. A process whose required model file is missing is alive but not ready, and a load balancer should be able to tell.</p>
+        <div class="code">
+          <button class="copy" type="button">copy</button>
+          <pre><code>curl -s localhost:8765/ready | python -m json.tool
+python -m pytest tests -q       <span class="c"># runs without the model binaries</span></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <h3>The three parts</h3>
+    <div class="parts">
+      <div class="part">
+        <h4>quadcond/</h4>
+        <p>Python package: twelve calibrated prediction heads, a sequence and conditions feature stack, a motif atlas, a CLI and an HTTP service.</p>
+      </div>
+      <div class="part">
+        <h4>web/</h4>
+        <p>AENNA-3D — a React, TypeScript and Three.js workbench that talks to that service and renders refusals rather than numbers where a head declines.</p>
+      </div>
+      <div class="part">
+        <h4>bridge/</h4>
+        <p>Helpers for pulling AlphaGenome variant scores and joining them to a QuadCond mutation scan on an exact coordinate match.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="heads">
+  <div class="wrap">
+    <p class="eyebrow">Claim registry</p>
+    <h2>Twelve heads, and what each is allowed to claim</h2>
+    <p class="lede">They are not twelve versions of the same thing, and the difference is not accuracy — it is what was measured. Every prediction carries three fields that say so.</p>
+
+    <div class="tscroll">
+      <table>
+        <caption><code>has_experimental_observation</code> — was anything measured upstream of this label? · <code>target_semantics</code> — biophysical, genomic_proxy, derived or predicted · <code>biophysically_grounded</code> — is the label a physical measurement of the structure this head predicts? Only the third licenses a folding or stability claim.</caption>
+        <thead>
+          <tr><th>Head</th><th>Predicts</th><th>Held-out metric</th><th>Principal limit</th></tr>
+        </thead>
+        <tbody>
+          <tr class="rowgroup"><td colspan="4">Biophysically anchored (7) <span class="tag anchored">may be quoted as evidence about DNA</span></td></tr>
+          <tr>
+            <td class="mono">g4_tm</td>
+            <td><span class="chip g4">G4</span><p>Melting temperature under a stated cation composition and pH</p></td>
+            <td><span class="metric">R&sup2; 0.670</span><br><span class="metric">RMSE 7.8 °C</span></td>
+            <td><p>Nothing at pH 5: the full span is 4.0&ndash;8.0 but the middle 90% is 7.0&ndash;7.5.</p></td>
+          </tr>
+          <tr>
+            <td class="mono">g4_topology</td>
+            <td><span class="chip g4">G4</span><p>Parallel, antiparallel or hybrid, conditioned on folding</p></td>
+            <td><span class="metric">bal. acc. 0.724</span></td>
+            <td><p>Training set is K&#8314;-only. Not condition-aware and does not pretend to be.</p></td>
+          </tr>
+          <tr>
+            <td class="mono">im_pht</td>
+            <td><span class="chip im">i-motif</span><p>Transitional pH from sequence, at the iM-Seeker reference buffer</p></td>
+            <td><span class="metric">R&sup2; 0.592</span></td>
+            <td><p>No salt response — all 160 measurements are in one buffer, and they are variants of few parents.</p></td>
+          </tr>
+          <tr>
+            <td class="mono">im_pht_condition</td>
+            <td><span class="chip im">i-motif</span><p>Transitional pH versus buffer</p></td>
+            <td><span class="metric">R&sup2; 0.835</span><br><span class="metric">grouped by buffer</span></td>
+            <td><p>Returns no value outside a two-construct allowlist. A condition-response model, not a sequence model.</p></td>
+          </tr>
+          <tr>
+            <td class="mono">im_tm_condition</td>
+            <td><span class="chip im">i-motif</span><p>Melting temperature versus pH and ionic strength</p></td>
+            <td><span class="metric">R&sup2; 0.853</span><br><span class="metric">grouped by buffer</span></td>
+            <td><p>Same two constructs. Asked about an unseen sequence it returned the <em>same</em> number as for Tel21C itself, so the keys are now absent rather than flagged.</p></td>
+          </tr>
+          <tr>
+            <td class="mono">g4_fold</td>
+            <td><span class="chip g4">G4</span><p>Discrimination against dinucleotide-preserving shuffles of itself</p></td>
+            <td><span class="metric">AUROC 0.970</span><br><span class="metric">ECE 0.008</span></td>
+            <td><p>Not an absolute probability for any population you will query: the negatives are generated and the task is balanced by construction.</p></td>
+          </tr>
+          <tr>
+            <td class="mono">im_fold</td>
+            <td><span class="chip im">i-motif</span><p>Discrimination against dinucleotide-preserving shuffles of itself</p></td>
+            <td><span class="metric">AUROC 0.870</span><br><span class="metric">ECE 0.055</span></td>
+            <td><p>Does not transfer: on the cross-assay CD panel it separates i-motifs from negatives by +0.024 and cannot tell an i-motif from a G4.</p></td>
+          </tr>
+
+          <tr class="rowgroup"><td colspan="4">Genomic proxy (3) <span class="tag proxy">antibody occupancy, not folding</span></td></tr>
+          <tr>
+            <td class="mono">im_fold_genomic</td>
+            <td><span class="chip im">i-motif</span><p>Resemblance to motifs enriched under reproducible iMab CUT&amp;Tag peaks in live HEK293T</p></td>
+            <td><span class="metric">AUROC 0.779</span><br><span class="metric">ECE 0.007</span></td>
+            <td><p>CUT&amp;Tag measures occupancy; the antibody is contested; no buffer was measured, so all eight condition fields are flagged imputed.</p></td>
+          </tr>
+          <tr>
+            <td class="mono">g4_fold_genomic</td>
+            <td><span class="chip g4">G4</span><p>The same, for BG4 peaks — present mostly as a control on the shared pipeline</p></td>
+            <td><span class="metric">AUROC 0.765</span><br><span class="metric">ECE 0.008</span></td>
+            <td><p>Never P(folds). The CLI prints both heads behind a <code>[GENOMIC PROXY]</code> marker.</p></td>
+          </tr>
+          <tr>
+            <td class="mono">locus_peak_overlap_state</td>
+            <td><span class="chip g4">G4</span> <span class="chip im">i-motif</span><p>Four-class posterior over how a 201-nt genomic window was called by two parallel CUT&amp;Tag reactions</p></td>
+            <td><span class="metric">4-class, calibrated</span></td>
+            <td><p>The two antibodies ran on separate aliquots of one cell population. Nothing in the design observes two structures on one DNA molecule.</p></td>
+          </tr>
+
+          <tr class="rowgroup"><td colspan="4">Derived or prior-model auxiliary (2) <span class="tag aux">label is not a measurement</span></td></tr>
+          <tr>
+            <td class="mono">g4_tm_distilled</td>
+            <td><span class="chip g4">G4</span><p>Reproduces the G4STAB ensemble's Tm response to cation composition</p></td>
+            <td><span class="metric">R&sup2; 0.963</span></td>
+            <td><p><code>target_semantics = predicted</code>. Agreement with a predictor, not accuracy against measurements, and it inherits every G4STAB bias. The head carrying the measurements is <code>g4_tm</code>, at 0.670.</p></td>
+          </tr>
+          <tr>
+            <td class="mono">im_architecture</td>
+            <td><span class="chip im">i-motif</span><p>Whether a sequence carries a canonical four-C-tract motif</p></td>
+            <td><span class="metric">AUROC 0.997</span></td>
+            <td><p><code>target_semantics = derived</code>. May claim essentially nothing: the negatives are shuffles from which that motif was rejected, so a near-perfect AUROC means the feature set can recompute the regex. It exists so the pipeline is exercisable end to end.</p></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p>An earlier release shipped a single <code>grounded_in_measurements</code> field that collapsed the first and third questions. The consequence was a model card describing a CUT&amp;Tag proxy head as measurement-grounded on the same day the results report called it a proxy. The field was the bug.</p>
+  </div>
+</section>
+
+<section id="refusals">
+  <div class="wrap">
+    <p class="eyebrow">Behaviour</p>
+    <h2>What the software refuses to do</h2>
+    <p class="lede">Refusal is a first-class result here, not an error path. A head asked about a sequence outside the region its training data covers returns a refusal with a reason, and the frontend renders that refusal rather than a number.</p>
+
+    <ul class="refusals">
+      <li><b>A refused head cannot be read as a score.</b> Downstream code reads the result through a discriminated union, so treating a refusal as a number is a compile error rather than a silent zero.</li>
+      <li><b>Out-of-allowlist condition heads omit their keys.</b> <code>value</code>, <code>interval</code> and <code>folded_fraction_at_condition</code> are absent, so a consumer that forgets to check the flag gets a <code>KeyError</code>. A flag next to a number relies on every downstream reader remembering which one wins.</li>
+      <li><b>Folding heads refuse genomic windows.</b> They are oligonucleotide models and do not transfer, so they refuse windows longer than their training range and point at <code>genome-scan</code>, which is a different model trained on G4-seq. A benchmark loss forced that split.</li>
+      <li><b>Every run carries provenance.</b> The model file's SHA-256, a three-valued <code>matches_manifest</code> (<code>true</code> / <code>false</code> / <code>unknown</code> — never a bare <code>false</code> when the manifest simply has no entry), the build environment, and whether the current environment matches it.</li>
+      <li><b><code>competition</code> reports each strand on its own.</b> No combined "which structure wins" score: the two motifs sit on opposite strands of the same duplex, and no combination rule in this package is calibrated against data that would support one.</li>
+      <li class="wd"><b>Withdrawn.</b> A Boltzmann ensemble over G4, i-motif and unfolded was served in v0.4.2 and has been removed: the state competing with both at physiological conditions is the duplex, and it was not in the partition function — nor was strand concentration or stoichiometry. The joint 2×2 table, the signed <code>preference_g4_minus_im</code> and the sentence naming a favoured structure are gone too. They were labelled experimental, and the label did not change what they claimed.</li>
+      <li class="wd"><b>Mixed evidence tiers are refused, not averaged.</b> A synthetic artifact leads with "SYNTHETIC MODEL — not for scientific use" and the service refuses it unless explicitly started for it. Mixed tiers poison rather than dilute a claim, because nobody can say which rows drove which prediction.</li>
+    </ul>
+
+    <p>What is still missing is the experiment: one duplex, both strands, a condition grid, and a measurement of which structure wins at each point. Until that exists, no head here can say which fold a locus adopts in a defined buffer — only which antibodies bound it in one cell line.</p>
+  </div>
+</section>
+
+<section id="api">
+  <div class="wrap">
+    <p class="eyebrow">HTTP API</p>
+    <h2>Endpoints</h2>
+    <p class="lede">All on the port <code>quadcond serve</code> binds. <code>/info</code> reports the version, the assets, the heads and what each head may claim.</p>
+
+    <div class="tscroll">
+      <table>
+        <thead>
+          <tr><th>Route</th><th>Method</th><th>Purpose</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="mono">/health</td><td class="mono">GET</td><td>Liveness — 200 whenever the process can reply</td></tr>
+          <tr><td class="mono">/ready</td><td class="mono">GET</td><td>Readiness — 503 until every required asset is present and verifies</td></tr>
+          <tr><td class="mono">/info</td><td class="mono">GET</td><td>Version, assets, heads, and what each head may claim</td></tr>
+          <tr><td class="mono">/schema/prediction</td><td class="mono">GET</td><td>Response schema</td></tr>
+          <tr><td class="mono">/predict</td><td class="mono">POST</td><td>Score one or more sequences</td></tr>
+          <tr><td class="mono">/scan/mutations</td><td class="mono">POST</td><td>Every single-base substitution across a window</td></tr>
+          <tr><td class="mono">/scan/conditions</td><td class="mono">POST</td><td>Response across a condition grid</td></tr>
+          <tr><td class="mono">/scan/variant</td><td class="mono">POST</td><td>Mutation scan joined to AlphaGenome scores</td></tr>
+          <tr><td class="mono">/scan/genome</td><td class="mono">POST</td><td>G4-seq-trained window scan of a long sequence (&le; 20 kb)</td></tr>
+          <tr><td class="mono">/batch</td><td class="mono">POST</td><td>Many sequences in one call</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="cli">
+  <div class="wrap">
+    <p class="eyebrow">Command line</p>
+    <h2>Working from a shell</h2>
+    <div class="code">
+      <button class="copy" type="button">copy</button>
+      <pre><code>quadcond info                                   <span class="c"># version, assets, heads, claim basis</span>
+quadcond predict GGGTTAGGGTTAGGGTTAGGG --k 100
+quadcond scan --fasta window.fa --heads g4_tm,im_pht
+quadcond competition &lt;sequence&gt;                 <span class="c"># both strands, scored separately</span>
+quadcond sweep &lt;sequence&gt; --vary k --start 0 --stop 150
+quadcond atlas summary
+quadcond genome-scan --fasta promoters.fa --out regions.csv
+quadcond report --out report.html</code></pre>
+    </div>
+    <p>The sequence above is the 21-nt human telomeric G-rich repeat, and <code>--k&nbsp;100</code> sets 100 mM K&#8314;. <code>genome-scan</code> is deliberately a different model from <code>predict</code>: it finds genomic windows first, then their motifs.</p>
+  </div>
+</section>
+
+<section id="alphagenome">
+  <div class="wrap">
+    <p class="eyebrow">Variant effects</p>
+    <h2>Joining a mutation scan to AlphaGenome</h2>
+    <p class="lede"><code>quadcond variant</code> matches a QuadCond mutation scan to AlphaGenome variant scores for the same edits, exactly on <code>(chromosome, position, ref, alt)</code> — never by proximity.</p>
+
+    <div class="code">
+      <button class="copy" type="button">copy</button>
+      <pre><code><span class="c"># No key needed: the published AVI Tabix bundle</span>
+quadcond variant --fasta hg38.fa --chromosome chr22 --start 10510000 --end 10510200 \
+    --avi-tabix /data/alphagenome/avi.tsv.gz
+
+<span class="c"># Cheap pre-check: motif screening only — no model, no query, no key</span>
+quadcond variant --fasta hg38.fa --chromosome chr22 --start 10510000 --end 10510200 --screen</code></pre>
+    </div>
+
+    <p>Four sources sit behind one contract — Tabix bundle, table export, live API and a null source — and the resolver prefers the Tabix bundle because it is the permissively licensed one. <code>--screen</code> exists because most windows have no canonical motif at all: it checks the reference and every single-base alternate on both strands and returns one of <code>motif_present</code>, <code>motif_gain_possible</code>, <code>borderline</code> or <code>no_motif</code>, so a query is only spent where a structural delta is possible.</p>
+
+    <h3>The worked example is a negative one</h3>
+    <p><code>examples/chr22-negative-control/</code> is a complete run: 183 variants, all 183 paired to a regulatory score, and <strong>zero</strong> structural deltas — the window carries no canonical motif on either strand, at G4Hunter 0.262. It is kept precisely because it is negative. It shows the join, the provenance block and the refusal path working on a window where the honest answer is "nothing to report", which is the common case.</p>
+    <p>A substitution that destroys the motif carries no delta, and since v0.5.1 it is nonetheless placed structurally high in the 2×2 by category, as <code>structural.basis = "motif_lost"</code>, rather than left unclassified: it is the strongest structural result the scan can produce, and it had been sinking to the bottom of a table ranked on absolute delta.</p>
+  </div>
+</section>
+
+<section id="benchmarks">
+  <div class="wrap">
+    <p class="eyebrow">Comparison</p>
+    <h2>Against twelve published tools</h2>
+    <p class="lede">On grouped hold-outs and, where a tool's training recipe is public, with that tool retrained on the same folds.</p>
+
+    <p><code>G4Hunter</code>, <code>pqsfinder</code>, <code>QGRS Mapper</code>, <code>G4Catchall</code>, <code>G4Boost</code>, <code>DeepG4</code>, <code>G4detector</code>, <code>G4mismatch</code>, <code>G4ShapePredictor</code>, <code>G4STAB</code>, <code>iM-Seeker</code> and <code>G4SNVHunter</code>.</p>
+
+    <div class="parts">
+      <div class="part" style="border-color: color-mix(in srgb, var(--g4) 40%, var(--rule))">
+        <h4 style="color: var(--g4)">Where it wins</h4>
+        <p>Buffer-resolved melting temperature, buffer response, measured single-substitution &Delta;Tm, and i-motif transitional pH. These are the questions the condition stack was built for, and no compared tool takes a buffer as input.</p>
+      </div>
+      <div class="part" style="border-color: color-mix(in srgb, var(--flag) 40%, var(--rule))">
+        <h4 style="color: var(--flag)">Where it lost</h4>
+        <p>Genomic G4 detection — badly enough to change the software. The folding heads now refuse genomic windows and point at <code>genome-scan</code>, a separate G4-seq-trained model. The benchmark that forced the split is recorded in <code>docs/GENOME_SCAN.md</code>.</p>
+      </div>
+    </div>
+
+    <p>Grouping is by sequence-similarity cluster rather than at random throughout, because a random split over an atlas where one construct contributes hundreds of measurements reports memorisation as generalisation.</p>
+  </div>
+</section>
+
+<footer id="cite">
+  <div class="wrap">
+    <p class="eyebrow">Cite</p>
+    <h2>QuadCond / AENNA-3D</h2>
+    <p class="authors">
+      <b>Auroni Deep</b>, <b>Himanshu Shekhar</b>, <b>Shilpi Minocha</b>, <b>Vivekanandan Perumal</b> and <b>Saran Kumar</b>.
+      <em>QuadCond / AENNA-3D: condition-aware G-quadruplex and i-motif prediction with an AlphaGenome join.</em>
+      Software, v0.5.1. Machine-readable metadata in <code>CITATION.cff</code>.
+    </p>
+    <div class="code">
+      <button class="copy" type="button">copy</button>
+      <pre><code>https://github.com/himanshushekhar367-sudo/Quadcond</code></pre>
+    </div>
+    <div class="foot-meta">
+      <span>MIT licence</span>
+      <span>v0.5.1</span>
+      <span><a class="srlink" href="https://github.com/himanshushekhar367-sudo/Quadcond">Source</a></span>
+      <span><a class="srlink" href="https://github.com/himanshushekhar367-sudo/Quadcond/blob/main/docs/CLAIMS.md">Claim registry</a></span>
+      <span><a class="srlink" href="https://github.com/himanshushekhar367-sudo/Quadcond/blob/main/docs/MODEL_CARD.md">Model card</a></span>
+      <span><a class="srlink" href="https://github.com/himanshushekhar367-sudo/Quadcond/blob/main/docs/GET_THE_DATA.md">Data sources</a></span>
+    </div>
+    <p style="font-size:13px;color:var(--ink-3);margin-top:20px;max-width:72ch">
+      Third-party data files carry their own terms. The AlphaGenome AVI bundle is permissively licensed; the splicing and SHAP bundles are not available for commercial use. <code>docs/DATA_SOURCES.md</code> records the terms for each.
+    </p>
+  </div>
+</footer>
+
+<script>
+document.querySelectorAll('.copy').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var pre = btn.parentElement.querySelector('pre');
+    if (!pre) return;
+    var text = pre.innerText.replace(/[ \t]*#[^\n]*/g, '').replace(/[ \t]+$/gm, '');
+    var done = function () {
+      btn.textContent = 'copied';
+      setTimeout(function () { btn.textContent = 'copy'; }, 1400);
+    };
+    try {
+      navigator.clipboard.writeText(text).then(done, function () { select(pre); });
+    } catch (e) {
+      select(pre);
+    }
+    function select(el) {
+      try {
+        var r = document.createRange();
+        r.selectNodeContents(el);
+        var s = window.getSelection();
+        s.removeAllRanges();
+        s.addRange(r);
+        btn.textContent = 'selected';
+        setTimeout(function () { btn.textContent = 'copy'; }, 1800);
+      } catch (e2) { /* nothing more to offer */ }
+    }
+  });
+});
+</script>
+</body>
+</html>
