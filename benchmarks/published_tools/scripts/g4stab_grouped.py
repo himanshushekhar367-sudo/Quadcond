@@ -1,12 +1,13 @@
 """Retrain the published G4STAB architecture (cloned from trained_model_00, fresh weights,
 published optimiser settings) under QuadCond's grouped folds, and also under random 5-fold."""
 import os, sys, numpy as np, pandas as pd
-os.chdir("/home/claude/tools/donn-liew_G4STAB"); sys.path.insert(0, ".")
+from _paths import TOOLS, WORK
+os.chdir(TOOLS / "donn-liew_G4STAB"); sys.path.insert(0, ".")
 sys.argv = ["x"]
 import tensorflow as tf
 import g4stab_predictor as G
 from sklearn.model_selection import KFold, GroupShuffleSplit
-d = pd.read_csv("/home/claude/bench/oof_g4_tm_full.csv")
+d = pd.read_csv(WORK / "oof_g4_tm_full.csv")
 seqs = list(d.sequence.str.upper())
 conc = d[["k", "na", "li_nh4"]].fillna(0).values.tolist()
 ph = d.ph.fillna(7.0).tolist()
@@ -49,4 +50,4 @@ for scheme in ["grouped"]:
     res[f"g4stab_retrained_{scheme}"] = oof
     res[f"fold_{scheme}"] = folds
 out = pd.DataFrame(res); out["sequence"] = seqs; out["y"] = y
-out.to_csv("/home/claude/bench/scores_g4stab_retrained.csv", index=False)
+out.to_csv(WORK / "scores_g4stab_retrained.csv", index=False)

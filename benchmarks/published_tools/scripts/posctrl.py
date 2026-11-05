@@ -1,9 +1,10 @@
 import sys, json, pandas as pd, numpy as np
-sys.path.insert(0, "/home/claude/qc")
+from _paths import REPO, MODEL
+sys.path.insert(0, str(REPO))
 from quadcond.models.predict import Predictor
 from quadcond.conditions import Condition
 from quadcond.scans import mutation_scan
-p = Predictor.load("/home/claude/qc/artifacts/quadcond_model.joblib")
+p = Predictor.load(MODEL)
 cond = Condition(k=140, na=10, mg=1, ph=7.4, temperature=37)
 ctrls = {"MYC Pu27": "TGGGGAGGGTGGGGAGGGTGGGGAAGG", "KIT c-kit1": "AGGGAGGGCGCTGGGAGGAGGG",
          "KIT c-kit2": "CGGGCGGGCGCGAGGGAGGGG", "VEGFA Pu22": "GGGGCGGGCCGGGGGCGGGGTCC",

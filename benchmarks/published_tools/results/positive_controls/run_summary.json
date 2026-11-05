@@ -6,7 +6,7 @@
     "sequence": "CCCCACCTTCCCCACCCTCCCCACCCTCCCCATAAGC",
     "motif": "TGGGGAGGGTGGGGAGGGTGGGGAAGG",
     "motif_strand": "-",
-    "source": "file:C:\\Users\\pc\\GRCh38.p13.genome.fa",
+    "source": "file:GRCh38.p13.genome.fa",
     "status": "exit 1"
   },
   {
@@ -16,7 +16,7 @@
     "sequence": "CGCAGAGGGAGGGCGCTGGGAGGAGGGGCTGC",
     "motif": "AGGGAGGGCGCTGGGAGGAGGG",
     "motif_strand": "+",
-    "source": "file:C:\\Users\\pc\\GRCh38.p13.genome.fa",
+    "source": "file:GRCh38.p13.genome.fa",
     "status": "exit 1"
   },
   {
@@ -26,7 +26,7 @@
     "sequence": "AGACCCGGGCGGGCGCGAGGGAGGGGAGGCG",
     "motif": "CGGGCGGGCGCGAGGGAGGGG",
     "motif_strand": "+",
-    "source": "file:C:\\Users\\pc\\GRCh38.p13.genome.fa",
+    "source": "file:GRCh38.p13.genome.fa",
     "status": "exit 1"
   },
   {
@@ -36,7 +36,7 @@
     "sequence": "CCCCCGGGGCGGGCCGGGGGCGGGGTCCCG",
     "motif": "GGGGCGGGCCGGGGGCGGGG",
     "motif_strand": "+",
-    "source": "file:C:\\Users\\pc\\GRCh38.p13.genome.fa",
+    "source": "file:GRCh38.p13.genome.fa",
     "status": "exit 1"
   },
   {
@@ -46,7 +46,7 @@
     "sequence": "CGCGGAGGGGCGGGCGCGGGAGGAAGGGGGCGGGAGCGGGGCTGTGGTG",
     "motif": "AGGGGCGGGCGCGGGAGGAAGGGGGCGGGAGCGGGGCTG",
     "motif_strand": "+",
-    "source": "file:C:\\Users\\pc\\GRCh38.p13.genome.fa",
+    "source": "file:GRCh38.p13.genome.fa",
     "status": "exit 1"
   },
   {
@@ -56,7 +56,7 @@
     "sequence": "AGGAAGGGGAGGGGCTGGGAGGGCCCGGAGGG",
     "motif": "GGGGAGGGGCTGGGAGGGCCCG",
     "motif_strand": "+",
-    "source": "file:C:\\Users\\pc\\GRCh38.p13.genome.fa",
+    "source": "file:GRCh38.p13.genome.fa",
     "status": "exit 1"
   }
 ]

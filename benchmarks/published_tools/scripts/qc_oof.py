@@ -1,13 +1,15 @@
 """Re-derive QuadCond grouped out-of-fold predictions for the biophysical heads,
 exactly as quadcond.models.train.train_head does, and save per-row tables."""
 import sys, json, numpy as np, pandas as pd
-sys.path.insert(0, "/home/claude/qc")
+from _paths import REPO, ATLAS, WORK
+sys.path.insert(0, str(REPO))
+WORK.mkdir(parents=True, exist_ok=True)
 from sklearn.model_selection import StratifiedGroupKFold, GroupKFold
 from quadcond.atlas import Atlas
 from quadcond.models import train as T
 from quadcond.models.grouping import cluster_sequences
 
-atlas = Atlas("/home/claude/qc/data/atlas_core.db")
+atlas = Atlas(str(ATLAS))
 want = ["g4_fold", "g4_topology", "g4_tm", "im_fold", "im_pht"]
 specs = {s.name: s for s in T.DEFAULT_TASKS}
 N_SEEDS = int(sys.argv[1]) if len(sys.argv) > 1 else 3
@@ -48,5 +50,5 @@ for name in want:
             for i, c in enumerate(spec.classes):
                 df[f"p_{c}"] = oof[:, i]
         tag = "full" if use_c else "seqonly"
-        df.to_csv(f"/home/claude/bench/oof_{name}_{tag}.csv", index=False)
+        df.to_csv(WORK / f"oof_{name}_{tag}.csv", index=False)
         print(name, tag, len(df), flush=True)

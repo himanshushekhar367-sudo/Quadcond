@@ -7,7 +7,7 @@
     "provenance": {
       "model": {
         "model_version_reported_by_artifact": "0.4.6",
-        "model_file": "/mnt/user-data/uploads/Quadcond/sandbox/quadcond_model.reassembled-v0.4.6.joblib",
+        "model_file": "sandbox/quadcond_model.reassembled-v0.4.6.joblib",
         "model_file_sha256": "493640193ad70974d35582c55b4a721095bfcba50edc6827d9636d2f7b7be0c7",
         "dataset_fingerprint": "4c5cca5a98e1259452824cc3f5aaad151a11671a4391b99f5abaa67e716d061b",
         "manifest_release": "0.4.8",
@@ -88,13 +88,13 @@
     },
     "regulatory_source": {
       "source": "table",
-      "path": "/mnt/user-data/uploads/Quadcond/alphagenome_bridge/results/chr22_example_20260915_105922_ce722e/quadcond_scores.csv",
+      "path": "alphagenome_bridge/results/chr22_example_20260915_105922_ce722e/quadcond_scores.csv",
       "n_variants": 183,
       "scorers": [
         "AVI_SCORE"
       ],
       "file": {
-        "path": "/mnt/user-data/uploads/Quadcond/alphagenome_bridge/results/chr22_example_20260915_105922_ce722e/quadcond_scores.csv",
+        "path": "alphagenome_bridge/results/chr22_example_20260915_105922_ce722e/quadcond_scores.csv",
         "sha256": "bf0247bdac14b9249dd1389423d1f528ae71523d5855ee44fc91501fc7fcbdba",
         "bytes": 9167,
         "mtime_utc": "2026-09-15T05:36:06.733282Z",

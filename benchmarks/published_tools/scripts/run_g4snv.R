@@ -1,4 +1,4 @@
-.libPaths(c("/home/claude/Rlib", .libPaths()))
+rlib <- Sys.getenv("QC_RLIB"); if (nzchar(rlib)) .libPaths(c(rlib, .libPaths()))
 suppressMessages({library(G4SNVHunter); library(Biostrings); library(GenomicRanges)})
 P <- read.csv("pairs_g4_tm.csv", stringsAsFactors=FALSE)
 P$pair_id <- seq_len(nrow(P)) - 1

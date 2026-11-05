@@ -12,7 +12,8 @@ def read_fa_zip(z, name, n, seed):
     recs = [r.split("\n",1) for r in txt.split(">")[1:]]
     recs = [(h.strip(), s.replace("\n","").upper()) for h,s in recs]
     random.Random(seed).shuffle(recs); return recs[:n]
-B="/home/claude/tools/OrensteinLab_G4detector/benchmarks/"
+from _paths import TOOLS
+B = str(TOOLS / "OrensteinLab_G4detector" / "benchmarks") + "/"
 pos = read_fa_zip(B+"K_positives.zip","pos_ex_K_125.fa",3000,1)
 npq = read_fa_zip(B+"human_K_negatives.zip","neg_ex_K_pq_125.fa",3000,2)
 nrd = read_fa_zip(B+"human_K_negatives.zip","neg_ex_K_random_125.fa",3000,3)

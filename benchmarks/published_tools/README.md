@@ -242,6 +242,10 @@ in-cell meaning of the genomic-proxy heads.
 
 ## Reproduce
 
-Scripts assume the tool repositories cloned beside them (paths at the top of each
-script); `scripts/qc_oof.py` re-derives QuadCond's grouped predictions, and
+Scripts read their locations from `scripts/_paths.py`: clone the tool repositories
+into `benchmarks/published_tools/tools/` (or point `QC_TOOLS` at them); intermediate
+tables go to `work/` (`QC_WORK`); the QuadCond model and atlas come from
+`QUADCOND_MODEL` and `QUADCOND_DB`, defaulting to `artifacts/` and `data/` in the
+repository; the R scripts add `QC_RLIB` to their library path when it is set.
+`scripts/qc_oof.py` re-derives QuadCond's grouped predictions, and
 `scripts/analyze.py` rebuilds `results/benchmark_results.csv`.

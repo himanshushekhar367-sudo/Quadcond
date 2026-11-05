@@ -15,7 +15,7 @@ Everything below is one bash session (WSL2 Ubuntu on this machine is fine).
 sudo apt-get update && sudo apt-get install -y tabix          # htslib, for indexing
 conda create -y -n qcgw python=3.11 && conda activate qcgw
 
-cd /mnt/c/Users/pc/Downloads/Quadcond/quadcond-repo
+cd Quadcond                  # the repository root
 pip install -e . -r requirements-model.txt
 pip install pysam pandas pyarrow scipy statsmodels matplotlib
 
@@ -25,7 +25,7 @@ quadcond assets status        # model + atlas_core must say "ok"
 ## 1. Reference genome
 
 ```bash
-export FASTA=/mnt/c/Users/pc/GRCh38.p13.genome.fa
+export FASTA=/path/to/GRCh38.p13.genome.fa
 samtools faidx "$FASTA"       # or: python -c "import pysam;pysam.faidx('$FASTA')"
 ```
 

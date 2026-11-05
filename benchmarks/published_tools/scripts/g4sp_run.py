@@ -1,6 +1,7 @@
 import sys, pickle, warnings, numpy as np, pandas as pd
 warnings.filterwarnings("ignore")
-A = "/home/claude/tools/donn-liew_G4ShapePredictor/g4sp application code/"
+from _paths import TOOLS
+A = str(TOOLS / "donn-liew_G4ShapePredictor" / "g4sp application code") + "/"
 sys.argv = ["x"]
 def conv(s, pad=100):
     m = {'A':1,'T':2,'C':3,'G':4,'N':0}; l=[m.get(c,0) for c in s.upper()]

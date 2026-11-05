@@ -1,6 +1,8 @@
 """Assemble the G4-seq (K+) window dataset with a chromosome hold-out and a mouse external set."""
-import zipfile, random, re, pandas as pd
-B = "/home/claude/tools/OrensteinLab_G4detector/benchmarks/"
+import os, zipfile, random, re, pandas as pd
+from pathlib import Path
+TOOLS = Path(os.environ.get("QC_TOOLS", Path(__file__).resolve().parents[1] / "benchmarks" / "published_tools" / "tools"))
+B = str(TOOLS / "OrensteinLab_G4detector" / "benchmarks") + "/"
 def read(z, name):
     txt = zipfile.ZipFile(z).read(name).decode()
     for rec in txt.split(">")[1:]:

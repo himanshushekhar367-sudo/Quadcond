@@ -1,9 +1,10 @@
 import sys, pandas as pd, numpy as np
-sys.path.insert(0,"/home/claude/qc")
+from _paths import REPO, MODEL
+sys.path.insert(0, str(REPO))
 from quadcond.models.predict import Predictor
 from quadcond.conditions import Condition
 from rules import revcomp
-p = Predictor.load("/home/claude/qc/artifacts/quadcond_model.joblib")
+p = Predictor.load(MODEL)
 cond = Condition(k=100)
 ext = pd.read_csv("ext_g4seq.csv")
 out = []

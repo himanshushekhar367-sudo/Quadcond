@@ -1,4 +1,4 @@
-.libPaths(c("/home/claude/Rlib", .libPaths()))
+rlib <- Sys.getenv("QC_RLIB"); if (nzchar(rlib)) .libPaths(c(rlib, .libPaths()))
 suppressMessages({library(pqsfinder); library(Biostrings)})
 d <- read.csv("allseqs.csv", stringsAsFactors=FALSE)
 sc <- numeric(nrow(d)); sc_def <- numeric(nrow(d))

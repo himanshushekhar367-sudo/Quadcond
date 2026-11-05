@@ -1,9 +1,10 @@
 import sys, numpy as np, pandas as pd
-sys.path.insert(0, "/home/claude/qc")
+from _paths import REPO, ATLAS
+sys.path.insert(0, str(REPO))
 from sklearn.model_selection import KFold
 from quadcond.atlas import Atlas
 from quadcond.models import train as T
-atlas = Atlas("/home/claude/qc/data/atlas_core.db")
+atlas = Atlas(str(ATLAS))
 spec = {s.name: s for s in T.DEFAULT_TASKS}["g4_tm"]
 rows = atlas.query(kind=spec.kind, tiers=list(spec.tiers), label=spec.target, sources=spec.sources, label_classes=spec.label_classes)
 seqs, conds, X, y, meta = T._rows_to_arrays(rows, spec, True)

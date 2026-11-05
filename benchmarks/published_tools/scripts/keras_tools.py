@@ -2,7 +2,8 @@ import os, sys, numpy as np, pandas as pd
 os.environ["TF_USE_LEGACY_KERAS"] = "1"; os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 import tensorflow as tf
 import tf_keras as keras
-T = "/home/claude/tools/"
+from _paths import TOOLS
+T = str(TOOLS) + "/"
 seqs = pd.read_csv("allseqs.csv")
 S = list(seqs.sequence)
 def rc(s): return s.translate(str.maketrans("ACGTN","TGCAN"))[::-1]

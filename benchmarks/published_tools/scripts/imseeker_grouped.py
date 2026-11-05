@@ -1,7 +1,8 @@
 import sys, pickle, importlib.util, warnings, numpy as np, pandas as pd
 warnings.filterwarnings("ignore")
 sys.argv = ["x"]
-spec = importlib.util.spec_from_file_location("ims", "/home/claude/tools/YANGB1_iM-Seeker/iM-Seeker.py")
+from _paths import TOOLS
+spec = importlib.util.spec_from_file_location("ims", str(TOOLS / "YANGB1_iM-Seeker" / "iM-Seeker.py"))
 ims = importlib.util.module_from_spec(spec); spec.loader.exec_module(ims)
 from scipy.stats import spearmanr
 from sklearn.metrics import r2_score
@@ -16,7 +17,7 @@ d = d.merge(rep[["id", "comp", "Folding strength"]], on="id", how="left")
 has = d.comp.notna().values
 X = np.array([ims.getFeatures(*c) if isinstance(c, list) else [np.nan] * 1 for c in d.comp], dtype=object)
 Xh = np.array([list(x) for x in X[has]], float)
-reg = pickle.load(open("/mnt/user-data/uploads/Quadcond/24587160/pickle_model_regression.pkl", "rb"))
+reg = pickle.load(open(TOOLS / "24587160" / "pickle_model_regression.pkl", "rb"))
 import xgboost as xgb
 params = reg.get_xgb_params()
 oof = np.full(len(d), np.nan)
