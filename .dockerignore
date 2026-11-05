@@ -1,0 +1,27 @@
+# Only pyproject.toml, README.md, LICENSE, quadcond/ and web/ go into the image.
+# Everything else stays out of the build context, above all any local model
+# files: the image gets its assets from the verified release download only.
+.git
+.github
+.venv
+venv
+**/__pycache__
+**/*.pyc
+**/node_modules
+web/dist
+quadcond/_web
+artifacts
+data
+gw_out
+manuscript
+benchmarks
+genomewide
+examples
+bridge
+scripts
+tests
+docs
+*.joblib
+*.db
+*.log
+*.egg-info
