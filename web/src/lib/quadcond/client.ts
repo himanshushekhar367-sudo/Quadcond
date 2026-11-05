@@ -251,10 +251,17 @@ export type QuadcondConditions = {
   preset?: string;
 };
 
+// Same origin unless told otherwise. `quadcond serve` hosts the workbench and
+// the API on one port, and the Vite dev server proxies the API paths, so a
+// relative base reaches the service in both. The previous default,
+// http://127.0.0.1:8765, only worked when the browser ran on the server's own
+// machine: every remote visitor was sent to a QuadCond on *their* computer and
+// saw "Model unavailable". Set VITE_QUADCOND_URL only for an API on another
+// origin.
 const DEFAULT_BASE =
   (typeof import.meta !== "undefined" &&
     (import.meta as { env?: Record<string, string> }).env?.VITE_QUADCOND_URL) ||
-  "http://127.0.0.1:8765";
+  "";
 
 export class QuadcondUnavailable extends Error {
   constructor(message: string) {
@@ -278,7 +285,7 @@ async function post<T>(base: string, path: string, body: unknown,
     });
   } catch (cause) {
     throw new QuadcondUnavailable(
-      `cannot reach the QuadCond service at ${base}. Start it with ` +
+      `cannot reach the QuadCond service at ${base || "this server"}. Start it with ` +
         `'python -m quadcond.service', or set VITE_QUADCOND_URL.`,
     );
   }
@@ -296,7 +303,7 @@ export async function health(base = DEFAULT_BASE): Promise<ServiceHealth> {
     const res = await fetch(`${base}/health`, { credentials: "omit" });
     return (await res.json()) as ServiceHealth;
   } catch {
-    return { status: "unavailable", error: `no service at ${base}` };
+    return { status: "unavailable", error: `no service at ${base || "this server"}` };
   }
 }
 

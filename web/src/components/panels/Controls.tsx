@@ -413,7 +413,7 @@ export function RightPanel() {
                 key={mode} 
                 size="sm" 
                 variant="ghost" 
-                className={`flex-1 text-[9px] font-bold tracking-widest uppercase transition-all ${visMode === mode ? 'bg-purple-500/20 text-purple-700 border border-purple-500/30' : 'text-fg-muted hover:bg-surface-3'}`}
+                className={`flex-1 min-w-0 h-auto py-1.5 px-1 whitespace-normal leading-tight text-[9px] font-bold tracking-widest uppercase transition-all ${visMode === mode ? 'bg-purple-500/20 text-purple-700 border border-purple-500/30' : 'text-fg-muted hover:bg-surface-3'}`}
                 onClick={() => setVisMode(mode)}
               >
                 {mode.replace(/-/g, ' ')}

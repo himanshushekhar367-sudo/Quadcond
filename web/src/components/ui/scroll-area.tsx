@@ -9,7 +9,11 @@ export function ScrollArea({
 }: ComponentProps<typeof ScrollAreaPrimitive.Root>) {
   return (
     <ScrollAreaPrimitive.Root className={cn("relative overflow-hidden", className)} {...props}>
-      <ScrollAreaPrimitive.Viewport className="h-full w-full rounded-[inherit]">
+      {/* Radix wraps children in a `display: table` div, which grows to the
+          widest unbreakable row instead of the panel's width: the evidence
+          panel's content measured 392 px inside a 338 px viewport and was cut
+          off on the right at every screen size. `block` makes it wrap. */}
+      <ScrollAreaPrimitive.Viewport className="h-full w-full rounded-[inherit] [&>div]:!block">
         {children}
       </ScrollAreaPrimitive.Viewport>
       <ScrollAreaPrimitive.Scrollbar
