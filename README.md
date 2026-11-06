@@ -139,6 +139,8 @@ quadcond variant --fasta hg38.fa --chromosome chr22 --start 10510000 --end 10510
 
 # A CSV/TSV export you already have
 quadcond variant ... --atlas-table scores.tsv
+# ...or served by the web service
+ALPHAGENOME_TABLE=scores.tsv quadcond serve
 
 # Live service (needs ALPHAGENOME_API_KEY)
 quadcond variant ... --live
@@ -173,7 +175,11 @@ paired to a regulatory score, and **zero** structural deltas — the window
 carries no canonical motif on either strand (G4Hunter 0.262). It is kept
 precisely because it is negative. It shows the join, the provenance block and
 the refusal path working on a window where the honest answer is "nothing to
-report", which is the common case.
+report", which is the common case. Its scores are bundled as
+`alphagenome_scores.tsv`, and a service started with no regulatory source
+serves that table under the name `example_table`, so the workbench's "Use chr22
+example" button shows both axes out of the box; every other window is reported
+unscored.
 
 ---
 

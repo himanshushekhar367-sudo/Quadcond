@@ -170,8 +170,18 @@ export function NaScene({
 
   return (
     <div className="h-full w-full" style={{ touchAction: "none" }}>
-      <Canvas camera={{ position: [12, 8, 16], fov: 42 }} gl={{ antialias: true }}>
-        <color attach="background" args={[0xf4f8f6]} />
+      {/* Transparent canvas: the studio gradient behind it is CSS, set in
+          ViewerPane, so the picture and the page share one background. */}
+      {/* Render on demand. A static scene used to be redrawn 60 times a
+          second for as long as the page was open -- including behind the
+          Compare tab -- which on a laptop is fan noise and battery for a
+          picture that is not moving. Orbit, damping, state changes and resize
+          all request their own frames; only auto-rotate needs a running loop. */}
+      <Canvas
+        frameloop={autoRotate ? "always" : "demand"}
+        camera={{ position: [12, 8, 16], fov: 42 }}
+        gl={{ antialias: true, alpha: true }}
+      >
         <hemisphereLight args={[0xdfe4e8, 0x1a1e22, 0.7]} />
         <directionalLight position={[8, 12, 6]} intensity={1.15} color={0xf2f4f6} />
         <ambientLight intensity={0.18} color={0xffffff} />

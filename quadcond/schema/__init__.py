@@ -16,7 +16,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-PREDICTION_SCHEMA_VERSION = "1.1.0"
+PREDICTION_SCHEMA_VERSION = "1.2.0"
 _SCHEMA_PATH = Path(__file__).with_name("prediction-v1.json")
 
 __all__ = ["PREDICTION_SCHEMA_VERSION", "prediction_schema", "validate_prediction"]

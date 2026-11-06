@@ -5,13 +5,15 @@ import { ViewerPane } from "@/components/viewer/ViewerPane";
 import { Workbench } from "@/components/panels/Workbench";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNA } from "@/lib/na/store";
-import { Dna, FlaskConical, ArrowRight } from "lucide-react";
+import { Dna, FlaskConical, ChevronRight, ShieldCheck } from "lucide-react";
 
 export function AppShell() {
   const polymer = useNA((s) => s.polymer);
   const n = useNA((s) => s.result.sequence.length);
   const backend = useNA((s) => s.backend);
   const bootstrap = useNA((s) => s.bootstrap);
+  const backendMessage = useNA((s) => s.backendMessage);
+  const version = useNA((s) => s.quadcond?.quadcond_version);
 
   useEffect(() => {
     bootstrap();
@@ -20,32 +22,42 @@ export function AppShell() {
   return (
     <div className="flex h-dvh overflow-hidden flex-col text-fg relative bg-transparent">
       
-      <header className="app-header relative z-10 flex items-center justify-between gap-3 border-b border-border bg-surface px-5 py-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent/10 text-accent"><Dna size={26} aria-hidden /></div>
-          <div>
-            <h1 className="font-display text-xl font-semibold tracking-tight text-fg">QuadCond <span className="font-normal text-fg-subtle">/</span> <span className="text-accent">AENNA-3D</span></h1>
-            <p className="mt-0.5 text-xs text-fg-muted">DNA structure &amp; variant evidence</p>
+      <header className="app-header relative z-10 flex h-14 shrink-0 items-center justify-between gap-4 border-b border-border bg-surface px-4 shadow-[0_1px_2px_rgb(16_28_38/0.04)]">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-accent text-white shadow-[0_1px_2px_rgb(16_28_38/0.2)]"><Dna size={18} aria-hidden /></div>
+          <div className="min-w-0">
+            <h1 className="font-display text-[15px] font-semibold leading-tight tracking-tight text-fg">
+              <span className="font-medium text-fg-muted">QuadCond</span> <span className="font-normal text-border-strong">/</span> AENNA-3D
+            </h1>
+            <p className="truncate text-[11px] leading-tight text-fg-subtle">G-quadruplex &amp; i-motif evidence workbench</p>
           </div>
-        </div>
-        
-        <div className="hidden xl:flex items-center gap-3 text-xs text-fg-muted" aria-label="Workflow">
-          <span>1. Add a sequence</span><ArrowRight size={13} aria-hidden />
-          <span>2. Set conditions</span><ArrowRight size={13} aria-hidden />
-          <span>3. Explore evidence</span>
+          {version ? <span className="hidden rounded-[var(--radius-xs)] border border-border px-1.5 py-0.5 font-mono text-[10px] text-fg-subtle md:inline">v{version}</span> : null}
         </div>
 
-        <div className="hidden sm:flex items-center gap-2 bg-surface-2 px-3 py-2 rounded-full border border-border">
-          <div className={`h-2 w-2 rounded-full ${backend === "connected" ? "bg-emerald-400" : "bg-amber-400"}`} title={backend === "connected" ? "Prediction service connected" : "Prediction service unavailable"} />
-          <p className="text-xs tabular-nums text-fg-muted">
-            {backend === "connected" ? "Model connected" : "Model unavailable"} <span className="ml-2 font-mono">{polymer} · {n} nt</span>
-          </p>
+        <ol className="hidden items-center gap-2 text-xs text-fg-muted xl:flex" aria-label="Workflow">
+          {["Add a sequence", "Set conditions", "Explore evidence"].map((step, i) => (
+            <li key={step} className="flex items-center gap-2">
+              {i > 0 ? <ChevronRight size={13} className="text-border-strong" aria-hidden /> : null}
+              <span className="flex size-[18px] items-center justify-center rounded-full border border-border-strong bg-surface-2 font-mono text-[10px] font-medium text-fg-muted">{i + 1}</span>
+              <span>{step}</span>
+            </li>
+          ))}
+        </ol>
+
+        <div className="flex items-center gap-2">
+          <div className="hidden items-center overflow-hidden rounded-[var(--radius-md)] border border-border bg-surface-2 text-xs sm:flex">
+            <span className="flex items-center gap-2 px-2.5 py-1.5">
+              <span className={`size-2 rounded-full ${backend === "connected" ? "bg-ok shadow-[0_0_0_3px_rgb(31_122_77/0.15)]" : backend === "unknown" ? "bg-fg-subtle/60" : "bg-amber-500 shadow-[0_0_0_3px_rgb(245_158_11/0.18)]"}`} title={backend === "connected" ? "Prediction service connected" : backend === "unknown" ? "Contacting the prediction service" : "Prediction service unavailable"} />
+              <span className="font-medium text-fg" data-testid="model-status">{backend === "connected" ? "Model connected" : backend === "unknown" ? "Connecting…" : "Model unavailable"}</span>
+            </span>
+            <span className="border-l border-border px-2.5 py-1.5 font-mono tabular-nums text-fg-muted">{polymer} · {n} nt</span>
+          </div>
+          <HelpDialog />
         </div>
-        <HelpDialog />
       </header>
 
       {/* Desktop Layout */}
-      <div className="hidden min-h-0 flex-1 lg:grid lg:grid-cols-[280px_minmax(0,1fr)_320px] xl:grid-cols-[296px_minmax(0,1fr)_340px] gap-4 p-4 relative z-10">
+      <div className="hidden min-h-0 flex-1 lg:grid lg:grid-cols-[280px_minmax(0,1fr)_320px] xl:grid-cols-[296px_minmax(0,1fr)_340px] gap-3 p-3 relative z-10">
         <aside className="glass-panel flex flex-col overflow-hidden">
           <LeftPanel />
         </aside>
@@ -64,16 +76,16 @@ export function AppShell() {
         */}
         <main className="glass-card flex min-w-0 flex-col overflow-hidden relative group">
           <Tabs defaultValue="structure" className="flex min-h-0 flex-1 flex-col">
-            <div className="border-b border-border p-3">
-              <TabsList className="w-full bg-surface-3">
+            <div className="border-b border-border px-4">
+              <TabsList className="h-11 w-full justify-start gap-6 rounded-none border-0 bg-transparent p-0">
                 <TabsTrigger
-                  className="flex-1 data-[state=active]:bg-accent data-[state=active]:text-white"
+                  className="h-11 rounded-none border-b-2 border-transparent px-0.5 text-[13px] data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:text-fg data-[state=active]:shadow-none"
                   value="structure"
                 >
                   <Dna size={15} className="mr-2" aria-hidden /> Structure
                 </TabsTrigger>
                 <TabsTrigger
-                  className="flex-1 data-[state=active]:bg-accent data-[state=active]:text-white"
+                  className="h-11 rounded-none border-b-2 border-transparent px-0.5 text-[13px] data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:text-fg data-[state=active]:shadow-none"
                   value="workbench"
                   data-testid="workbench-tab"
                 >
@@ -100,10 +112,8 @@ export function AppShell() {
               className="relative min-h-0 flex-1 data-[state=inactive]:hidden"
             >
               <ViewerPane />
-              {/* Subtle inner glow for the 3D viewer container */}
-              <div className="absolute inset-0 border border-border rounded-2xl pointer-events-none group-hover:border-accent/20 transition-colors duration-500" />
             </TabsContent>
-            <TabsContent value="workbench" className="min-h-0 flex-1 overflow-y-auto p-3">
+            <TabsContent value="workbench" className="min-h-0 flex-1 overflow-y-auto bg-surface-2 p-3">
               <Workbench />
             </TabsContent>
           </Tabs>
@@ -114,22 +124,35 @@ export function AppShell() {
         </aside>
       </div>
 
+      {/* Status bar: the model identity is always on screen, not only in exports. */}
+      <footer className="app-statusbar relative z-10 hidden h-7 shrink-0 items-center justify-between gap-4 border-t border-border bg-surface px-4 text-fg-subtle lg:flex">
+        <span className="flex min-w-0 items-center gap-2 truncate">
+          <span className={`size-1.5 shrink-0 rounded-full ${backend === "connected" ? "bg-ok" : backend === "unknown" ? "bg-fg-subtle/60" : "bg-amber-500"}`} aria-hidden />
+          <span className="truncate font-mono">{backend === "connected" ? backendMessage : backend === "unknown" ? "Contacting the prediction service…" : "Prediction service not connected: schematic geometry only, no predicted values"}</span>
+        </span>
+        <span className="flex shrink-0 items-center gap-3">
+          <span className="flex items-center gap-1.5"><ShieldCheck size={12} aria-hidden /> No accounts · requests are not stored</span>
+          <span className="text-border-strong">|</span>
+          <span>MIT licence</span>
+        </span>
+      </footer>
+
       {/* Mobile Layout */}
-      <div className="flex min-h-0 flex-1 flex-col lg:hidden p-4 relative z-10">
+      <div className="flex min-h-0 flex-1 flex-col lg:hidden p-3 relative z-10">
         <Tabs defaultValue="view" className="glass-panel flex min-h-0 flex-1 flex-col overflow-hidden">
           <div className="border-b border-border p-2">
-            <TabsList className="w-full bg-surface-3">
-              <TabsTrigger className="flex-1 data-[state=active]:bg-accent data-[state=active]:text-white" value="seq">
+            <TabsList className="w-full">
+              <TabsTrigger className="flex-1" value="seq">
                 Sequence
               </TabsTrigger>
-              <TabsTrigger className="flex-1 data-[state=active]:bg-accent data-[state=active]:text-white" value="view">
+              <TabsTrigger className="flex-1" value="view">
                 3D
               </TabsTrigger>
-              <TabsTrigger className="flex-1 data-[state=active]:bg-accent data-[state=active]:text-white" value="ens">
+              <TabsTrigger className="flex-1" value="ens">
                 Evidence
               </TabsTrigger>
               <TabsTrigger
-                className="flex-1 data-[state=active]:bg-accent data-[state=active]:text-white"
+                className="flex-1"
                 value="compare"
               >
                 Compare

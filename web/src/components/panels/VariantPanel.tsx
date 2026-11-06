@@ -41,9 +41,9 @@ const QUADRANT_LABEL: Record<VariantRow["quadrant"], string> = {
 };
 
 const QUADRANT_TONE: Record<VariantRow["quadrant"], string> = {
-  both: "border-emerald-500/40 bg-emerald-500/10 text-emerald-700",
+  both: "border-ok/40 bg-ok/10 text-ok",
   structural_only: "border-accent/40 bg-accent/10 text-fg",
-  regulatory_only: "border-sky-500/40 bg-sky-500/10 text-sky-700",
+  regulatory_only: "border-accent/40 bg-accent/10 text-accent",
   neither: "border-border bg-bg/40 text-fg-muted",
   unclassified: "border-dashed border-amber-500/40 bg-amber-500/5 text-amber-700",
 };
@@ -202,7 +202,11 @@ export function VariantPanel() {
           setStart("36201668");
           setScan(null); setPin(null); setShowAll(false); setError(null);
         }}>Use chr22 example</Button>
-        <p className="text-xs text-fg-muted">Negative control · requires the matching saved Atlas export.</p>
+        <p className="text-xs text-fg-muted">
+          Negative control: this window has no canonical G4 or i-motif, so all 183
+          substitutions get an AlphaGenome score (bundled) and none gets a structural
+          change. The quadrant stays empty by design.
+        </p>
       </div>
 
       <div className="mt-3 flex flex-wrap items-end gap-2">

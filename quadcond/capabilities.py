@@ -85,13 +85,25 @@ def axis_response(head) -> dict[str, dict]:
                    because assuming a response nobody recorded is the failure
                    mode this module exists to prevent.
 
-    ``predicts`` marks the axis a Tm head outputs rather than consumes, which is
+    ``predicts`` marks the axis a head outputs rather than consumes, which is
     a fourth thing again: temperature is neither varied nor fixed for `g4_tm`,
-    it is the answer.
+    and pH is neither for `im_pht`; each is the answer.
     """
     ap = head.applicability or {}
     out: dict[str, dict] = {}
     for axis in CONDITION_AXES:
+        if axis == "ph" and getattr(head, "target", "") == "ph_t":
+            out[axis] = {
+                "state": "predicts",
+                "label": AXIS_LABEL[axis],
+                "note": (
+                    "This head predicts a transitional pH; it does not take one. "
+                    "Its training rows store pH 7.0 only as an imputed placeholder "
+                    "on titration data. The requested pH is the evaluation point of "
+                    "the Hill titration applied afterwards, not an input here."
+                ),
+            }
+            continue
         if axis == "temperature" and getattr(head, "target", "") == "tm":
             out[axis] = {
                 "state": "predicts",

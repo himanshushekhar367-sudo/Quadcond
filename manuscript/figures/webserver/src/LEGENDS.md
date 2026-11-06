@@ -1,7 +1,7 @@
 # Web-server figures: legends
 
 Numbers in these legends were read from the server's responses when the figures
-were made (QuadCond 0.5.1, model file SHA-256 `493640193ad70974…`, which matches
+were made (QuadCond 0.5.1 for WS1 and WS3, 0.5.2 for WS2; model file SHA-256 `493640193ad70974…`, which matches
 the v0.5.1 release manifest).
 
 ## Figure WS1. Architecture of the QuadCond web server
@@ -38,16 +38,20 @@ statement that this is not occupancy at a genomic locus. **(C)** The same strand
 with K⁺ removed and Na⁺ raised to 150 mM: predicted Tm 58.7 °C (46.3–71.1 °C).
 **(D)** The `im_pht` card for the telomeric C-strand CCCTAACCCTAACCCTAACCCT in
 the buffer its training measurements share (100 mM K⁺, 10 mM Na⁺, no Mg²⁺,
-pH 7.0, 25 °C): predicted transitional pH 6.38 (5.75–7.01). **(E)** The same
-C-strand in the default buffer of (A). Every training record for this head used
-100 mM K⁺, no Mg²⁺, pH 7 and 25 °C, so the head has no learned response to any of
-the four values requested; it declines, names each one, and withholds the number
-unless the user chooses to show the extrapolation. **(F)** The Conditions tool
+25 °C), at pH 7.0: predicted transitional pH 6.38 (5.75–7.01), and the folded
+fraction at the requested pH from a Hill titration with an assumed cooperativity
+of 2.5. pH is not checked against this head's training data: it is the quantity
+the head predicts, and its training records carry pH 7.0 only as an imputed
+placeholder. **(E)** The same C-strand in the default buffer of (A). Every
+training record for this head used 100 mM K⁺, no Mg²⁺ and 25 °C, so the head has
+no learned response to the three values requested; it withholds the number,
+names each value, offers to switch to its training buffer in one click, and shows
+the extrapolation only if the user asks. **(F)** The Conditions tool
 after sweeping K⁺ from 0 to 150 mM for the strand in (A). `g4_tm` is reported as
 responding (its prediction moves 33.5 °C against a typical error of 12.4 °C, a
 descriptive comparison rather than a significance test), while heads with no
 supported points are listed as such rather than drawn. Screenshots were taken
-from a fresh clone of the public repository serving the v0.5.1 release assets.
+from QuadCond v0.5.2 serving the v0.5.1 release assets.
 
 ## Figure WS3. A condition sweep returned by `/scan/conditions`
 

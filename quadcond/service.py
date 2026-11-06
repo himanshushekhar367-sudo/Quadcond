@@ -39,7 +39,7 @@ from . import __version__, assets, capabilities, claims, readout, scans
 from .conditions import CONDITION_FIELDS, PRESETS, Condition
 from .motifs import clean, find_g4, find_im, revcomp
 from .schema import PREDICTION_SCHEMA_VERSION, prediction_schema
-from .thermo import DEFAULT_DH_G4, R, folded_fraction_ph, folded_fraction_thermal
+from .thermo import DEFAULT_DH_G4, DEFAULT_HILL_IM, R, folded_fraction_ph, folded_fraction_thermal
 
 MAX_SEQUENCES = 64
 MAX_LENGTH = 5000
@@ -327,6 +327,11 @@ def _regulatory_source():
         if _regulatory is None:
             try:
                 _regulatory = _ag.resolve_source()
+                if isinstance(_regulatory, _ag.NullAtlas) and _ag.EXAMPLE_TABLE.exists():
+                    # Nothing configured: score the bundled worked example and
+                    # say so, rather than leave its button producing an empty
+                    # table. Every other window is still reported unscored.
+                    _regulatory = _ag.ExampleTableAtlas.from_path(_ag.EXAMPLE_TABLE)
             except _ag.AtlasUnavailable as exc:
                 # A misconfigured source degrades to "no regulatory axis", which
                 # the response states, rather than taking the endpoint down.
@@ -531,9 +536,11 @@ def evidence_payload(payload: dict) -> dict:
             "predictedPhT_interval": im_preds["im_pht"].get("interval"),
             "foldedFraction": round(folded_fraction_ph(cond.ph, pht), 4),
             "foldedFraction_note": (
-                "Fraction folded for the isolated strand from a Hill titration at "
-                "the predicted transitional pH. Same caveat as the G4 card: not "
-                "occupancy, and the duplex is not in the model."),
+                "Fraction folded for the isolated strand at your pH, from a Hill "
+                f"titration centred on the predicted transitional pH (cooperativity "
+                f"n = {DEFAULT_HILL_IM:g}, an assumption, not fitted per sequence). "
+                "Same caveat as the G4 card: not occupancy, and the duplex is not "
+                "in the model."),
             "source": "head:im_pht",
             "claim_basis": claims.semantics(
                 "im_pht", p.model.heads["im_pht"].training_meta, "regression"),

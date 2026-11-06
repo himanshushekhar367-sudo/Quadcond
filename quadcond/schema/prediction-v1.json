@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/quadcond/quadcond/schema/prediction-v1.json",
   "title": "QuadCond prediction record, version 1",
-  "description": "One record per queried sequence. Frozen at v0.4.2, extended compatibly at v0.4.3 (added `refused` / `refusal_reason`, no field removed): fields may be ADDED in a v1.x release, and a field may never be removed, renamed, or have its meaning changed without incrementing the major version in schema_version. A consumer that reads this document may rely on every required field below existing with the stated meaning for the life of schema 1.",
+  "description": "One record per queried sequence. Frozen at v0.4.2, extended compatibly at v0.4.3 (added `refused` / `refusal_reason`) and at v0.5.2 (added `applicability.suggested_condition`), no field removed: fields may be ADDED in a v1.x release, and a field may never be removed, renamed, or have its meaning changed without incrementing the major version in schema_version. A consumer that reads this document may rely on every required field below existing with the stated meaning for the life of schema 1.",
   "type": "object",
   "required": [
     "schema_version",
@@ -298,6 +298,13 @@
                 "string",
                 "null"
               ]
+            },
+            "suggested_condition": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "number"
+              },
+              "description": "Added in schema 1.2.0. The condition axes that would have to change, and to what, for this query to sit inside what the head was trained on: a fixed axis is set to its one training value, a varied axis is clamped into its range. Only axes that need to move are listed; empty when the buffer is not the reason (motif, length) or the head refused."
             }
           }
         },

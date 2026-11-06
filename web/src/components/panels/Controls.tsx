@@ -1,4 +1,6 @@
+import { useEffect, useState } from "react";
 import { EXAMPLES } from "@/lib/na/examples";
+import { parseDraft } from "@/lib/na/parse";
 import { DEFAULT_CONDITIONS, KIND_LABEL, type Conditions } from "@/lib/na/types";
 import { useNA } from "@/lib/na/store";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +20,56 @@ import {
   StructureProvenance,
   WithheldFolds,
 } from "./EvidencePanels";
+
+/**
+ * A number box that can be typed into.
+ *
+ * The previous box committed on every keystroke and silently rejected anything
+ * outside the range, so typing 25 into a field whose minimum is 4 failed at the
+ * "2" and snapped back to the old value. The box now keeps the user's text,
+ * commits whenever that text is a value inside the range, flags it while it is
+ * not, and tidies up on blur or Enter.
+ */
+function NumberField({
+  label, value, min, max, step, onCommit, className,
+}: {
+  label: string; value: number; min: number; max: number; step: number;
+  onCommit: (v: number) => void; className?: string;
+}) {
+  const [draft, setDraft] = useState(String(value));
+  const [focused, setFocused] = useState(false);
+  useEffect(() => {
+    if (!focused) setDraft(String(value));
+  }, [value, focused]);
+  const invalid = draft.trim() !== "" && parseDraft(draft, min, max) === null;
+  return (
+    <input
+      type="number"
+      aria-label={`${label} value`}
+      aria-invalid={invalid}
+      title={invalid ? `Enter a value from ${min} to ${max}` : undefined}
+      value={draft}
+      min={min}
+      max={max}
+      step={step}
+      onFocus={() => setFocused(true)}
+      onBlur={() => {
+        setFocused(false);
+        setDraft(String(value));
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+      }}
+      onChange={(e) => {
+        const text = e.target.value;
+        setDraft(text);
+        const v = parseDraft(text, min, max);
+        if (v !== null && v !== value) onCommit(v);
+      }}
+      className={`${className ?? ""} ${invalid ? "border-amber-500 ring-2 ring-amber-500/30" : ""}`}
+    />
+  );
+}
 
 function ConditionRow({
   label,
@@ -41,17 +93,15 @@ function ConditionRow({
   hint?: string;
 }) {
   return (
-    <div className="space-y-3 p-3 rounded-xl bg-surface border border-border group">
+    <div className="space-y-2.5 rounded-lg border border-border bg-surface p-3 transition-colors hover:border-border-strong">
       <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 text-fg-muted group-hover:text-accent transition-colors">
+        <div className="flex items-center gap-2 text-fg-muted">
           <Icon className="w-4 h-4 " />
           <span className="text-xs font-medium">{label}</span>
         </div>
         <div className="flex items-center gap-1">
-          <input type="number" aria-label={`${label} value`} value={value}
-            min={min} max={max} step={step}
-            onChange={(e) => { const next = e.target.valueAsNumber; if (Number.isFinite(next) && next >= min && next <= max) onChange(next); }}
-            className="w-16 rounded-md border border-border bg-surface-2 px-1.5 py-1 text-right font-mono text-xs text-fg" />
+          <NumberField label={label} value={value} min={min} max={max} step={step} onCommit={onChange}
+            className="w-16 rounded-[var(--radius-sm)] border border-border-strong bg-surface px-1.5 py-1 text-right font-mono text-xs text-fg outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-ring" />
           <span className="text-fg-subtle text-[10px]">{unit}</span>
         </div>
       </div>
@@ -92,15 +142,15 @@ export function LeftPanel() {
           </div>
           <p className="text-xs leading-relaxed text-fg-muted">Paste DNA below or start with an example. Predictions update automatically.</p>
           
-          <div className="flex gap-2 p-1 rounded-lg bg-surface-2 border border-border">
+          <div className="flex gap-0.5 rounded-[var(--radius-md)] border border-border bg-surface-3 p-0.5">
             {(["DNA", "RNA"] as const).map((p) => (
               <Button
                 key={p}
                 size="sm"
                 variant="ghost"
-                className={`flex-1 text-xs font-bold tracking-wider transition-all ${
+                className={`flex-1 text-xs font-semibold tracking-wide transition-colors ${
                   polymer === p 
-                    ? "bg-accent/20 text-accent border border-accent/50 shadow-sm"
+                    ? "bg-surface text-accent shadow-[0_1px_2px_rgb(16_28_38/0.10)]"
                     : "text-fg-muted hover:text-fg hover:bg-surface-3"
                 }`}
                 onClick={() => setPolymer(p)}
@@ -118,7 +168,7 @@ export function LeftPanel() {
               onChange={(e) => setSequence(e.target.value)}
               spellCheck={false}
               rows={5}
-              className="relative w-full resize-y rounded-xl border border-border-strong bg-surface px-3 py-3 font-mono text-sm leading-7 text-fg outline-none focus:border-accent transition-colors"
+              className="relative w-full resize-y rounded-lg border border-border-strong bg-surface px-3 py-3 font-mono text-sm leading-7 text-fg outline-none transition-[border-color,box-shadow] focus:border-accent focus:ring-2 focus:ring-ring"
               aria-label="Nucleic acid sequence"
             />
           </div>
@@ -130,7 +180,7 @@ export function LeftPanel() {
           </div>
           <label className="block text-xs text-fg-muted">
             Try an example
-            <select aria-label="Choose an example" value="" onChange={(e) => { if (e.target.value) loadExample(e.target.value); }} className="mt-2 w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-fg">
+            <select aria-label="Choose an example" value="" onChange={(e) => { if (e.target.value) loadExample(e.target.value); }} className="mt-2 w-full rounded-[var(--radius-md)] border border-border-strong bg-surface px-3 py-2 text-sm text-fg outline-none focus:border-accent focus:ring-2 focus:ring-ring">
               <option value="" disabled>Choose a sequence…</option>
               {EXAMPLES.map((ex) => <option value={ex.id} key={ex.id}>{ex.name}{ex.polymer === "RNA" ? " (unsupported RNA)" : ""}</option>)}
             </select>
@@ -143,7 +193,7 @@ export function LeftPanel() {
         <details className="group [&_summary::-webkit-details-marker]:hidden">
           <summary className="flex items-center justify-between cursor-pointer list-none text-fg-subtle hover:text-fg transition-colors select-none">
             <div className="flex items-center gap-2">
-              <Library className="w-4 h-4 text-purple-700" />
+              <Library className="w-4 h-4 text-fg-subtle" />
               <p className="text-sm font-medium text-fg">About the examples</p>
             </div>
             <ChevronRight className="w-4 h-4 transition-transform group-open:rotate-90" />
@@ -155,11 +205,11 @@ export function LeftPanel() {
                 key={ex.id}
                 type="button"
                 onClick={() => loadExample(ex.id)}
-                className="group/btn relative overflow-hidden rounded-xl border border-border bg-gradient-to-b from-surface-2 to-surface-2 p-3 text-left transition-all duration-300 hover:border-purple-400/50 hover:shadow-sm"
+                className="group/btn relative rounded-lg border border-border bg-surface p-3 text-left transition-colors hover:border-accent/40 hover:bg-surface-2"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/0 to-purple-500/0 group-hover/btn:via-purple-500/10 transition-all duration-700 translate-x-[-100%] group-hover/btn:translate-x-[100%]"></div>
+                
                 <div className="flex items-center justify-between gap-2 relative z-10">
-                  <span className="text-sm font-semibold text-fg group-hover/btn:text-purple-700 transition-colors">{ex.name}</span>
+                  <span className="text-sm font-semibold text-fg transition-colors group-hover/btn:text-accent">{ex.name}</span>
                   <div className="flex items-center gap-1">
                     {ex.coverage && ex.coverage !== "full" ? (
                       <Badge
@@ -177,7 +227,7 @@ export function LeftPanel() {
                             : "not modelled"}
                       </Badge>
                     ) : null}
-                    <Badge className="bg-surface-2 border-purple-500/30 text-purple-700 text-[10px]">{ex.polymer}</Badge>
+                    <Badge variant="outline" className="bg-surface-2 border-border font-mono text-[10px] text-fg-muted">{ex.polymer}</Badge>
                   </div>
                 </div>
                 <p className="mt-1.5 text-xs text-fg-muted relative z-10">{ex.note}</p>
@@ -192,7 +242,7 @@ export function LeftPanel() {
         <details open className="group [&_summary::-webkit-details-marker]:hidden">
           <summary className="flex items-center justify-between cursor-pointer list-none text-fg-subtle hover:text-fg transition-colors select-none">
             <div className="flex items-center gap-2">
-              <Activity className="w-4 h-4 text-green-700" />
+              <Activity className="w-4 h-4 text-ok" />
               <p className="text-sm font-semibold text-fg">
                 Buffer conditions
               </p>
@@ -331,6 +381,9 @@ export function RightPanel() {
   const backend = useNA((s) => s.backend);
   const backendMessage = useNA((s) => s.backendMessage);
   const busy = useNA((s) => s.busy);
+  const stale = useNA((s) => s.stale);
+  const serviceRefusal = useNA((s) => s.serviceRefusal);
+  const refusal = result.refusal ?? serviceRefusal;
 
   const quadcond = useNA((s) => s.quadcond);
   const qcCards = quadcond?.evidence?.length ? quadcond.evidence : null;
@@ -353,7 +406,7 @@ export function RightPanel() {
           state where it is unreachable and the numbers on screen are local.
         */}
         <div
-          className={`flex items-center justify-between gap-2 p-2 rounded-lg border transition-all duration-300 ${
+          className={`flex items-center justify-between gap-2 rounded-[var(--radius-md)] border px-2.5 py-2 transition-colors ${
             backend === "connected"
               ? "bg-surface-2 border-border"
               : backend === "offline"
@@ -390,7 +443,7 @@ export function RightPanel() {
             <Button 
               size="sm" 
               variant="ghost" 
-              className={`flex-1 text-xs font-semibold tracking-wider transition-all ${overlay ? "bg-accent/20 text-accent" : "text-fg-muted"}`}
+              className={`flex-1 text-xs font-medium transition-colors ${overlay ? "bg-surface text-accent shadow-[0_1px_2px_rgb(16_28_38/0.10)]" : "text-fg-muted hover:bg-surface-3"}`}
               onClick={() => setOverlay(!overlay)}
             >
               <Layers className="w-3 h-3 mr-2" />
@@ -400,7 +453,7 @@ export function RightPanel() {
             <Button
               size="sm"
               variant="ghost"
-              className={`flex-1 text-xs font-semibold tracking-wider transition-all ${autoRotate ? "bg-accent/20 text-accent" : "text-fg-muted"}`}
+              className={`flex-1 text-xs font-medium transition-colors ${autoRotate ? "bg-surface text-accent shadow-[0_1px_2px_rgb(16_28_38/0.10)]" : "text-fg-muted hover:bg-surface-3"}`}
               onClick={() => setAutoRotate(!autoRotate)}
             >
               <RefreshCw className={`w-3 h-3 mr-2 ${autoRotate ? 'animate-spin-slow' : ''}`} />
@@ -413,10 +466,10 @@ export function RightPanel() {
                 key={mode} 
                 size="sm" 
                 variant="ghost" 
-                className={`flex-1 min-w-0 h-auto py-1.5 px-1 whitespace-normal leading-tight text-[9px] font-bold tracking-widest uppercase transition-all ${visMode === mode ? 'bg-purple-500/20 text-purple-700 border border-purple-500/30' : 'text-fg-muted hover:bg-surface-3'}`}
+                className={`flex-1 min-w-0 h-auto py-1.5 px-1 whitespace-normal leading-tight text-xs font-medium transition-colors border ${visMode === mode ? 'bg-surface text-accent border-border-strong shadow-[0_1px_2px_rgb(16_28_38/0.10)]' : 'border-transparent text-fg-muted hover:bg-surface-3'}`}
                 onClick={() => setVisMode(mode)}
               >
-                {mode.replace(/-/g, ' ')}
+                {mode.charAt(0).toUpperCase() + mode.slice(1).replace(/-/g, ' ')}
               </Button>
             ))}
           </div>
@@ -432,9 +485,9 @@ export function RightPanel() {
             <ChevronRight className="w-4 h-4 transition-transform group-open:rotate-90" />
           </summary>
 
-          {result.refusal ? (
+          {refusal ? (
             <div className="mt-4">
-              <RefusalNotice reason={result.refusal} />
+              <RefusalNotice reason={refusal} />
             </div>
           ) : qcCards ? (
             <>
@@ -442,6 +495,7 @@ export function RightPanel() {
                 cards={qcCards}
                 note={quadcond?.evidence_note}
                 syntheticModel={quadcond?.synthetic_model}
+                stale={stale}
               />
               {quadcond?.condition_imputed_fields?.length ? (
                 <p className="mt-3 text-[10px] leading-relaxed text-fg-subtle">

@@ -252,6 +252,24 @@ export function MutationExplorer() {
 
           {head && ranked ? (
             <>
+              {/* Said first, not left in a collapsed list under a long table:
+                  on a C-rich strand every C sits in a C-tract, so most
+                  substitutions destroy the i-motif and have no delta at all.
+                  Read without this line, the table's small loop effects look
+                  like the model ignoring the C-tracts. */}
+              {ranked.without.length ? (
+                <p
+                  className="mt-3 rounded-[var(--radius-md)] border border-border bg-surface-2 p-2 text-xs text-fg-muted"
+                  data-testid="mutation-motif-summary"
+                >
+                  <span className="font-semibold text-fg">
+                    {ranked.without.filter((r) => r.heads[head]?.motif.state === "motif_lost").length} of{" "}
+                    {ranked.withDelta.length + ranked.without.length}
+                  </span>{" "}
+                  substitutions destroy the motif, so {head} has no number for them (listed
+                  below the table). The table ranks the {ranked.withDelta.length} that keep it.
+                </p>
+              ) : null}
               <p className="mt-3 text-xs text-fg-subtle">{scan.ranking_note}</p>
 
               <div className="mt-2 min-w-0 max-w-full overflow-x-auto">

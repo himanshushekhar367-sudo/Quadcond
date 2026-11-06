@@ -1,6 +1,6 @@
 {
   "name": "aenna3d",
-  "version": "0.5.0",
+  "version": "0.5.2",
   "private": true,
   "type": "module",
   "description": "AENNA-3D \u2014 browser workbench for condition-aware G-quadruplex and i-motif evidence",
@@ -10,7 +10,7 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --import ./scripts/register-ts-resolver.mjs --test src/lib/na/na.test.ts"
+    "test": "node --experimental-strip-types --import ./scripts/register-ts-resolver.mjs --test src/lib/na/na.test.ts src/lib/na/fixes.test.ts"
   },
   "dependencies": {
     "@fontsource/ibm-plex-mono": "^5.3.0",

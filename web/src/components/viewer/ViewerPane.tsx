@@ -40,7 +40,7 @@ export function ViewerPane() {
   const members = overlay ? result.members : selected ? [selected] : [];
 
   return (
-    <div className="relative h-full min-h-[320px] overflow-hidden rounded-[var(--radius-xl)] border border-border bg-bg">
+    <div className="relative h-full min-h-[320px] overflow-hidden bg-[radial-gradient(ellipse_at_50%_45%,#ffffff_0%,#f4f7fa_55%,#e8edf2_100%)]">
       {Scene ? (
         <Scene members={members} overlay={overlay} autoRotate={autoRotate} />
       ) : (
@@ -49,8 +49,8 @@ export function ViewerPane() {
         </div>
       )}
       <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between p-4">
-        <div className="rounded-[var(--radius-md)] border border-border bg-bg/80 px-3 py-2">
-          <p className="text-[0.65rem] tracking-wide text-fg-subtle uppercase">Active fold</p>
+        <div className="rounded-[var(--radius-md)] border border-border bg-surface/90 px-3 py-2 shadow-[0_1px_2px_rgb(16_28_38/0.06)] backdrop-blur-sm">
+          <p className="section-label">Active fold</p>
           {/* Kind alone does not identify a member. Two members of the same
               kind differ by strand and topology, and the id-namespace defect
               this attribute exists for produced exactly that pair: the right
@@ -71,8 +71,8 @@ export function ViewerPane() {
             </p>
           ) : null}
         </div>
-        <div className="rounded-[var(--radius-md)] border border-border bg-bg/80 px-3 py-2 text-right">
-          <p className="text-[0.65rem] tracking-wide text-fg-subtle uppercase">Bases</p>
+        <div className="rounded-[var(--radius-md)] border border-border bg-surface/90 px-3 py-2 text-right shadow-[0_1px_2px_rgb(16_28_38/0.06)] backdrop-blur-sm">
+          <p className="section-label">Bases</p>
           <p className="font-mono text-xs text-fg">
             <span className="text-base-a">A</span>{" "}
             <span className="text-base-t">T/U</span>{" "}
@@ -81,7 +81,7 @@ export function ViewerPane() {
           </p>
         </div>
       </div>
-      <p className="pointer-events-none absolute bottom-3 left-4 text-[0.65rem] text-fg-subtle">
+      <p className="pointer-events-none absolute bottom-3 left-4 rounded-[var(--radius-sm)] bg-surface/80 px-2 py-1 text-[0.65rem] text-fg-subtle backdrop-blur-sm">
         Drag to orbit · scroll to zoom
       </p>
     </div>

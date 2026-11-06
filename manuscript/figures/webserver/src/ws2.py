@@ -18,7 +18,7 @@ def img(name, crop=None):
 A = img("A_overview.png", (0, 0, 5040, 2150))
 B = img("C_card_K140.png"); C = img("D_card_Na150.png"); D = img("E_card_imotif.png")
 E = img("F_refusal.png")
-F = img("F_compare_conditions.png", (0, 530, 2940, 2185))
+F = img("F_compare_conditions.png", (0, 470, 2988, 2070))
 
 W = 7.09                       # 180 mm, double column
 gap, lab = 0.12, 0.18          # inter-row gap, room for panel letter/title (in)
@@ -48,9 +48,9 @@ def put(im, x, ytop, w, letter=None, title=None):
 y = 0.36
 axA, _ = put(A, 0, y, W)
 fig.text(0, (H - 0.02) / H, "A", fontsize=10, fontweight="bold", color=INK, va="top")
-for (x0, x1), name in [((16, 312), "1  Sequence and buffer"),
-                       ((328, 1308), "2  Schematic 3D archetype / Compare tools"),
-                       ((1324, 1664), "3  Evidence cards")]:
+for (x0, x1), name in [((12, 308), "1  Sequence and buffer"),
+                       ((320, 1316), "2  Schematic 3D archetype / Compare tools"),
+                       ((1328, 1668), "3  Evidence cards")]:
     fx0, fx1 = x0 / 1680 * W, x1 / 1680 * W
     yb = H - y + 0.05
     fig.add_artist(plt.Line2D([fx0 / W, fx1 / W], [yb / H] * 2, color=NAVY, lw=0.8))

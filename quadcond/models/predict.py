@@ -13,7 +13,7 @@ each head that applies:
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Sequence
 
@@ -83,9 +83,25 @@ def _domain_check(head, condition: Condition, seq: str) -> dict:
         # through as in-domain against training data that never left 0% and 5 uM.
         "crowder_pct": condition.crowder_pct, "strand_conc": condition.strand_conc,
     }
+    # Where the query would have to move, axis by axis, to sit inside what this
+    # head learned. Returned beside the warnings so an interface can offer
+    # "use this head's buffer" instead of asking the user to read five
+    # sentences and retype five fields. Only the axes that need to change.
+    suggested: dict[str, float] = {}
     for field, value in checks.items():
         rng = ap.get(field)
         if not rng:
+            continue
+        if field == "ph" and head.target == "ph_t":
+            # A transitional-pH head predicts the pH; it does not take one. The
+            # same mistake the temperature exemption below fixes for Tm heads:
+            # every pH_T record in the atlas stores ph=7.0, and every one of them
+            # lists "ph" in condition_imputed -- a titration sweeps pH, so no
+            # single value describes it and 7.0 is a placeholder, not a
+            # condition. Gating on it hid the i-motif card at every pH below 7,
+            # which is exactly where i-motifs fold. The requested pH is the
+            # evaluation point of the downstream Hill titration, whose
+            # cooperativity is a stated assumption (thermo.DEFAULT_HILL_IM).
             continue
         if field == "temperature" and head.target == "tm":
             # A melting-temperature head predicts the temperature; it does not
@@ -108,12 +124,14 @@ def _domain_check(head, condition: Condition, seq: str) -> dict:
                     f"so this head has no {field} response to apply to your "
                     f"{field}={value:g}. Not an extrapolation -- an absence."
                 )
+                suggested[field] = float(rng["min"])
             continue
         if value < rng["min"] or value > rng["max"]:
             issues.append(
                 f"{field}={value:g} is outside the training range "
                 f"[{rng['min']:g}, {rng['max']:g}]"
             )
+            suggested[field] = float(min(max(value, rng["min"]), rng["max"]))
         elif rng["n_unique"] <= 2 and value not in (rng["min"], rng["max"]):
             issues.append(
                 f"{field} took only {rng['n_unique']} distinct value(s) in training "
@@ -209,6 +227,9 @@ def _domain_check(head, condition: Condition, seq: str) -> dict:
         "refused": refused is not None,
         "refusal_reason": refused,
         "warnings": issues,
+        # Empty when the buffer is not the problem (motif, length, refusal).
+        # Moving these axes clears the condition warnings and nothing else.
+        "suggested_condition": {} if refused is not None else suggested,
         # Kept under the applicability block for callers written against
         # v0.4.0, but derived rather than read from the retired field, so a
         # genomic-proxy head reports False here as it always should have.
@@ -295,7 +316,18 @@ class Predictor:
         for name, head in self.model.heads.items():
             if name not in wanted:
                 continue
-            X = featurize(sequences, [cond] * len(sequences),
+            head_cond = cond
+            ap_ph = (head.applicability or {}).get("ph") or {}
+            if (head.target == "ph_t" and head.use_conditions
+                    and ap_ph.get("n_unique") == 1 and cond.ph != ap_ph["min"]):
+                # A transitional pH is a property of the sequence in its buffer,
+                # not of the pH it is read at. Evaluate the head at the pH its
+                # training rows carry (an imputed placeholder), so the requested
+                # pH cannot leak into the prediction through a feature that never
+                # varied in training; it is applied afterwards, by the Hill
+                # titration, and pH_T no longer drifts as the user moves the pH.
+                head_cond = replace(cond, ph=float(ap_ph["min"]))
+            X = featurize(sequences, [head_cond] * len(sequences),
                           kind=head.kind, use_conditions=head.use_conditions)
             out = head.predict(X)
             for i, s in enumerate(sequences):

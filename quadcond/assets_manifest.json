@@ -90,8 +90,8 @@
   "joblib": "1.5.3"
  },
  "versions": {
-  "application": "0.5.1",
-  "web_workbench": "0.5.1",
+  "application": "0.5.2",
+  "web_workbench": "0.5.2",
   "asset_manifest": "0.5.1",
   "model_artifact": "0.4.6",
   "note": "The application and the model are versioned separately because they are separate artifacts. 0.5.x of this package ships the model trained under 0.4.6: the code moved, the estimators did not. A single number would have to misdescribe one of them, and the one it would misdescribe is the one that produces the numbers."

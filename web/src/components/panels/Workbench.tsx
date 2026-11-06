@@ -28,7 +28,7 @@ import { BatchPanel } from "./BatchPanel";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const SEMANTICS_TONE: Record<string, string> = {
-  biophysical: "text-emerald-700",
+  biophysical: "text-ok",
   genomic_proxy: "text-amber-700",
   derived: "text-fg-muted",
   predicted: "text-fg-muted",

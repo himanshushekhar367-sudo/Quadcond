@@ -22,37 +22,49 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg: #f5f8f7;
-  --color-bg-gradient-start: #f5f8f7;
-  --color-bg-gradient-end: #eef4f2;
-  
+  /* Instrument-grade light theme. Flat neutral ground, white work surfaces,
+     1px borders with faint elevation, one navy accent. Teal and amber are kept
+     for the two structure classes (G-quadruplex, i-motif) so the workbench, the
+     manuscript figures and the project site use the same colour language. */
+  --color-bg: #f2f4f7;
+  --color-bg-gradient-start: #f2f4f7;
+  --color-bg-gradient-end: #f2f4f7;
+
   --color-surface: #ffffff;
-  --color-surface-2: #f1f6f4;
-  --color-surface-3: #e7efec;
+  --color-surface-2: #f7f9fb;
+  --color-surface-3: #edf1f5;
   --color-surface-solid: #ffffff;
-  
-  --color-fg: #20302f;
-  --color-fg-muted: #4d625e;
-  --color-fg-subtle: #586e68;
-  
-  --color-accent: #087f74;
+
+  --color-fg: #0f1b26;
+  --color-fg-muted: #44525e;
+  --color-fg-subtle: #5f6e7a;
+
+  --color-accent: #1b5a8c;
+  --color-accent-strong: #154a75;
   --color-accent-foreground: #ffffff;
-  --color-accent-glow: rgba(8, 127, 116, 0.16);
-  
-  --color-border: #dbe5e1;
-  --color-border-strong: #c5d6cf;
-  --color-ring: rgba(8, 127, 116, 0.16);
-  
+  --color-accent-glow: rgba(27, 90, 140, 0.12);
+
+  --color-border: #dfe5eb;
+  --color-border-strong: #c8d1da;
+  --color-ring: rgba(27, 90, 140, 0.3);
+
+  --color-g4: #0a8f9c;
+  --color-im: #b35f02;
+  --color-ok: #1f7a4d;
+
   --color-base-a: #2463a7;
   --color-base-t: #9b710a;
   --color-base-g: #0b8064;
   --color-base-c: #c84b52;
 
-  --radius-xs: 6px;
-  --radius-sm: 10px;
-  --radius-md: 14px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
+  /* Tailwind's rounded-* utilities read these, so tightening them here squares
+     up every panel, card, input and chip at once. */
+  --radius-xs: 3px;
+  --radius-sm: 5px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-2xl: 12px;
 
   /* "Inter" and "Outfit" led these stacks but were never loaded by anything,
      so both already resolved to IBM Plex Sans. Naming a font you do not ship
@@ -63,9 +75,9 @@
   --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
 
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --motion-quick: 150ms;
-  --motion-fast: 250ms;
-  --motion-smooth: 400ms;
+  --motion-quick: 120ms;
+  --motion-fast: 200ms;
+  --motion-smooth: 300ms;
 }
 
 @layer base {
@@ -75,10 +87,10 @@
     -moz-osx-font-smoothing: grayscale;
   }
   body {
-    background: linear-gradient(135deg, var(--color-bg-gradient-start), var(--color-bg-gradient-end));
-    background-attachment: fixed;
+    background: var(--color-bg);
     color: var(--color-fg);
     font-family: var(--font-sans);
+    font-feature-settings: "tnum" 1;
     min-height: 100vh;
   }
   button:not(:disabled),
@@ -90,21 +102,28 @@
   h3 {
     text-wrap: balance;
   }
+  ::selection { background: rgba(27, 90, 140, 0.16); }
 }
 
 @layer utilities {
+  /* The names are historical; there is no glass left. Solid white surfaces with
+     a hairline border and the lightest elevation that still separates them from
+     the ground. */
   .glass {
-    @apply bg-surface border border-border shadow-[0_2px_10px_rgba(31,66,52,0.03)];
+    @apply bg-surface border border-border;
+    box-shadow: 0 1px 2px rgb(16 28 38 / 0.04);
   }
   .glass-panel {
-    @apply bg-surface border border-border rounded-xl;
+    @apply bg-surface border border-border rounded-lg;
+    box-shadow: 0 1px 2px rgb(16 28 38 / 0.04), 0 1px 3px rgb(16 28 38 / 0.05);
   }
   .glass-card {
-    @apply bg-surface border border-border rounded-2xl shadow-sm;
+    @apply bg-surface border border-border rounded-lg;
+    box-shadow: 0 1px 2px rgb(16 28 38 / 0.04), 0 1px 3px rgb(16 28 38 / 0.05);
   }
-  .glass-card:hover {
-    @apply border-border;
-    box-shadow: 0 2px 12px rgb(31 66 52 / 0.04);
+  .section-label {
+    @apply text-[11px] font-semibold uppercase text-fg-subtle;
+    letter-spacing: 0.08em;
   }
 }
 
@@ -119,7 +138,6 @@
 @layer base {
   :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
   button:disabled { cursor: not-allowed; }
-  [role="tab"] { min-height: 44px; }
   summary { min-height: 44px; }
 }
 .workbench-guide {
@@ -128,9 +146,11 @@
   background: var(--color-surface-solid); color: var(--color-fg);
   border: 1px solid var(--color-border-strong); overflow-y: auto;
 }
-.workbench-guide::backdrop { background: rgb(26 48 42 / 0.3); }
+.workbench-guide::backdrop { background: rgb(15 27 38 / 0.35); }
 [data-testid="evidence-card"] p, [data-testid="genomic-readout"] p { font-size: 0.75rem; line-height: 1.5; }
-@media (max-width: 1023px) {
+/* 44px touch targets where a finger is the pointer; a mouse gets the compact
+   desktop density. */
+@media (max-width: 1023px), (pointer: coarse) {
   button:not([role="checkbox"]), [role="tab"] { min-height: 44px; }
   .glass-panel { min-width: 0; }
 }
@@ -146,15 +166,21 @@ button, summary, select { -webkit-tap-highlight-color: transparent; }
 [data-testid="workbench"] th { background: var(--color-surface-2); }
 [data-testid="workbench"] td, [data-testid="workbench"] th { padding: 0.65rem 0.6rem; }
 [data-testid="workbench"] tbody tr:hover { background: var(--color-surface-2); }
-[data-testid="variant-quadrant"] { border-radius: 12px; }
+[data-testid="variant-quadrant"] { border-radius: var(--radius-lg); }
 [data-testid="variant-quadrant"][data-quadrant="unclassified"] { grid-column: 1 / -1; }
-[data-testid="variant-coverage"] { background: var(--color-surface-2); border-radius: 10px; padding: 0.85rem; }
+[data-testid="variant-coverage"] { background: var(--color-surface-2); border-radius: var(--radius-lg); padding: 0.85rem; }
 [class*="text-[0.6"], [class*="text-[0.7"], [class*="text-[10px]"], [class*="text-[11px]"] { font-size: 0.75rem; }
 [class*="text-[9px]"] { font-size: 0.68rem; }
-.workbench-guide { box-shadow: 0 24px 70px rgb(26 48 42 / 0.15); }
+.workbench-guide { box-shadow: 0 24px 64px rgb(15 27 38 / 0.18); }
 @media (max-width: 639px) {
   .app-header { padding: 0.9rem 1rem; }
   .app-header h1 { font-size: 1rem; }
   .app-header h1 + p { font-size: 0.7rem; }
   [data-testid="workbench"] [role="tabpanel"] > section { padding: 0.9rem; }
 }
+
+/* Workbench tables: quiet headers, tabular figures, hairline rows. */
+[data-testid="workbench"] th { font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-fg-subtle); }
+[data-testid="workbench"] td { font-variant-numeric: tabular-nums; }
+.app-statusbar { font-size: 11px; }
+[data-testid="evidence-card"] p.evidence-value { font-size: 1.25rem; line-height: 1.35; margin-top: 2px; }

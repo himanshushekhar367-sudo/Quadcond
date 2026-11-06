@@ -1,4 +1,4 @@
-# Manuscript, software release v0.5.1
+# Manuscript, software release v0.5.2
 
 `manuscript_source.md` is the text. `build_manuscript.py` renders it to Markdown
 and .docx, filling six figures and four generated tables from frozen inputs. It

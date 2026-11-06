@@ -56,7 +56,7 @@ const AXES: { id: string; label: string; min: number; max: number; unit: string 
 ];
 
 const VERDICT_TONE: Record<string, string> = {
-  responds: "text-emerald-700",
+  responds: "text-ok",
   // `flat` is retired. It read as a measured insensitivity to the axis, which
   // is a claim nobody made: what was computed is a response range beside a
   // marginal residual half-width.

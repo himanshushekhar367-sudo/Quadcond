@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import {
   allWarnings,
   claimBadge,
+  describeBuffer,
   extrapolatedFolds,
   visibleFolds,
   type EvidenceCard,
@@ -27,10 +28,10 @@ import { MODEL_DISCLAIMER } from "@/lib/na/geometry-params";
 import { pdbUrl, templatesForKind } from "@/lib/na/templates";
 import type { StructureKind } from "@/lib/na/types";
 import { useNA } from "@/lib/na/store";
-import { AlertTriangle, Ban, ChevronRight, Dna, Eye, EyeOff, Microscope } from "lucide-react";
+import { AlertTriangle, Ban, ChevronRight, Dna, Eye, EyeOff, FlaskConical, Microscope } from "lucide-react";
 
 const TONE: Record<string, string> = {
-  solid: "bg-emerald-500/15 text-emerald-700 border-emerald-500/30",
+  solid: "bg-ok/10 text-ok border-ok/30",
   warn: "bg-amber-500/15 text-amber-700 border-amber-500/30",
   muted: "bg-surface-3 text-fg-subtle border-border",
 };
@@ -86,11 +87,15 @@ export function EvidenceCards({
   cards,
   note,
   syntheticModel,
+  stale = false,
 }: {
   cards: EvidenceCard[];
   note?: string;
   syntheticModel?: SyntheticBanner;
+  /** The cards answer the previous request; a new one is in flight. */
+  stale?: boolean;
 }) {
+  const applyConditions = useNA((s) => s.applyConditions);
   const selectedId = useNA((s) => s.selectedId);
   const selectStructure = useNA((s) => s.selectStructure);
   const show = useNA((s) => s.showExtrapolation);
@@ -115,9 +120,15 @@ export function EvidenceCards({
     if (member) selectStructure(member.id);
   };
   const drawableFor = (card: EvidenceCard) => memberForCard(members, card);
+  const KIND_NAME: Record<string, string> = { "g-quadruplex": "G-quadruplex", "i-motif": "i-motif" };
 
   return (
-    <div className="space-y-3">
+    <div
+      className={`space-y-3 transition-opacity duration-200 ${stale ? "opacity-60" : "opacity-100"}`}
+      aria-busy={stale}
+      data-testid="evidence-cards"
+      data-stale={stale ? "true" : "false"}
+    >
       {/* Above the numbers, not below them. */}
       <SyntheticNotice banner={syntheticModel} />
       {note ? (
@@ -156,15 +167,15 @@ export function EvidenceCards({
                 onClick={() => pick(c)}
                 disabled={!drawable}
                 title={drawable ? undefined : "no archetype available for this topology"}
-                className={`w-full rounded-xl border p-4 text-left transition-all duration-300 ${
+                className={`w-full rounded-lg border p-3.5 text-left transition-[border-color,background-color,box-shadow] duration-150 ${
                   active
-                    ? "border-accent/50 bg-accent/5"
-                    : "border-border bg-surface-2 hover:bg-surface-2 hover:border-border"
+                    ? "border-accent/60 bg-surface shadow-[0_0_0_3px_rgb(27_90_140/0.10)]"
+                    : "border-border bg-surface hover:border-border-strong"
                 } ${out ? "border-dashed opacity-80" : ""}`}
               >
-                <div className="mb-3 flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className={`text-sm font-bold ${active ? "text-accent" : "text-fg"}`}>
+                <div className="mb-3 flex items-start justify-between gap-2">
+                  <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1.5">
+                    <span className="size-2 shrink-0 rounded-full" style={{ background: c.kind === "g-quadruplex" ? "var(--color-g4)" : "var(--color-im)" }} aria-hidden /><span className={`whitespace-nowrap text-sm font-semibold ${active ? "text-accent" : "text-fg"}`}>
                       {c.kind === "g-quadruplex" ? "G-quadruplex" : "i-motif"}
                     </span>
                     <ClaimBadge fold={c} />
@@ -172,7 +183,7 @@ export function EvidenceCards({
                   {/* Which strand, always. A G4 and an i-motif at one duplex
                       position sit on opposite strands, and the previous build
                       evaluated both heads on whichever strand the user typed. */}
-                  <Badge variant="outline" className="border-border font-mono text-[10px] text-fg-subtle">
+                  <Badge variant="outline" className="shrink-0 whitespace-nowrap border-border font-mono text-[10px] text-fg-subtle">
                     strand {c.strand}
                   </Badge>
                 </div>
@@ -180,7 +191,7 @@ export function EvidenceCards({
                 {value ? (
                   <div className="mb-2">
                     <p className="text-[10px] uppercase tracking-widest text-fg-subtle">{value.label}</p>
-                    <p className="font-mono text-lg font-bold tabular-nums text-accent">
+                    <p className="evidence-value font-mono font-semibold tracking-tight tabular-nums text-fg">
                       {value.text}
                       {value.ci ? (
                         <span className="ml-2 font-normal text-[11px] text-fg-subtle">
@@ -235,6 +246,27 @@ export function EvidenceCards({
                   </li>
                 ))}
               </ul>
+              {hidden.map((h) => {
+                const patch = h.applicability?.suggested_condition;
+                if (!patch || !Object.keys(patch).length) return null;
+                return (
+                  <Button
+                    key={`${h.id}${h.strand}`}
+                    size="sm"
+                    variant="outline"
+                    data-testid="use-training-buffer"
+                    className="h-auto w-full justify-start whitespace-normal border-amber-500/40 bg-surface px-2 py-1.5 text-left text-[10px] leading-snug text-amber-800 hover:bg-amber-500/10"
+                    onClick={() => applyConditions(patch)}
+                    title="Set the buffer to the one this model was trained in"
+                  >
+                    <FlaskConical className="mr-1.5 h-3 w-3 shrink-0" />
+                    <span>
+                      Use the {KIND_NAME[h.kind] ?? h.kind} model&apos;s buffer:{" "}
+                      <span className="font-mono">{describeBuffer(patch)}</span>
+                    </span>
+                  </Button>
+                );
+              })}
               <Button
                 size="sm"
                 variant="ghost"
@@ -455,7 +487,7 @@ export function StructureProvenance({
 
       {matches.length ? (
         <div className="mt-3 border-t border-border pt-3">
-          <p className="text-[10px] leading-relaxed text-emerald-700/90">
+          <p className="text-[10px] leading-relaxed text-ok/90">
             {matches.length === 1
               ? "A solved structure exists for this exact sequence:"
               : `${matches.length} solved structures exist for this exact sequence — the fold depends on the buffer:`}

@@ -696,6 +696,38 @@ def _as_float(value: Any) -> float | None:
 
 #: Where a published AVI bundle is looked for when no path is given.
 AVI_PATH_ENV = "ALPHAGENOME_AVI_TABIX"
+#: A CSV/TSV score export to serve when no Tabix bundle is configured.
+TABLE_PATH_ENV = "ALPHAGENOME_TABLE"
+
+#: Scores for the repository's worked example: the 183 substitutions of
+#: chr22:36,201,668-36,201,728, copied from examples/chr22-negative-control.
+#: The service falls back to it only when the operator configured no source,
+#: so the workbench's "chr22 example" shows both axes out of the box.
+EXAMPLE_TABLE = (Path(__file__).resolve().parents[1] / "examples"
+                 / "chr22-negative-control" / "alphagenome_scores.tsv")
+
+
+class ExampleTableAtlas(TableAtlas):
+    """The bundled worked-example table, labelled as exactly that.
+
+    It covers one 61-nt window. Served as if it were a configured source it
+    would make every other window look scored-and-unremarkable; served under
+    its own name, every other variant is plainly unscored.
+    """
+
+    name = "example_table"
+
+    def describe(self) -> dict:
+        d = super().describe()
+        d["source"] = "example_table"
+        d["note"] = (
+            "No regulatory source was configured, so only the bundled worked "
+            "example is scored: AlphaGenome AVI scores for the 183 substitutions "
+            "of chr22:36,201,668-36,201,728 (examples/chr22-negative-control). "
+            "Every other variant carries the structural axis only and is not "
+            "assigned a quadrant. Set ALPHAGENOME_AVI_TABIX or ALPHAGENOME_TABLE "
+            "to serve real scores.")
+        return d
 
 
 def resolve_source(*, tabix: str | Path | None = None,
@@ -715,6 +747,7 @@ def resolve_source(*, tabix: str | Path | None = None,
     tabix = tabix or os.environ.get(AVI_PATH_ENV) or None
     if tabix:
         return TabixAtlas.from_path(tabix)
+    table = table or os.environ.get(TABLE_PATH_ENV) or None
     if table:
         return TableAtlas.from_path(table)
     if use_live or api_key or os.environ.get("ALPHAGENOME_API_KEY"):

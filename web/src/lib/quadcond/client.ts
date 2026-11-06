@@ -49,6 +49,12 @@ export type Applicability = {
   in_domain: boolean;
   warnings: string[];
   biophysically_grounded?: boolean;
+  /**
+   * Since 0.5.2 (schema 1.2.0): the condition axes that would bring this
+   * query inside the head's training data, and to what. Empty when the buffer
+   * is not the reason. Older services omit it.
+   */
+  suggested_condition?: Record<string, number>;
 };
 
 export type EvidenceCard = {
@@ -270,6 +276,25 @@ export class QuadcondUnavailable extends Error {
   }
 }
 
+/**
+ * The service is up and answered, and the answer is "no prediction for this
+ * input" (HTTP 400 / 413: RNA, an empty or too-short sequence, a malformed
+ * request). Kept apart from QuadcondUnavailable because the two used to share
+ * one code path, so a refused RNA example turned the whole interface to
+ * "Model unavailable" while the server was running normally.
+ */
+export class QuadcondRefused extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "QuadcondRefused";
+  }
+}
+
+/** HTTP statuses that mean "the service declined this input", not "it is down". */
+export function isRefusalStatus(status: number): boolean {
+  return status === 400 || status === 413 || status === 422;
+}
+
 async function post<T>(base: string, path: string, body: unknown,
                        signal?: AbortSignal): Promise<T> {
   let res: Response;
@@ -291,9 +316,9 @@ async function post<T>(base: string, path: string, body: unknown,
   }
   const payload = (await res.json().catch(() => ({}))) as Record<string, unknown>;
   if (!res.ok) {
-    throw new QuadcondUnavailable(
-      typeof payload.error === "string" ? payload.error : `service returned ${res.status}`,
-    );
+    const message =
+      typeof payload.error === "string" ? payload.error : `service returned ${res.status}`;
+    throw isRefusalStatus(res.status) ? new QuadcondRefused(message) : new QuadcondUnavailable(message);
   }
   return payload as T;
 }
@@ -777,6 +802,26 @@ export function visibleFolds(
 
 export function extrapolatedFolds(folds: EvidenceCard[]): EvidenceCard[] {
   return folds.filter((f) => f.applicability?.in_domain === false && f.id !== "unfolded");
+}
+
+const AXIS_TEXT: Record<string, (v: number) => string> = {
+  k: (v) => `K⁺ ${v} mM`,
+  na: (v) => `Na⁺ ${v} mM`,
+  li_nh4: (v) => `Li⁺/NH₄⁺ ${v} mM`,
+  mg: (v) => `Mg²⁺ ${v} mM`,
+  ph: (v) => `pH ${v}`,
+  temperature: (v) => `${v} °C`,
+  crowder_pct: (v) => `crowder ${v}%`,
+  strand_conc: (v) => `strand ${v} µM`,
+};
+const AXIS_ORDER = ["k", "na", "li_nh4", "mg", "ph", "temperature", "crowder_pct", "strand_conc"];
+
+/** "K⁺ 100 mM · Mg²⁺ 0 mM · 25 °C" for a head's suggested buffer, in panel order. */
+export function describeBuffer(patch: Record<string, number>): string {
+  return Object.keys(patch)
+    .sort((a, b) => AXIS_ORDER.indexOf(a) - AXIS_ORDER.indexOf(b))
+    .map((k) => (AXIS_TEXT[k] ? AXIS_TEXT[k](patch[k]!) : `${k} ${patch[k]}`))
+    .join(" · ");
 }
 
 /** Every distinct applicability warning across an ensemble, deduplicated. */
